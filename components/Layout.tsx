@@ -60,7 +60,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentPage, navigate 
         <nav className="flex-1 space-y-6 w-full">
             {/* Only show label when sidebar is open */}
             {isSidebarOpen && (
-                <div className="text-sm text-muted mb-4 pl-2 animate-fade-in">
+                <div className="text-sm text-muted mb-4 pl-2">
                     導覽
                 </div>
             )}
@@ -97,7 +97,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentPage, navigate 
                             className="w-8 h-8 rounded-full object-cover border border-gray-200 shadow-sm"
                         />
                         {isSidebarOpen && (
-                            <div className="flex-1 min-w-0 animate-fade-in">
+                            <div className="flex-1 min-w-0">
                                 <div className="text-sm font-bold text-text truncate">{user.name}</div>
                                 <div className="text-xs text-gray-400 truncate">Free Plan</div>
                             </div>
@@ -114,7 +114,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentPage, navigate 
                         title={!isSidebarOpen ? "登出" : undefined}
                     >
                         <LogOut className="w-5 h-5" />
-                        {isSidebarOpen && <span className="text-base font-medium animate-fade-in">登出</span>}
+                        {isSidebarOpen && <span className="text-base font-medium">登出</span>}
                     </button>
                 </>
             )}
@@ -133,7 +133,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentPage, navigate 
 
       {/* Mobile Menu */}
       {mobileMenuOpen && (
-          <div className="md:hidden fixed inset-0 bg-background z-40 pt-20 px-8 animate-fade-in">
+          <div className="md:hidden fixed inset-0 bg-background z-40 pt-20 px-8">
               {navItems.map((item) => (
                 <button
                     key={item.id}

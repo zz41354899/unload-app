@@ -94,7 +94,7 @@ export const History: React.FC<HistoryProps> = () => {
   };
 
   return (
-    <div className="max-w-6xl mx-auto animate-fade-in">
+    <div className="max-w-6xl mx-auto">
       <div className="bg-white rounded-3xl p-8 md:p-10 shadow-sm border border-gray-100 min-h-[600px]">
           <h1 className="text-2xl font-bold mb-8 tracking-wide text-text">歷史紀錄</h1>
 
@@ -176,8 +176,7 @@ export const History: React.FC<HistoryProps> = () => {
             {filteredTasks.map((task, index) => (
               <div 
                 key={task.id} 
-                className="bg-[#F4F4F4] p-6 md:px-8 md:py-6 rounded-xl hover:shadow-md transition-all duration-300 group animate-fade-in"
-                style={{ animationDelay: `${index * 50}ms` }}
+                className="bg-[#F4F4F4] p-6 md:px-8 md:py-6 rounded-xl hover:shadow-md transition-all duration-300 group"
               >
                 {/* Top Row: Tags + Date */}
                 <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 md:mb-8 gap-4">
@@ -246,8 +245,8 @@ export const History: React.FC<HistoryProps> = () => {
 
       {/* Confirmation Modal */}
       {deleteId && (
-        <div className="fixed inset-0 bg-black/20 backdrop-blur-sm z-[100] flex items-center justify-center p-4 animate-fade-in">
-           <div className="bg-white rounded-2xl p-8 shadow-2xl max-w-sm w-full transform transition-all scale-100 animate-scale-in">
+        <div className="fixed inset-0 bg-black/20 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+           <div className="bg-white rounded-2xl p-8 shadow-2xl max-w-sm w-full transform transition-all scale-100">
                <div className="flex flex-col items-center text-center">
                    <div className="w-12 h-12 bg-red-50 rounded-full flex items-center justify-center mb-4">
                        <AlertCircle className="w-6 h-6 text-red-500" />

@@ -37,7 +37,7 @@ const AppContent: React.FC = () => {
       {/* Toast Notification */}
       {toast && (
         <div className="fixed bottom-8 right-8 z-[9999]">
-          <div className={`px-6 py-4 rounded-lg shadow-2xl font-medium animate-slide-up ${
+          <div className={`px-6 py-4 rounded-lg shadow-2xl font-medium ${
             toast.type === 'success' ? 'bg-white text-green-500' : 'bg-white text-red-500'
           }`}>
             {toast.message}

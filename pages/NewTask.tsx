@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { WizardLayout, SelectionGrid, SelectionList } from '../components/StepWizard';
 import { TaskCategory, TaskWorry, ResponsibilityOwner } from '../types';
 import { useAppStore } from '../store';
@@ -19,7 +19,58 @@ export const NewTask: React.FC<NewTaskProps> = ({ navigate }) => {
   const [customWorry, setCustomWorry] = useState<string>('');
   
   const [owner, setOwner] = useState<string | null>(null);
-  const [control, setControl] = useState<number>(100);
+  const [control, setControl] = useState<number>(0);
+  const sliderRef = useRef<HTMLDivElement>(null);
+  const isDraggingRef = useRef(false);
+  const pendingValueRef = useRef<number>(0);
+  const rafRef = useRef<number | null>(null);
+
+  // 處理滑桿拖曳 - 使用 requestAnimationFrame 優化性能
+  const handleSliderChange = (clientX: number) => {
+    if (!sliderRef.current) return;
+    
+    const rect = sliderRef.current.getBoundingClientRect();
+    const x = clientX - rect.left;
+    const percentage = Math.max(0, Math.min(100, (x / rect.width) * 100));
+    pendingValueRef.current = Math.round(percentage);
+
+    // 使用 RAF 批量更新，避免頻繁重新渲染
+    if (rafRef.current !== null) {
+      cancelAnimationFrame(rafRef.current);
+    }
+    
+    rafRef.current = requestAnimationFrame(() => {
+      setControl(pendingValueRef.current);
+      rafRef.current = null;
+    });
+  };
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (isDraggingRef.current) {
+        handleSliderChange(e.clientX);
+      }
+    };
+
+    const handleMouseUp = () => {
+      isDraggingRef.current = false;
+    };
+
+    document.addEventListener('mousemove', handleMouseMove, { passive: true });
+    document.addEventListener('mouseup', handleMouseUp, { passive: true });
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+      if (rafRef.current !== null) {
+        cancelAnimationFrame(rafRef.current);
+      }
+    };
+  }, []);
+
+  const handleMouseDown = () => {
+    isDraggingRef.current = true;
+  };
 
   const handleNext = () => setStep(prev => prev + 1);
   const handleBack = () => {
@@ -49,13 +100,6 @@ export const NewTask: React.FC<NewTaskProps> = ({ navigate }) => {
     }
   };
 
-  // Animation Wrapper
-  const StepWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-    <div className="animate-slide-up" key={step}>
-        {children}
-    </div>
-  );
-
   // Step 1: Category
   if (step === 1) {
     const isOtherSelected = category === TaskCategory.Other;
@@ -70,7 +114,7 @@ export const NewTask: React.FC<NewTaskProps> = ({ navigate }) => {
         nextDisabled={!isValid}
         currentStep={1}
       >
-        <StepWrapper>
+        <div key={step}>
             <SelectionGrid
             options={Object.values(TaskCategory)}
             selected={category}
@@ -80,7 +124,7 @@ export const NewTask: React.FC<NewTaskProps> = ({ navigate }) => {
             }}
             />
             {isOtherSelected && (
-                <div className="animate-fade-in">
+                <div>
                     <input
                         type="text"
                         placeholder="請輸入具體分類..."
@@ -91,7 +135,7 @@ export const NewTask: React.FC<NewTaskProps> = ({ navigate }) => {
                     />
                 </div>
             )}
-        </StepWrapper>
+        </div>
       </WizardLayout>
     );
   }
@@ -110,7 +154,7 @@ export const NewTask: React.FC<NewTaskProps> = ({ navigate }) => {
         nextDisabled={!isValid}
         currentStep={2}
       >
-        <StepWrapper>
+        <div key={step}>
             <SelectionGrid
             options={Object.values(TaskWorry)}
             selected={worry}
@@ -120,7 +164,7 @@ export const NewTask: React.FC<NewTaskProps> = ({ navigate }) => {
             }}
             />
             {isOtherSelected && (
-                <div className="animate-fade-in">
+                <div>
                     <input
                         type="text"
                         placeholder="請輸入具體擔憂..."
@@ -131,7 +175,7 @@ export const NewTask: React.FC<NewTaskProps> = ({ navigate }) => {
                     />
                 </div>
             )}
-        </StepWrapper>
+        </div>
       </WizardLayout>
     );
   }
@@ -147,13 +191,13 @@ export const NewTask: React.FC<NewTaskProps> = ({ navigate }) => {
         nextDisabled={!owner}
         currentStep={3}
       >
-        <StepWrapper>
+        <div key={step}>
             <SelectionList
             options={Object.values(ResponsibilityOwner)}
             selected={owner}
             onSelect={setOwner}
             />
-        </StepWrapper>
+        </div>
       </WizardLayout>
     );
   }
@@ -169,40 +213,66 @@ export const NewTask: React.FC<NewTaskProps> = ({ navigate }) => {
         nextLabel="完成課題"
         currentStep={4}
       >
-        <StepWrapper>
+        <div key={step}>
             <div className="py-12 px-4">
-            <div className="text-center text-6xl font-normal mb-12 text-text font-sans animate-scale-in">
+            <div className="text-center text-6xl font-normal mb-12 text-text font-sans">
                 {control}%
             </div>
 
-            <div className="relative mb-8">
-                    <input
-                        type="range"
-                        min="0"
-                        max="100"
-                        value={control}
-                        onChange={(e) => setControl(parseInt(e.target.value))}
-                        className="w-full h-1 bg-gray-800 rounded-lg appearance-none cursor-pointer"
-                    />
-                    {/* Custom Thumb Logic is handled via CSS in index.html */}
-                    <style>{`
-                    input[type=range]::-webkit-slider-thumb {
-                            height: 24px;
-                            width: 24px;
-                            border-radius: 50%;
-                            background: #ffffff;
-                            border: 2px solid #1E2A22;
-                            cursor: pointer;
-                            margin-top: -10px; 
-                    }
-                    input[type=range]::-webkit-slider-runnable-track {
-                            width: 100%;
-                            height: 4px;
-                            cursor: pointer;
-                            background: #1E2A22;
-                            border-radius: 2px;
-                    }
-                    `}</style>
+            <div className="mb-12">
+              {/* 刻度標記 */}
+              <div className="flex justify-between text-xs text-gray-400 mb-2 px-1">
+                {[0, 25, 50, 75, 100].map((mark) => (
+                  <span key={mark}>{mark}</span>
+                ))}
+              </div>
+
+              <div 
+                ref={sliderRef}
+                className="relative h-10 flex items-center cursor-pointer group select-none"
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleSliderChange(e.clientX);
+                }}
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                }}
+              >
+                      {/* 刻度線 */}
+                      <div className="absolute left-0 right-0 h-2 flex pointer-events-none">
+                        {[0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100].map((mark) => (
+                          <div
+                            key={mark}
+                            className="absolute w-px h-1 bg-gray-300"
+                            style={{ left: `${mark}%`, transform: 'translateX(-50%)' }}
+                          />
+                        ))}
+                      </div>
+
+                      {/* Visual Background Track (視覺軌道) */}
+                      <div className="absolute left-0 right-0 h-2 bg-gray-200 rounded-full pointer-events-none">
+                          <div 
+                              className="h-full bg-accent rounded-full"
+                              style={{ width: `${control}%` }}
+                          ></div>
+                      </div>
+                      
+                      {/* Custom Thumb Visual (跟隨數值的視覺圓點) */}
+                      <div 
+                          className="absolute top-1/2 -translate-y-1/2 w-7 h-7 bg-accent rounded-full shadow-lg flex items-center justify-center cursor-grab active:cursor-grabbing hover:scale-110"
+                          style={{ 
+                              left: `calc(${control}% - 14px)`,
+                              transition: isDraggingRef.current ? 'none' : 'all 75ms ease-out'
+                          }}
+                          onMouseDown={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            handleMouseDown();
+                          }}
+                      >
+                          <div className="w-3 h-3 bg-white rounded-full opacity-40"></div>
+                      </div>
+              </div>
             </div>
 
             <div className="flex justify-between text-sm text-gray-600 mb-12">
@@ -218,7 +288,7 @@ export const NewTask: React.FC<NewTaskProps> = ({ navigate }) => {
                 </ul>
             </div>
             </div>
-        </StepWrapper>
+        </div>
       </WizardLayout>
     );
   }

@@ -122,7 +122,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ navigate }) => {
   const todayReflections = getTodayReflections();
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8 pb-12 animate-fade-in">
+    <div className="max-w-6xl mx-auto space-y-8 pb-12">
       
       {/* Header Section */}
       <div className="bg-white rounded-2xl p-8 md:p-12 shadow-sm border border-gray-100">
@@ -154,8 +154,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ navigate }) => {
         ].map((stat, idx) => (
             <div 
                 key={stat.label} 
-                className="bg-white p-6 rounded-2xl shadow-sm min-h-[160px] flex flex-col justify-between animate-slide-up"
-                style={{ animationDelay: `${stat.delay}ms` }}
+                className="bg-white p-6 rounded-2xl shadow-sm min-h-[160px] flex flex-col justify-between"
             >
                 <stat.icon className="w-5 h-5 text-gray-400 mb-2" />
                 <div>
@@ -238,7 +237,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ navigate }) => {
                             </ResponsiveContainer>
                             {/* Center Text - Shows Total Tasks */}
                             <div className="absolute inset-0 flex items-center justify-center pointer-events-none flex-col">
-                                <span className="text-5xl font-bold text-text animate-scale-in">
+                                <span className="text-5xl font-bold text-text">
                                 {totalTasks}
                                 </span>
                             </div>
@@ -283,7 +282,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ navigate }) => {
               {sources.length > 0 ? (
                 <div className="space-y-6 overflow-y-auto max-h-[300px] pr-2 scrollbar-hide">
                     {sources.map((source, index) => (
-                        <div key={source.name} className="flex items-center gap-4 animate-slide-up" style={{ animationDelay: `${index * 50}ms` }}>
+                        <div key={source.name} className="flex items-center gap-4">
                             <span className="text-xs text-gray-500 w-16 text-right shrink-0">{source.name}</span>
                             <div className="flex-1 bg-gray-100 rounded-full h-4 overflow-hidden relative">
                                 {/* Background grid lines simulation */}
@@ -320,8 +319,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ navigate }) => {
                     {todayReflections.map((task, index) => (
                         <div 
                             key={task.id} 
-                            className="flex items-start gap-3 group hover:bg-gray-50 p-2 rounded-lg transition-colors animate-slide-up"
-                            style={{ animationDelay: `${index * 50}ms` }}
+                            className="flex items-start gap-3 group hover:bg-gray-50 p-2 rounded-lg transition-colors"
                         >
                             {/* Side bar color reflects owner */}
                             <div 
