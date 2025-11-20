@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Feather, LayoutDashboard, History, Menu, PanelLeft, LogOut, CheckCircle } from 'lucide-react';
+import { Feather, LayoutDashboard, History, Menu, PanelLeft, LogOut, CheckCircle, Loader } from 'lucide-react';
 import { useAppStore } from '../store';
 
 interface LayoutProps {
@@ -13,6 +13,14 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentPage, navigate 
   const { user, logout, toast } = useAppStore();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  const handleLogout = async () => {
+    setIsLoggingOut(true);
+    // 模擬登出延遲
+    await new Promise(resolve => setTimeout(resolve, 800));
+    logout();
+  };
   
   const navItems = [
     { id: 'dashboard', label: '儀錶板', icon: LayoutDashboard },
@@ -106,15 +114,20 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentPage, navigate 
 
                     {/* Logout Button */}
                     <button
-                        onClick={() => logout()}
+                        onClick={handleLogout}
+                        disabled={isLoggingOut}
                         className={`
-                            flex items-center transition-all duration-200 w-full text-red-500 hover:bg-red-50 rounded-xl
+                            flex items-center transition-all duration-200 w-full text-red-500 hover:bg-red-50 rounded-xl disabled:opacity-70 disabled:cursor-not-allowed
                             ${isSidebarOpen ? 'gap-3 px-2 py-2 justify-start' : 'justify-center p-3'}
                         `}
                         title={!isSidebarOpen ? "登出" : undefined}
                     >
-                        <LogOut className="w-5 h-5" />
-                        {isSidebarOpen && <span className="text-base font-medium">登出</span>}
+                        {isLoggingOut ? (
+                            <Loader className="w-5 h-5 animate-spin" />
+                        ) : (
+                            <LogOut className="w-5 h-5" />
+                        )}
+                        {isSidebarOpen && <span className="text-base font-medium">{isLoggingOut ? '登出中...' : '登出'}</span>}
                     </button>
                 </>
             )}
@@ -152,14 +165,21 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentPage, navigate 
             ))}
             {user && (
                 <button
-                    onClick={() => {
+                    onClick={async () => {
+                        setIsLoggingOut(true);
+                        await new Promise(resolve => setTimeout(resolve, 800));
                         logout();
                         setMobileMenuOpen(false);
                     }}
-                    className="flex items-center gap-4 w-full text-left py-4 text-lg border-b border-gray-100 text-red-500"
+                    disabled={isLoggingOut}
+                    className="flex items-center gap-4 w-full text-left py-4 text-lg border-b border-gray-100 text-red-500 disabled:opacity-70 disabled:cursor-not-allowed"
                 >
-                    <LogOut className="w-5 h-5" />
-                    登出
+                    {isLoggingOut ? (
+                        <Loader className="w-5 h-5 animate-spin" />
+                    ) : (
+                        <LogOut className="w-5 h-5" />
+                    )}
+                    {isLoggingOut ? '登出中...' : '登出'}
                 </button>
             )}
           </div>

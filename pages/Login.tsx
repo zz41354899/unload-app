@@ -1,6 +1,6 @@
 
-import React from 'react';
-import { ArrowRight } from 'lucide-react';
+import React, { useState } from 'react';
+import { ArrowRight, Loader } from 'lucide-react';
 import { useAppStore } from '../store';
 
 interface LoginProps {
@@ -9,8 +9,12 @@ interface LoginProps {
 
 export const Login: React.FC<LoginProps> = ({ navigate }) => {
   const { login } = useAppStore();
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
+    setIsLoading(true);
+    // 模擬登入延遲
+    await new Promise(resolve => setTimeout(resolve, 800));
     login();
     navigate('dashboard');
   };
@@ -35,10 +39,20 @@ export const Login: React.FC<LoginProps> = ({ navigate }) => {
 
                 <button 
                     onClick={handleLogin}
-                    className="w-full bg-primary text-white rounded-lg py-3 flex items-center justify-center gap-3 hover:bg-[#1e2b1e] transition-all mb-8 shadow-lg shadow-primary/20"
+                    disabled={isLoading}
+                    className="w-full bg-primary text-white rounded-lg py-3 flex items-center justify-center gap-3 hover:bg-[#1e2b1e] transition-all mb-8 shadow-lg shadow-primary/20 disabled:opacity-70 disabled:cursor-not-allowed"
                 >
-                    <span className="font-bold text-lg tracking-wide">馬上試用</span>
-                    <ArrowRight className="w-5 h-5" />
+                    {isLoading ? (
+                        <>
+                            <Loader className="w-5 h-5 animate-spin" />
+                            <span className="font-bold text-lg tracking-wide">登入中...</span>
+                        </>
+                    ) : (
+                        <>
+                            <span className="font-bold text-lg tracking-wide">馬上試用</span>
+                            <ArrowRight className="w-5 h-5" />
+                        </>
+                    )}
                 </button>
 
                 <p className="text-xs text-gray-500 mt-8">
