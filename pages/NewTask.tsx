@@ -56,12 +56,27 @@ export const NewTask: React.FC<NewTaskProps> = ({ navigate }) => {
       isDraggingRef.current = false;
     };
 
+    const handleTouchMove = (e: TouchEvent) => {
+      if (isDraggingRef.current && e.touches.length > 0) {
+        e.preventDefault();
+        handleSliderChange(e.touches[0].clientX);
+      }
+    };
+
+    const handleTouchEnd = () => {
+      isDraggingRef.current = false;
+    };
+
     document.addEventListener('mousemove', handleMouseMove, { passive: true });
     document.addEventListener('mouseup', handleMouseUp, { passive: true });
+    document.addEventListener('touchmove', handleTouchMove, { passive: false });
+    document.addEventListener('touchend', handleTouchEnd, { passive: true });
 
     return () => {
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
+      document.removeEventListener('touchmove', handleTouchMove);
+      document.removeEventListener('touchend', handleTouchEnd);
       if (rafRef.current !== null) {
         cancelAnimationFrame(rafRef.current);
       }
@@ -237,6 +252,13 @@ export const NewTask: React.FC<NewTaskProps> = ({ navigate }) => {
                 onMouseDown={(e) => {
                   e.preventDefault();
                 }}
+                onTouchStart={(e) => {
+                  e.preventDefault();
+                  if (e.touches.length > 0) {
+                    handleMouseDown();
+                    handleSliderChange(e.touches[0].clientX);
+                  }
+                }}
               >
                       {/* 刻度線 */}
                       <div className="absolute left-0 right-0 h-2 flex pointer-events-none">
@@ -268,6 +290,14 @@ export const NewTask: React.FC<NewTaskProps> = ({ navigate }) => {
                             e.preventDefault();
                             e.stopPropagation();
                             handleMouseDown();
+                          }}
+                          onTouchStart={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            if (e.touches.length > 0) {
+                              handleMouseDown();
+                              handleSliderChange(e.touches[0].clientX);
+                            }
                           }}
                       >
                           <div className="w-3 h-3 bg-white rounded-full opacity-40"></div>

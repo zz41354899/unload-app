@@ -95,36 +95,36 @@ export const History: React.FC<HistoryProps> = () => {
 
   return (
     <div className="max-w-6xl mx-auto">
-      <div className="bg-white rounded-3xl p-8 md:p-10 shadow-sm border border-gray-100 min-h-[600px]">
-          <h1 className="text-2xl font-bold mb-8 tracking-wide text-text">歷史紀錄</h1>
+      <div className="bg-white rounded-2xl md:rounded-3xl p-4 md:p-10 shadow-sm border border-gray-100 min-h-[600px]">
+          <h1 className="text-xl md:text-2xl font-bold mb-4 md:mb-8 tracking-wide text-text">歷史紀錄</h1>
 
           {/* Search Bar */}
-          <div className="relative mb-6">
-            <Search className="absolute left-5 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-300" />
+          <div className="relative mb-4 md:mb-6">
+            <Search className="absolute left-4 md:left-5 top-1/2 transform -translate-y-1/2 w-4 md:w-5 h-4 md:h-5 text-gray-300" />
             <input 
               type="text"
               placeholder="搜尋事件名稱或課題來源"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-14 pr-4 py-4 rounded-xl border border-gray-200 bg-white focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-gray-700 placeholder-gray-300 shadow-sm text-base transition-shadow"
+              className="w-full pl-11 md:pl-14 pr-4 py-2.5 md:py-4 rounded-lg md:rounded-xl border border-gray-200 bg-white focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-gray-700 placeholder-gray-300 shadow-sm text-sm md:text-base transition-shadow"
             />
           </div>
 
           {/* Filters */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4 mb-4 md:mb-8">
              {/* Time Filter */}
              <div className="relative">
                  <select
                     value={timeFilter}
                     onChange={(e) => setTimeFilter(e.target.value)}
-                    className="w-full py-3 pl-4 pr-10 border border-gray-200 rounded-xl text-left text-gray-600 text-sm bg-white hover:bg-gray-50 transition-colors shadow-sm appearance-none cursor-pointer focus:outline-none focus:border-primary"
+                    className="w-full py-2 md:py-3 px-2 md:px-4 pr-8 md:pr-10 border border-gray-200 rounded-lg md:rounded-xl text-left text-gray-600 text-xs md:text-sm bg-white hover:bg-gray-50 transition-colors shadow-sm appearance-none cursor-pointer focus:outline-none focus:border-primary"
                  >
                      <option value="all">所有時間</option>
                      <option value="today">今天</option>
                      <option value="week">過去 7 天</option>
                      <option value="month">過去 30 天</option>
                  </select>
-                 <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                 <ChevronDown className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 w-3 md:w-4 h-3 md:h-4 text-gray-400 pointer-events-none" />
              </div>
 
              {/* Category Filter */}
@@ -132,14 +132,14 @@ export const History: React.FC<HistoryProps> = () => {
                  <select
                     value={categoryFilter}
                     onChange={(e) => setCategoryFilter(e.target.value)}
-                    className="w-full py-3 pl-4 pr-10 border border-gray-200 rounded-xl text-left text-gray-600 text-sm bg-white hover:bg-gray-50 transition-colors shadow-sm appearance-none cursor-pointer focus:outline-none focus:border-primary"
+                    className="w-full py-2 md:py-3 px-2 md:px-4 pr-8 md:pr-10 border border-gray-200 rounded-lg md:rounded-xl text-left text-gray-600 text-xs md:text-sm bg-white hover:bg-gray-50 transition-colors shadow-sm appearance-none cursor-pointer focus:outline-none focus:border-primary"
                  >
                      <option value="all">所有分類</option>
                      {Object.values(TaskCategory).map(cat => (
                          <option key={cat} value={cat}>{cat}</option>
                      ))}
                  </select>
-                 <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                 <ChevronDown className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 w-3 md:w-4 h-3 md:h-4 text-gray-400 pointer-events-none" />
              </div>
 
              {/* Owner Filter */}
@@ -147,14 +147,14 @@ export const History: React.FC<HistoryProps> = () => {
                  <select
                     value={ownerFilter}
                     onChange={(e) => setOwnerFilter(e.target.value)}
-                    className="w-full py-3 pl-4 pr-10 border border-gray-200 rounded-xl text-left text-gray-600 text-sm bg-white hover:bg-gray-50 transition-colors shadow-sm appearance-none cursor-pointer focus:outline-none focus:border-primary"
+                    className="w-full py-2 md:py-3 px-2 md:px-4 pr-8 md:pr-10 border border-gray-200 rounded-lg md:rounded-xl text-left text-gray-600 text-xs md:text-sm bg-white hover:bg-gray-50 transition-colors shadow-sm appearance-none cursor-pointer focus:outline-none focus:border-primary"
                  >
                      <option value="all">所有課題類型</option>
                      {Object.values(ResponsibilityOwner).map(owner => (
                          <option key={owner} value={owner}>{owner}</option>
                      ))}
                  </select>
-                 <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                 <ChevronDown className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 w-3 md:w-4 h-3 md:h-4 text-gray-400 pointer-events-none" />
              </div>
 
              {/* Sort Order */}
@@ -162,58 +162,58 @@ export const History: React.FC<HistoryProps> = () => {
                  <select
                     value={sortOrder}
                     onChange={(e) => setSortOrder(e.target.value)}
-                    className="w-full py-3 pl-4 pr-10 border border-gray-200 rounded-xl text-left text-gray-600 text-sm bg-white hover:bg-gray-50 transition-colors shadow-sm appearance-none cursor-pointer focus:outline-none focus:border-primary"
+                    className="w-full py-2 md:py-3 px-2 md:px-4 pr-8 md:pr-10 border border-gray-200 rounded-lg md:rounded-xl text-left text-gray-600 text-xs md:text-sm bg-white hover:bg-gray-50 transition-colors shadow-sm appearance-none cursor-pointer focus:outline-none focus:border-primary"
                  >
                      <option value="newest">由新到舊</option>
                      <option value="oldest">由舊到新</option>
                  </select>
-                 <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                 <ChevronDown className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 w-3 md:w-4 h-3 md:h-4 text-gray-400 pointer-events-none" />
              </div>
           </div>
 
           {/* Task List */}
-          <div className="space-y-4">
+          <div className="space-y-3 md:space-y-4">
             {filteredTasks.map((task, index) => (
               <div 
                 key={task.id} 
-                className="bg-[#F4F4F4] p-6 md:px-8 md:py-6 rounded-xl hover:shadow-md transition-all duration-300 group"
+                className="bg-[#F4F4F4] p-4 md:p-6 md:px-8 rounded-lg md:rounded-xl hover:shadow-md transition-all duration-300 group"
               >
                 {/* Top Row: Tags + Date */}
-                <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 md:mb-8 gap-4">
-                  <div className="flex items-center gap-3">
-                    <span className="bg-[#E5E7EB] text-gray-700 px-4 py-1.5 rounded-lg text-sm font-medium tracking-wide">
+                <div className="flex flex-col md:flex-row md:items-center justify-between mb-3 md:mb-4 gap-2 md:gap-4">
+                  <div className="flex items-center gap-2 md:gap-3 flex-wrap">
+                    <span className="bg-[#E5E7EB] text-gray-700 px-3 md:px-4 py-1 md:py-1.5 rounded-lg text-xs md:text-sm font-medium tracking-wide">
                       {task.category}
                     </span>
                     <span 
-                        className="px-4 py-1.5 rounded-lg text-sm font-medium text-white tracking-wide"
+                        className="px-3 md:px-4 py-1 md:py-1.5 rounded-lg text-xs md:text-sm font-medium text-white tracking-wide"
                         style={{ backgroundColor: getOwnerColor(task.owner) }}
                     >
                       {task.owner}
                     </span>
                   </div>
-                  <span className="text-sm text-gray-500 font-medium tracking-wide">
+                  <span className="text-xs md:text-sm text-gray-500 font-medium tracking-wide">
                     {formatDate(task.date)}
                   </span>
                 </div>
                 
                 {/* Bottom Row: Control Bar + Trash */}
-                <div className="flex items-center justify-between gap-6">
-                   <div className="flex items-center gap-4 flex-1">
-                      <span className="text-sm font-bold text-text whitespace-nowrap tracking-wide">控制力</span>
-                      <div className="flex-1 h-1.5 bg-gray-300/80 rounded-full overflow-hidden max-w-md">
+                <div className="flex items-center justify-between gap-3 md:gap-6">
+                   <div className="flex items-center gap-2 md:gap-4 flex-1 min-w-0">
+                      <span className="text-xs md:text-sm font-bold text-text whitespace-nowrap tracking-wide">控制力</span>
+                      <div className="flex-1 h-1.5 bg-gray-300/80 rounded-full overflow-hidden">
                           <div 
                             className="h-full bg-primary rounded-full transition-all duration-700 ease-out" 
                             style={{ width: `${task.controlLevel}%` }}
                           ></div>
                       </div>
-                      <span className="text-sm font-bold text-text w-12">{task.controlLevel}%</span>
+                      <span className="text-xs md:text-sm font-bold text-text w-10 md:w-12 text-right">{task.controlLevel}%</span>
                    </div>
                    
                    <button 
                      onClick={() => setDeleteId(task.id)}
-                     className="text-gray-400 hover:text-red-500 transition-colors p-2 rounded-full hover:bg-white/50"
+                     className="text-gray-400 hover:text-red-500 transition-colors p-1.5 md:p-2 rounded-full hover:bg-white/50 flex-shrink-0"
                    >
-                     <Trash2 className="w-5 h-5" />
+                     <Trash2 className="w-4 md:w-5 h-4 md:h-5" />
                    </button>
                 </div>
               </div>
