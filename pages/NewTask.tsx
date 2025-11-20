@@ -246,14 +246,12 @@ export const NewTask: React.FC<NewTaskProps> = ({ navigate }) => {
                 ref={sliderRef}
                 className="relative h-10 flex items-center cursor-pointer group select-none"
                 onClick={(e) => {
-                  e.preventDefault();
                   handleSliderChange(e.clientX);
                 }}
                 onMouseDown={(e) => {
-                  e.preventDefault();
+                  handleMouseDown();
                 }}
                 onTouchStart={(e) => {
-                  e.preventDefault();
                   if (e.touches.length > 0) {
                     handleMouseDown();
                     handleSliderChange(e.touches[0].clientX);
@@ -292,7 +290,6 @@ export const NewTask: React.FC<NewTaskProps> = ({ navigate }) => {
                             handleMouseDown();
                           }}
                           onTouchStart={(e) => {
-                            e.preventDefault();
                             e.stopPropagation();
                             if (e.touches.length > 0) {
                               handleMouseDown();

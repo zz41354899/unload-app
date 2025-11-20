@@ -213,7 +213,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ navigate }) => {
             <h3 className="text-lg font-bold mb-4">課題比例</h3>
             {totalTasks > 0 ? (
                 <>
-                    <div className="flex-1 flex items-center justify-center relative">
+                    <div className="flex items-center justify-center relative" style={{ width: '220px', height: '220px', margin: '0 auto' }}>
                         <ResponsiveContainer width={220} height={220}>
                                 <PieChart>
                                     <Pie
@@ -233,7 +233,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ navigate }) => {
                                 </PieChart>
                             </ResponsiveContainer>
                         {/* Center Text - Shows Total Tasks */}
-                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none flex-col" style={{ width: '220px', height: '220px' }}>
+                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none flex-col">
                                 <span className="text-5xl font-bold text-text">
                                 {totalTasks}
                                 </span>
