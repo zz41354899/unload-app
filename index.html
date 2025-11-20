@@ -51,29 +51,21 @@
       }
       /* Custom Slider Styling */
       input[type=range] {
-        -webkit-appearance: none; 
+        appearance: none; 
         background: transparent; 
       }
       input[type=range]::-webkit-slider-thumb {
-        -webkit-appearance: none;
+        appearance: none;
       }
       input[type=range]:focus {
         outline: none; 
       }
     </style>
-  <script type="importmap">
-{
-  "imports": {
-    "react": "https://aistudiocdn.com/react@^19.2.0",
-    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
-    "react/": "https://aistudiocdn.com/react@^19.2.0/",
-    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.554.0",
-    "recharts": "https://aistudiocdn.com/recharts@^3.4.1"
-  }
-}
-</script>
-</head>
+    <script crossorigin src="https://unpkg.com/react@19.2.0/index.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@19.2.0/index.js"></script>
+  </head>
   <body>
     <div id="root"></div>
+    <script type="module" src="./index.tsx"></script>
   </body>
 </html>

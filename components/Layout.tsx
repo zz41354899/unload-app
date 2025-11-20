@@ -29,22 +29,21 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentPage, navigate 
         `}
       >
         {/* Header: Logo + Toggle */}
-        <div className={`flex items-center mb-12 ${isSidebarOpen ? 'gap-4' : 'flex-col gap-6'}`}>
+        <div className={`flex items-center mb-12 ${isSidebarOpen ? 'gap-4 flex-row' : 'flex-col gap-6'}`}>
            {/* Logo Group */}
            {isSidebarOpen ? (
                <div 
                  className="flex items-center gap-2 cursor-pointer" 
                  onClick={() => navigate('dashboard')}
                >
-                  <Feather className="w-6 h-6 text-text stroke-2" />
-                  <span className="text-2xl font-bold tracking-wide">Unload</span>
+                  <img src="/logo.svg" alt="Unload Logo" className="w-[140px] h-10 object-contain" />
                </div>
            ) : (
                <div 
                  className="cursor-pointer p-2" 
                  onClick={() => navigate('dashboard')}
                >
-                  <Feather className="w-6 h-6 text-text stroke-2" />
+                  <img src="/logo-m.svg" alt="Unload Logo" className="w-8 h-8 object-contain" />
                </div>
            )}
 
@@ -125,8 +124,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentPage, navigate 
       {/* Mobile Header */}
       <div className="md:hidden fixed top-0 w-full bg-background z-50 px-6 py-4 flex justify-between items-center shadow-sm md:shadow-none">
           <div className="flex items-center gap-2">
-             <Feather className="w-5 h-5" />
-             <span className="font-bold text-xl">Unload</span>
+             <img src="/logo-m.svg" alt="Unload Logo" className="w-8 h-8 object-contain" />
           </div>
           <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
               <Menu className="w-6 h-6" />
