@@ -211,9 +211,9 @@ export const History: React.FC<HistoryProps> = () => {
                    
                    <button 
                      onClick={() => setDeleteId(task.id)}
-                     className="text-gray-400 hover:text-red-500 transition-colors p-1.5 md:p-2 rounded-full hover:bg-white/50 flex-shrink-0"
+                     className="text-gray-400 hover:text-red-500 transition-colors p-2 md:p-2 rounded-full hover:bg-white/50 flex-shrink-0"
                    >
-                     <Trash2 className="w-4 md:w-5 h-4 md:h-5" />
+                     <Trash2 className="w-5 md:w-5 h-5 md:h-5" />
                    </button>
                 </div>
               </div>
