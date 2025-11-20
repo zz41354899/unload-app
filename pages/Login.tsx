@@ -18,9 +18,9 @@ export const Login: React.FC<LoginProps> = ({ navigate }) => {
   return (
     <div className="min-h-screen flex flex-col md:flex-row">
         {/* Logo Corner */}
-        <div className="absolute top-8 left-8 flex items-center gap-2">
+        <a href="https://unload.zeabur.app/" className="absolute top-8 left-8 flex items-center gap-2">
             <img src="/logo.svg" alt="Unload Logo" className="w-[140px] h-10 object-contain" />
-        </div>
+        </a>
 
         {/* Main Content */}
         <div className="flex-1 flex items-center justify-center p-4 bg-background">
