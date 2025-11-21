@@ -25,9 +25,11 @@ export const History: React.FC<HistoryProps> = () => {
   // Filtering Logic
   const filteredTasks = tasks.filter(task => {
     // 1. Search Text
+    const categories = Array.isArray(task.category) ? task.category : [task.category];
+    const worries = Array.isArray(task.worry) ? task.worry : [task.worry];
     const matchesSearch = 
-      task.category.includes(search) || 
-      task.worry.includes(search);
+      categories.some(cat => cat.includes(search)) || 
+      worries.some(worry => worry.includes(search));
     if (!matchesSearch) return false;
 
     // 2. Time Filter
@@ -49,13 +51,14 @@ export const History: React.FC<HistoryProps> = () => {
 
     // 3. Category Filter
     if (categoryFilter !== 'all') {
+        const taskCategories = Array.isArray(task.category) ? task.category : [task.category];
         if (categoryFilter === TaskCategory.Other) {
             // "Other" filter captures both explicit '其他' AND custom strings that aren't in standard list
-            const isStandard = standardCategories.includes(task.category);
-            if (isStandard) return false;
+            const hasNonStandard = taskCategories.some(cat => !standardCategories.includes(cat));
+            if (!hasNonStandard) return false;
         } else {
-            // Standard Exact Match
-            if (task.category !== categoryFilter) {
+            // Standard Exact Match - check if any category matches
+            if (!taskCategories.includes(categoryFilter)) {
                 return false;
             }
         }
@@ -103,7 +106,7 @@ export const History: React.FC<HistoryProps> = () => {
             <Search className="absolute left-4 md:left-5 top-1/2 transform -translate-y-1/2 w-4 md:w-5 h-4 md:h-5 text-gray-300" />
             <input 
               type="text"
-              placeholder="搜尋事件名稱或課題來源"
+              placeholder="搜尋你曾整理過的事件或困擾"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full pl-11 md:pl-14 pr-4 py-2.5 md:py-4 rounded-lg md:rounded-xl border border-gray-200 bg-white focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-gray-700 placeholder-gray-300 shadow-sm text-sm md:text-base transition-shadow"
@@ -111,7 +114,7 @@ export const History: React.FC<HistoryProps> = () => {
           </div>
 
           {/* Filters */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4 mb-4 md:mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 md:gap-4 mb-4 md:mb-8">
              {/* Time Filter */}
              <div className="relative">
                  <select
@@ -181,9 +184,17 @@ export const History: React.FC<HistoryProps> = () => {
                 {/* Top Row: Tags + Date */}
                 <div className="flex flex-col md:flex-row md:items-center justify-between mb-3 md:mb-4 gap-2 md:gap-4">
                   <div className="flex items-center gap-2 md:gap-3 flex-wrap">
-                    <span className="bg-[#E5E7EB] text-gray-700 px-3 md:px-4 py-1 md:py-1.5 rounded-lg text-xs md:text-sm font-medium tracking-wide">
-                      {task.category}
-                    </span>
+                    {Array.isArray(task.category) ? (
+                      task.category.map((cat, idx) => (
+                        <span key={idx} className="bg-[#E5E7EB] text-gray-700 px-3 md:px-4 py-1 md:py-1.5 rounded-lg text-xs md:text-sm font-medium tracking-wide">
+                          {cat}
+                        </span>
+                      ))
+                    ) : (
+                      <span className="bg-[#E5E7EB] text-gray-700 px-3 md:px-4 py-1 md:py-1.5 rounded-lg text-xs md:text-sm font-medium tracking-wide">
+                        {task.category}
+                      </span>
+                    )}
                     <span 
                         className="px-3 md:px-4 py-1 md:py-1.5 rounded-lg text-xs md:text-sm font-medium text-white tracking-wide"
                         style={{ backgroundColor: getOwnerColor(task.owner) }}
@@ -194,6 +205,14 @@ export const History: React.FC<HistoryProps> = () => {
                   <span className="text-xs md:text-sm text-gray-500 font-medium tracking-wide">
                     {formatDate(task.date)}
                   </span>
+                </div>
+
+                {/* Worry Row */}
+                <div className="mb-3 md:mb-4">
+                  <p className="text-xs md:text-sm text-gray-600 font-medium mb-1">擔憂：</p>
+                  <p className="text-xs md:text-sm text-gray-700">
+                    {Array.isArray(task.worry) ? task.worry.join('、') : task.worry}
+                  </p>
                 </div>
                 
                 {/* Bottom Row: Control Bar + Trash */}

@@ -86,10 +86,13 @@ export const Dashboard: React.FC<DashboardProps> = ({ navigate }) => {
   const getAllSources = () => {
     if (tasks.length === 0) return [];
     
-    // Group by Worry to find counts
+    // Group by Worry to find counts (handle both single and multiple worries)
     const counts: Record<string, number> = {};
     tasks.forEach(t => {
-      counts[t.worry] = (counts[t.worry] || 0) + 1;
+      const worries = Array.isArray(t.worry) ? t.worry : [t.worry];
+      worries.forEach(worry => {
+        counts[worry] = (counts[worry] || 0) + 1;
+      });
     });
     
     const sortedWorries = Object.entries(counts).sort((a, b) => b[1] - a[1]);
@@ -99,7 +102,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ navigate }) => {
     
     return sortedWorries.map(([worryName, count]) => {
         // Find dominant owner for this worry to color code it
-        const worryTasks = tasks.filter(t => t.worry === worryName);
+        const worryTasks = tasks.filter(t => {
+          const worries = Array.isArray(t.worry) ? t.worry : [t.worry];
+          return worries.includes(worryName);
+        });
         const ownerCounts: Record<string, number> = {};
         worryTasks.forEach(t => {
             ownerCounts[t.owner] = (ownerCounts[t.owner] || 0) + 1;
@@ -148,8 +154,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ navigate }) => {
       <div className="bg-white rounded-2xl p-8 md:p-12 shadow-sm border border-gray-100">
          <div className="flex justify-between items-start">
             <div>
-                <h1 className="text-2xl font-bold mb-4">今天，先問問自己</h1>
-                <p className="text-gray-600 mb-8">哪些是我能處理的？哪些不是我的責任？</p>
+                <h1 className="text-2xl font-bold mb-4">今天，先照顧好自己的選擇</h1>
+                <p className="text-gray-600 mb-8">外在的期待與標準裡，哪些是真正屬於你的？</p>
             </div>
             <div className="text-right hidden md:block">
                 <div className="text-3xl font-bold text-primary/20">{currentYear}</div>
@@ -160,17 +166,17 @@ export const Dashboard: React.FC<DashboardProps> = ({ navigate }) => {
             onClick={() => navigate('new-task')}
             className="bg-primary text-white px-8 py-3 rounded-full hover:bg-[#1e2b1e] transition-all shadow-lg shadow-primary/20 hover:shadow-primary/40"
          >
-            開始新的覺察
+            開始釐清脈絡
          </button>
       </div>
 
       {/* Stats Row */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-            { label: '總分離次數', value: totalTasks, icon: TrendingUp, delay: 0 },
-            { label: '我的課題', value: myTasks, icon: Book, delay: 100 },
-            { label: '他的課題', value: theirTasks, icon: MessageSquare, delay: 200 },
-            { label: '共同的課題', value: sharedTasks, icon: Smile, delay: 300 },
+            { label: '釐清次數', value: totalTasks, icon: TrendingUp, delay: 0 },
+            { label: '我能掌控的部分', value: myTasks, icon: Book, delay: 100 },
+            { label: '不在我範圍內的部分', value: theirTasks, icon: MessageSquare, delay: 200 },
+            { label: '一起影響的部分', value: sharedTasks, icon: Smile, delay: 300 },
         ].map((stat, idx) => (
             <div 
                 key={stat.label} 
@@ -192,7 +198,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ navigate }) => {
          <div className="lg:col-span-2 bg-white p-6 md:p-8 rounded-2xl shadow-sm">
             <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 md:gap-3 mb-6 md:mb-8">
                 <h3 className="text-base md:text-lg font-bold">
-                  {trendMode === 'future' ? '一週未來情緒趨勢' : '一週過去情緒趨勢'}
+                  {trendMode === 'future' ? '一週內的狀態變化' : '一週內的狀態變化'}
                 </h3>
                 <div className="flex items-center gap-3">
                   <div className="relative">
@@ -245,11 +251,11 @@ export const Dashboard: React.FC<DashboardProps> = ({ navigate }) => {
          </div>
 
          {/* Ratio Pie Chart */}
-         <div className="bg-white p-8 rounded-2xl shadow-sm flex flex-col">
-            <h3 className="text-lg font-bold mb-4">課題比例</h3>
+         <div className="bg-white p-8 rounded-2xl shadow-sm flex flex-col min-h-[500px]">
+            <h3 className="text-lg font-bold mb-4">內外在因素分布</h3>
             {totalTasks > 0 ? (
-                <>
-                    <div className="flex items-center justify-center relative" style={{ width: '220px', height: '220px', margin: '0 auto' }}>
+                <div className="flex-1 flex flex-col items-center justify-center">
+                    <div className="flex items-center justify-center relative" style={{ width: '220px', height: '220px' }}>
                         <ResponsiveContainer width={220} height={220}>
                                 <PieChart>
                                     <Pie
@@ -295,7 +301,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ navigate }) => {
                             </div>
                         )}
                     </div>
-                </>
+                </div>
             ) : (
                 <div className="flex-1 flex flex-col items-center justify-center text-gray-400 pb-4">
                    <div className="w-24 h-24 rounded-full border-8 border-gray-50 mb-4 box-border"></div>
@@ -310,7 +316,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ navigate }) => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Source Bar */}
           <div className="bg-white p-8 rounded-2xl shadow-sm min-h-[200px] flex flex-col">
-              <h3 className="text-base font-medium mb-8">主要課題來源</h3>
+              <h3 className="text-base font-medium mb-8">困擾最大的原因</h3>
               {sources.length > 0 ? (
                 <div className="space-y-6 overflow-y-auto max-h-[300px] pr-2 scrollbar-hide">
                     {sources.map((source, index) => (
@@ -345,7 +351,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ navigate }) => {
 
           {/* Today's Reflection */}
           <div className="bg-white p-8 rounded-2xl shadow-sm min-h-[200px] flex flex-col">
-              <h3 className="text-base font-medium mb-6">今日反思</h3>
+              <h3 className="text-base font-medium mb-6">自我檢視</h3>
               {todayReflections.length > 0 ? (
                 <div className="space-y-4 overflow-y-auto max-h-[300px] pr-2 scrollbar-hide">
                     {todayReflections.map((task, index) => (
@@ -360,8 +366,12 @@ export const Dashboard: React.FC<DashboardProps> = ({ navigate }) => {
                             ></div>
                             
                             <div className="flex-1 min-w-0">
-                                <div className="font-bold text-text truncate">{task.category}</div>
-                                <div className="text-xs text-gray-500 mb-1 truncate">{task.worry}</div>
+                                <div className="font-bold text-text truncate">
+                                  {Array.isArray(task.category) ? task.category.join(', ') : task.category}
+                                </div>
+                                <div className="text-xs text-gray-500 mb-1 truncate">
+                                  {Array.isArray(task.worry) ? task.worry.join(', ') : task.worry}
+                                </div>
                             </div>
                             
                             {/* Tag reflects owner */}
@@ -378,9 +388,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ navigate }) => {
               ) : (
                  <div className="flex-1 flex flex-col items-center justify-center text-gray-400 pb-8">
                     <AlertCircle className="w-8 h-8 mb-2 opacity-20" />
-                    <span className="text-sm">今日尚未新增覺察</span>
+                    <span className="text-sm">今天還沒有新增檢視</span>
                     <button onClick={() => navigate('new-task')} className="text-primary text-xs font-bold mt-2 hover:underline">
-                        立即新增
+                        立即開始
                     </button>
                  </div>
               )}

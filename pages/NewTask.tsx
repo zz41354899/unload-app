@@ -1,6 +1,6 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { WizardLayout, SelectionGrid, SelectionList } from '../components/StepWizard';
+import { WizardLayout, SelectionGrid, SelectionList, MultiSelectGrid } from '../components/StepWizard';
 import { TaskCategory, TaskWorry, ResponsibilityOwner } from '../types';
 import { useAppStore } from '../store';
 
@@ -12,10 +12,10 @@ export const NewTask: React.FC<NewTaskProps> = ({ navigate }) => {
   const { addTask, showToast } = useAppStore();
   const [step, setStep] = useState(1);
   
-  const [category, setCategory] = useState<string | null>(null);
+  const [categories, setCategories] = useState<string[]>([]);
   const [customCategory, setCustomCategory] = useState<string>('');
   
-  const [worry, setWorry] = useState<string | null>(null);
+  const [worries, setWorries] = useState<string[]>([]);
   const [customWorry, setCustomWorry] = useState<string>('');
   
   const [owner, setOwner] = useState<string | null>(null);
@@ -95,18 +95,22 @@ export const NewTask: React.FC<NewTaskProps> = ({ navigate }) => {
 
   const handleSubmit = () => {
     // Determine final values: use custom input if '其他' is selected
-    const finalCategory = (category === TaskCategory.Other && customCategory.trim()) 
-        ? customCategory.trim() 
-        : category;
-        
-    const finalWorry = (worry === TaskWorry.Other && customWorry.trim()) 
-        ? customWorry.trim() 
-        : worry;
+    let finalCategories = [...categories];
+    if (categories.includes(TaskCategory.Other) && customCategory.trim()) {
+      finalCategories = finalCategories.filter(c => c !== TaskCategory.Other);
+      finalCategories.push(customCategory.trim());
+    }
+    
+    let finalWorries = [...worries];
+    if (worries.includes(TaskWorry.Other) && customWorry.trim()) {
+      finalWorries = finalWorries.filter(w => w !== TaskWorry.Other);
+      finalWorries.push(customWorry.trim());
+    }
 
-    if (finalCategory && finalWorry && owner) {
+    if (finalCategories.length > 0 && finalWorries.length > 0 && owner) {
       addTask({
-        category: finalCategory,
-        worry: finalWorry,
+        category: finalCategories.length === 1 ? finalCategories[0] : finalCategories,
+        worry: finalWorries.length === 1 ? finalWorries[0] : finalWorries,
         owner: owner as ResponsibilityOwner,
         controlLevel: control
       });
@@ -117,25 +121,25 @@ export const NewTask: React.FC<NewTaskProps> = ({ navigate }) => {
 
   // Step 1: Category
   if (step === 1) {
-    const isOtherSelected = category === TaskCategory.Other;
-    const isValid = category && (!isOtherSelected || customCategory.trim().length > 0);
+    const isOtherSelected = categories.includes(TaskCategory.Other);
+    const isValid = categories.length > 0 && (!isOtherSelected || customCategory.trim().length > 0);
 
     return (
       <WizardLayout
-        title="分離你的課題"
-        subtitle="發生了什麼事了?"
+        title="發生了什麼事了？"
+        subtitle="請選擇最貼近你現在狀態的情境"
         onBack={handleBack}
         onNext={handleNext}
         nextDisabled={!isValid}
         currentStep={1}
       >
         <div key={step}>
-            <SelectionGrid
+            <MultiSelectGrid
             options={Object.values(TaskCategory)}
-            selected={category}
-            onSelect={(val) => {
-                setCategory(val);
-                if (val !== TaskCategory.Other) setCustomCategory('');
+            selected={categories}
+            onSelect={(vals) => {
+                setCategories(vals);
+                if (!vals.includes(TaskCategory.Other)) setCustomCategory('');
             }}
             />
             {isOtherSelected && (
@@ -157,25 +161,25 @@ export const NewTask: React.FC<NewTaskProps> = ({ navigate }) => {
 
   // Step 2: Worry
   if (step === 2) {
-    const isOtherSelected = worry === TaskWorry.Other;
-    const isValid = worry && (!isOtherSelected || customWorry.trim().length > 0);
+    const isOtherSelected = worries.includes(TaskWorry.Other);
+    const isValid = worries.length > 0 && (!isOtherSelected || customWorry.trim().length > 0);
 
     return (
       <WizardLayout
-        title="分離你的課題"
-        subtitle="這讓你擔心什麼？"
+        title="這件事情讓你擔心什麼？"
+        subtitle="請選出最貼近你此刻的擔心"
         onBack={handleBack}
         onNext={handleNext}
         nextDisabled={!isValid}
         currentStep={2}
       >
         <div key={step}>
-            <SelectionGrid
+            <MultiSelectGrid
             options={Object.values(TaskWorry)}
-            selected={worry}
-            onSelect={(val) => {
-                setWorry(val);
-                if (val !== TaskWorry.Other) setCustomWorry('');
+            selected={worries}
+            onSelect={(vals) => {
+                setWorries(vals);
+                if (!vals.includes(TaskWorry.Other)) setCustomWorry('');
             }}
             />
             {isOtherSelected && (
@@ -199,8 +203,8 @@ export const NewTask: React.FC<NewTaskProps> = ({ navigate }) => {
   if (step === 3) {
     return (
       <WizardLayout
-        title="分離你的課題"
-        subtitle="最終後果由誰承擔？"
+        title="最終這件事情的結果，由誰承擔？"
+        subtitle="從這個步驟開始，學會課題分離吧。"
         onBack={handleBack}
         onNext={handleNext}
         nextDisabled={!owner}
@@ -221,8 +225,8 @@ export const NewTask: React.FC<NewTaskProps> = ({ navigate }) => {
   if (step === 4) {
     return (
       <WizardLayout
-        title="分離你的課題"
-        subtitle="你對這個情況有多少控制力？"
+        title="你對這個情況有多少控制力？"
+        subtitle="這件事情，你能掌控多少？又有哪些並不取決於你？"
         onBack={handleBack}
         onNext={handleSubmit}
         nextLabel="完成課題"
@@ -303,15 +307,16 @@ export const NewTask: React.FC<NewTaskProps> = ({ navigate }) => {
             </div>
 
             <div className="flex justify-between text-sm text-gray-600 mb-12">
-                <span>無法控制</span>
-                <span>完全控制</span>
+                <span>0%：無法控制</span>
+                <span>100%：完全控制</span>
             </div>
 
             <div className="bg-white p-6 rounded-lg border border-gray-100 shadow-sm">
                 <h4 className="font-bold mb-2 text-sm">判斷提示：</h4>
-                <ul className="list-disc pl-5 text-sm text-gray-600 space-y-1">
-                    <li>如果只有 10-20% 能控制，通常這是「別人的課題」。</li>
-                    <li>如果超過 60% 能控制，這才是你需要專注的「我的課題」。</li>
+                <ul className="list-disc pl-5 text-sm text-gray-600 space-y-2">
+                    <li>如果你的控制力落在 0–20% 左右，多半屬於「對方的課題」（例如公司流程、錄取決定）。</li>
+                    <li>如果介於 20–60% 中間，代表這件事是雙方共同影響的課題（例如面試互動、溝通是否清楚）。</li>
+                    <li>如果超過 60%，這部分比較屬於「我的課題」（例如準備程度、投遞履歷、方向選擇）。</li>
                 </ul>
             </div>
             </div>

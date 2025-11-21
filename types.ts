@@ -1,23 +1,23 @@
 
 export enum TaskCategory {
-  Work = '工作職場',
-  Family = '家庭關係',
-  Partner = '伴侶感情',
-  Social = '人際社交',
-  Self = '自我期許',
-  Health = '健康狀態',
-  Finance = '財務狀況',
+  Interview = '面試相關',
+  Resume = '履歷與作品集',
+  CareerDirection = '職涯方向不確定',
+  JobSearchPressure = '求職進度壓力',
+  FamilyExpectation = '家人與伴侶期待',
+  FinancialPressure = '財務壓力',
+  MarketCompetition = '市場競爭',
   Other = '其他'
 }
 
 export enum TaskWorry {
   Performance = '我的表現',
-  Dislike = '怕被討厭',
-  OthersThoughts = '他人想法',
-  Conflict = '潛在衝突',
+  Rejection = '怕被拒絕',
+  OthersThoughts = '他人怎麼看我',
+  Pressure = '潛在壓力',
   Comparison = '比較心態',
-  Anxiety = '預期焦慮',
-  CantRefuse = '無法拒絕',
+  Anxiety = '期待焦慮',
+  Decision = '無法做決定',
   Uncertainty = '不確定性',
   Other = '其他'
 }
@@ -31,8 +31,8 @@ export enum ResponsibilityOwner {
 export interface Task {
   id: string;
   date: string; // ISO string
-  category: string; // Changed from TaskCategory to allow custom input
-  worry: string;    // Changed from TaskWorry to allow custom input
+  category: string | string[]; // Support single or multiple categories
+  worry: string | string[];    // Support single or multiple worries
   owner: ResponsibilityOwner;
   controlLevel: number;
 }
