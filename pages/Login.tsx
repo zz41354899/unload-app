@@ -34,8 +34,8 @@ export const Login: React.FC<LoginProps> = ({ navigate }) => {
                 </div>
                 
                 <h1 className="text-3xl font-bold mb-6 text-text">登入</h1>
-                <h2 className="text-xl font-bold text-text mb-2">歡迎回到 Unload。</h2>
-                <p className="text-lg text-text font-bold mb-8">給自己一點喘息的時間吧</p>
+                <h2 className="text-xl font-bold text-text mb-2">歡迎回到 Unload</h2>
+                <p className="text-lg text-text font-bold mb-8">釐清脈絡，照顧自己</p>
 
                 <button 
                     onClick={handleLogin}
