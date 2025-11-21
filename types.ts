@@ -2,7 +2,7 @@ export enum TaskCategory {
   Interview = '面試壓力',
   CareerPlanning = '職涯規劃',
   SelfConfusion = '自我迷惘',
-  ProgressAnxiety = '進度焦慮',
+  ProgressAnxiety = '時程壓力',
   ExpectationPressure = '他人期待',
   FinancialPressure = '財務壓力',
   MarketChange = '市場變動',
