@@ -155,7 +155,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ navigate }) => {
          <div className="flex justify-between items-start">
             <div>
                 <h1 className="text-2xl font-bold mb-4">今天，先照顧好自己的選擇</h1>
-                <p className="text-gray-600 mb-8">外在的期待與標準裡，哪些是真正屬於你的？</p>
+                <p className="text-gray-600 mb-8">外在的標準裡，哪些是真正屬於你的？</p>
             </div>
             <div className="text-right hidden md:block">
                 <div className="text-3xl font-bold text-primary/20">{currentYear}</div>
