@@ -430,7 +430,7 @@ export const NewTask: React.FC<NewTaskProps> = ({ navigate }) => {
                 className="w-full bg-primary text-white px-4 md:px-6 py-3 md:py-4 rounded-lg md:rounded-xl hover:bg-[#1e2b1e] transition-all font-medium flex items-center justify-center gap-2 shadow-lg shadow-primary/20 text-sm md:text-base"
               >
                 <CheckCircle className="w-4 md:w-5 h-4 md:h-5" />
-                前往日記記錄反思
+                前往反思日記
               </button>
               <button 
                 onClick={() => navigate('dashboard')}
