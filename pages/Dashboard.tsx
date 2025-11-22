@@ -2,8 +2,9 @@
 import React, { useState } from 'react';
 import { useAppStore } from '../store';
 import { Task, ResponsibilityOwner } from '../types';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-import { Smile, MessageSquare, Book, TrendingUp, AlertCircle, ChevronDown } from 'lucide-react';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, BarChart, Bar } from 'recharts';
+import { Smile, MessageSquare, Book, TrendingUp, AlertCircle, ChevronDown, Zap, Target, Brain, ZoomIn, Users, Lightbulb, Waves, Sparkles } from 'lucide-react';
+import { getDailyQuote } from '../lib/quotes';
 
 interface DashboardProps {
   navigate: (page: string) => void;
@@ -168,6 +169,19 @@ export const Dashboard: React.FC<DashboardProps> = ({ navigate }) => {
          >
             開始釐清脈絡
          </button>
+      </div>
+
+      {/* Daily Quote */}
+      <div className="bg-gradient-to-r from-primary/10 via-accent/10 to-primary/10 rounded-2xl p-8 border border-primary/20 shadow-sm">
+        <div className="flex items-start gap-4">
+          <Sparkles className="w-6 h-6 text-primary shrink-0 mt-1" />
+          <div className="flex-1">
+            <p className="text-sm text-primary/60 font-medium mb-2">今日語錄</p>
+            <p className="text-lg leading-relaxed text-text font-medium">
+              "{getDailyQuote()}"
+            </p>
+          </div>
+        </div>
       </div>
 
       {/* Stats Row */}
@@ -395,6 +409,104 @@ export const Dashboard: React.FC<DashboardProps> = ({ navigate }) => {
                  </div>
               )}
           </div>
+      </div>
+
+      {/* Simplified Insights Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        
+        {/* Quick Stats */}
+        <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
+          <div className="flex items-center gap-2 mb-6">
+            <Zap className="w-5 h-5 text-primary" />
+            <h3 className="font-bold text-lg">掌控力概況</h3>
+          </div>
+          
+          {tasks.length > 0 ? (
+            <div className="space-y-4">
+              {(() => {
+                const avgControl = Math.round(tasks.reduce((sum, t) => sum + t.controlLevel, 0) / tasks.length);
+                
+                return (
+                  <>
+                    <div className="bg-gradient-to-br from-primary/10 to-accent/10 rounded-lg p-6 border border-primary/20">
+                      <div className="text-sm text-gray-600 mb-2">平均掌控力</div>
+                      <div className="text-4xl font-bold text-primary mb-2">{avgControl}%</div>
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div 
+                          className="bg-primary h-2 rounded-full transition-all duration-500" 
+                          style={{ width: `${avgControl}%` }}
+                        ></div>
+                      </div>
+                    </div>
+                    
+                    <p className="text-sm text-gray-600 leading-relaxed">
+                      {avgControl >= 70 
+                        ? '你傾向掌控局面，記得也要信任他人。'
+                        : avgControl >= 40
+                        ? '你能很好地平衡掌控與放手。'
+                        : '你傾向接納，可以嘗試更多主動行動。'}
+                    </p>
+                  </>
+                );
+              })()}
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center text-gray-400 py-8">
+              <Zap className="w-8 h-8 mb-2 opacity-20" />
+              <span className="text-sm">尚無資料</span>
+            </div>
+          )}
+        </div>
+
+        {/* Personal Insights */}
+        <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
+          <div className="flex items-center gap-2 mb-6">
+            <Brain className="w-5 h-5 text-primary" />
+            <h3 className="font-bold text-lg">今日洞察</h3>
+          </div>
+          
+          {tasks.length > 0 ? (
+            <div className="space-y-3">
+              {(() => {
+                const avgControl = Math.round(tasks.reduce((sum, t) => sum + t.controlLevel, 0) / tasks.length);
+                const topWorry = sources.length > 0 ? sources[0].name : null;
+                
+                return (
+                  <>
+                    <div className="flex gap-3 p-3 bg-gray-50 rounded-lg">
+                      <Target className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+                      <p className="text-sm text-gray-700">
+                        <strong>課題分布：</strong> {myTasks} 個我的課題，{sharedTasks} 個共同課題，{theirTasks} 個他人課題
+                      </p>
+                    </div>
+                    
+                    {topWorry && (
+                      <div className="flex gap-3 p-3 bg-gray-50 rounded-lg">
+                        <Lightbulb className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+                        <p className="text-sm text-gray-700">
+                          <strong>主要困擾：</strong> 「{topWorry}」
+                        </p>
+                      </div>
+                    )}
+                    
+                    <button 
+                      onClick={() => navigate('journal')}
+                      className="w-full mt-4 px-4 py-2 bg-primary/10 text-primary rounded-lg hover:bg-primary/20 transition-colors text-sm font-medium"
+                    >
+                      查看詳細分析 →
+                    </button>
+                  </>
+                );
+              })()}
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center text-gray-400 py-8">
+              <Brain className="w-8 h-8 mb-2 opacity-20" />
+              <span className="text-sm">尚無資料</span>
+            </div>
+          )}
+        </div>
+
       </div>
 
     </div>

@@ -9,6 +9,7 @@ interface AppContextType {
   tasks: Task[];
   addTask: (task: Omit<Task, 'id' | 'date'>) => void;
   deleteTask: (id: string) => void;
+  updateTask: (id: string, updates: Partial<Task>) => void;
   showToast: (message: string, type?: 'success' | 'error') => void;
   toast: { message: string; type: 'success' | 'error' } | null;
 }
@@ -68,13 +69,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setTasks(prev => prev.filter(t => t.id !== id));
   };
 
+  const updateTask = (id: string, updates: Partial<Task>) => {
+    setTasks(prev => prev.map(t => t.id === id ? { ...t, ...updates } : t));
+  };
+
   const showToast = (message: string, type: 'success' | 'error' = 'success') => {
     setToast({ message, type });
     setTimeout(() => setToast(null), 3000);
   };
 
   return (
-    <AppContext.Provider value={{ user, login, logout, tasks, addTask, deleteTask, showToast, toast }}>
+    <AppContext.Provider value={{ user, login, logout, tasks, addTask, deleteTask, updateTask, showToast, toast }}>
       {children}
     </AppContext.Provider>
   );

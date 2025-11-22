@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Feather, LayoutDashboard, History, Menu, PanelLeft, LogOut, CheckCircle, Loader } from 'lucide-react';
+import { Feather, LayoutDashboard, History, Menu, PanelLeft, LogOut, CheckCircle, Loader, BookOpen } from 'lucide-react';
 import { useAppStore } from '../store';
 
 interface LayoutProps {
@@ -24,6 +24,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentPage, navigate 
   
   const navItems = [
     { id: 'dashboard', label: '儀錶板', icon: LayoutDashboard },
+    { id: 'journal', label: '摘要日記', icon: BookOpen },
     { id: 'history', label: '歷史記錄', icon: History },
   ];
 

@@ -6,6 +6,7 @@ import { Login } from './pages/Login';
 import { Dashboard } from './pages/Dashboard';
 import { History } from './pages/History';
 import { NewTask } from './pages/NewTask';
+import { Journal } from './pages/Journal';
 
 const AppContent: React.FC = () => {
   const { user, toast } = useAppStore();
@@ -32,6 +33,7 @@ const AppContent: React.FC = () => {
         {currentPage === 'dashboard' && <Dashboard navigate={setCurrentPage} />}
         {currentPage === 'history' && <History navigate={setCurrentPage} />}
         {currentPage === 'new-task' && <NewTask navigate={setCurrentPage} />}
+        {currentPage === 'journal' && <Journal navigate={setCurrentPage} />}
       </Layout>
       
       {/* Toast Notification */}

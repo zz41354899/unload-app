@@ -3,6 +3,9 @@ import React, { useState, useRef, useEffect } from 'react';
 import { WizardLayout, SelectionGrid, SelectionList, MultiSelectGrid } from '../components/StepWizard';
 import { TaskCategory, TaskWorry, ResponsibilityOwner } from '../types';
 import { useAppStore } from '../store';
+import { getQuoteByControlLevel } from '../lib/quotes';
+import { getControlLevelSuggestion, isControlLevelValid, getControlLevelWarning, getControlLevelAdvice } from '../lib/controlLevelSuggestion';
+import { CheckCircle, ArrowRight, Brain, AlertCircle } from 'lucide-react';
 
 interface NewTaskProps {
   navigate: (page: string) => void;
@@ -11,6 +14,7 @@ interface NewTaskProps {
 export const NewTask: React.FC<NewTaskProps> = ({ navigate }) => {
   const { addTask, showToast } = useAppStore();
   const [step, setStep] = useState(1);
+  const [resultQuote, setResultQuote] = useState<string>('');
   
   const [categories, setCategories] = useState<string[]>([]);
   const [customCategory, setCustomCategory] = useState<string>('');
@@ -108,14 +112,25 @@ export const NewTask: React.FC<NewTaskProps> = ({ navigate }) => {
     }
 
     if (finalCategories.length > 0 && finalWorries.length > 0 && owner) {
+      // 獲取控制力建議
+      const suggestion = getControlLevelSuggestion(finalCategories, finalWorries, owner);
+      
+      // 檢查控制力是否符合建議
+      if (!isControlLevelValid(control, suggestion)) {
+        showToast('控制力範圍不符合建議，請調整後再提交', 'error');
+        return;
+      }
+
       addTask({
         category: finalCategories.length === 1 ? finalCategories[0] : finalCategories,
         worry: finalWorries.length === 1 ? finalWorries[0] : finalWorries,
         owner: owner as ResponsibilityOwner,
         controlLevel: control
       });
-      showToast('課題已成功建立');
-      navigate('dashboard');
+      // 根據掌控力獲取語錄
+      const quote = getQuoteByControlLevel(control);
+      setResultQuote(quote);
+      setStep(5); // 進入結果頁面
     }
   };
 
@@ -223,6 +238,11 @@ export const NewTask: React.FC<NewTaskProps> = ({ navigate }) => {
 
   // Step 4: Control Slider
   if (step === 4) {
+    const suggestion = getControlLevelSuggestion(categories, worries, owner);
+    const isValid = isControlLevelValid(control, suggestion);
+    const warning = getControlLevelWarning(control, suggestion);
+    const advice = getControlLevelAdvice(suggestion);
+
     return (
       <WizardLayout
         title="你對這個情況有多少控制力？"
@@ -230,6 +250,7 @@ export const NewTask: React.FC<NewTaskProps> = ({ navigate }) => {
         onBack={handleBack}
         onNext={handleSubmit}
         nextLabel="完成課題"
+        nextDisabled={!isValid}
         currentStep={4}
       >
         <div key={step}>
@@ -237,6 +258,21 @@ export const NewTask: React.FC<NewTaskProps> = ({ navigate }) => {
             <div className="text-center text-6xl font-normal mb-12 text-text font-sans">
                 {control}%
             </div>
+
+            {/* 建議範圍提示 */}
+            {advice && (
+              <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6">
+                <p className="text-sm text-blue-800">{advice}</p>
+              </div>
+            )}
+
+            {/* 警告訊息 */}
+            {warning && (
+              <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6 flex gap-3">
+                <AlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+                <p className="text-sm text-amber-800">{warning}</p>
+              </div>
+            )}
 
             <div className="mb-12">
               {/* 刻度標記 */}
@@ -322,6 +358,91 @@ export const NewTask: React.FC<NewTaskProps> = ({ navigate }) => {
             </div>
         </div>
       </WizardLayout>
+    );
+  }
+
+  // Step 5: Result with Quote
+  if (step === 5) {
+    // 獲取課題相關的回饋訊息
+    const getResultFeedback = (): string => {
+      const categoryStr = Array.isArray(categories) ? categories.join('、') : categories;
+      const worryStr = Array.isArray(worries) ? worries.join('、') : worries;
+      
+      if (control < 20) {
+        return `你識別出「${categoryStr}」這個課題，主要擔憂是「${worryStr}」。由於控制力較低（${control}%），這表示許多因素超出你的掌控。接納這些不可控的部分，會幫助你減少不必要的焦慮。`;
+      } else if (control < 60) {
+        return `你識別出「${categoryStr}」這個課題，主要擔憂是「${worryStr}」。控制力在${control}%，這是一個共同課題。關鍵是找到你能影響的部分，並與相關人員進行有效溝通。`;
+      } else {
+        return `你識別出「${categoryStr}」這個課題，主要擔憂是「${worryStr}」。控制力達到${control}%，這主要是你的課題。你已經掌握了大部分的主動權，現在是時候制定具體的行動計畫了。`;
+      }
+    };
+
+    return (
+      <div className="min-h-screen flex items-center justify-center p-6 bg-gradient-to-br from-primary/5 to-accent/5">
+        <div className="max-w-2xl w-full">
+          {/* Success Card */}
+          <div className="bg-white rounded-3xl p-12 shadow-xl border border-gray-100">
+            {/* Success Icon */}
+            <div className="flex justify-center mb-8">
+              <div className="relative">
+                <div className="absolute inset-0 bg-primary/20 rounded-full blur-xl"></div>
+                <CheckCircle className="w-20 h-20 text-primary relative" />
+              </div>
+            </div>
+
+            {/* Success Message */}
+            <h1 className="text-3xl font-bold text-center mb-2 text-text">課題已成功建立</h1>
+            <p className="text-center text-gray-500 mb-12">你已經完成了第一步的釐清</p>
+
+            {/* Quote Section */}
+            <div className="bg-gradient-to-br from-primary/5 to-accent/5 rounded-2xl p-8 mb-12 border border-primary/10">
+              <p className="text-center text-lg leading-relaxed text-text font-medium">
+                "{resultQuote}"
+              </p>
+            </div>
+
+            {/* Result Feedback */}
+            <div className="bg-blue-50 rounded-xl p-6 mb-8 border border-blue-100">
+              <p className="text-sm text-blue-900 leading-relaxed">
+                {getResultFeedback()}
+              </p>
+            </div>
+
+            {/* Reflection Prompt */}
+            <div className="bg-gray-50 rounded-xl p-6 mb-12">
+              <div className="flex gap-2 mb-2">
+                <Brain className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+                <p className="text-sm text-gray-600"><strong>反思提示：</strong></p>
+              </div>
+              <p className="text-sm text-gray-700 leading-relaxed">
+                {control < 20 
+                  ? '這個課題中，有哪些部分是你真正無法控制的？接納它，會帶給你平靜。'
+                  : control < 60
+                  ? '在這個共同課題中，你可以如何與對方更好地溝通和協作？'
+                  : '你已經掌握了大部分的控制權。現在，你準備好採取行動了嗎？'}
+              </p>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex flex-col gap-3">
+              <button 
+                onClick={() => navigate('journal')}
+                className="w-full bg-primary text-white px-6 py-4 rounded-xl hover:bg-[#1e2b1e] transition-all font-medium flex items-center justify-center gap-2 shadow-lg shadow-primary/20"
+              >
+                <CheckCircle className="w-5 h-5" />
+                前往日記記錄反思
+              </button>
+              <button 
+                onClick={() => navigate('dashboard')}
+                className="w-full bg-gray-100 text-text px-6 py-4 rounded-xl hover:bg-gray-200 transition-all font-medium flex items-center justify-center gap-2"
+              >
+                <ArrowRight className="w-5 h-5" />
+                返回儀錶板
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
     );
   }
 
