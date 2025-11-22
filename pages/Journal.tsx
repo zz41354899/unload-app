@@ -12,7 +12,6 @@ export const Journal: React.FC<JournalProps> = ({ navigate }) => {
   const { tasks, updateTask, showToast } = useAppStore();
   const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [editingSummary, setEditingSummary] = useState<string>('');
   const [editingReflection, setEditingReflection] = useState<string>('');
   const [filterOwner, setFilterOwner] = useState<string | null>(null);
 
@@ -94,7 +93,6 @@ export const Journal: React.FC<JournalProps> = ({ navigate }) => {
 
   const handleSaveJournal = (taskId: string) => {
     updateTask(taskId, {
-      summary: editingSummary,
       reflection: editingReflection
     });
     showToast('日記已保存');
@@ -319,7 +317,6 @@ export const Journal: React.FC<JournalProps> = ({ navigate }) => {
                         setEditingId(null);
                       } else {
                         setEditingId(task.id);
-                        setEditingSummary(task.summary || '');
                         setEditingReflection(task.reflection || '');
                       }
                     }}
@@ -336,16 +333,6 @@ export const Journal: React.FC<JournalProps> = ({ navigate }) => {
                 {/* Journal Content */}
                 {editingId === task.id ? (
                   <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">摘要</label>
-                      <textarea
-                        value={editingSummary}
-                        onChange={(e) => setEditingSummary(e.target.value)}
-                        placeholder="記錄這個課題的摘要..."
-                        className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none"
-                        rows={3}
-                      />
-                    </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">反思筆記</label>
                       <textarea
@@ -366,19 +353,13 @@ export const Journal: React.FC<JournalProps> = ({ navigate }) => {
                   </div>
                 ) : (
                   <div className="space-y-3 pt-4 border-t border-gray-100">
-                    {task.summary && (
-                      <div>
-                        <div className="text-xs font-medium text-gray-500 mb-1">摘要</div>
-                        <div className="text-sm text-gray-700 bg-gray-50 p-3 rounded-lg">{task.summary}</div>
-                      </div>
-                    )}
                     {task.reflection && (
                       <div>
                         <div className="text-xs font-medium text-gray-500 mb-1">反思筆記</div>
                         <div className="text-sm text-gray-700 bg-gray-50 p-3 rounded-lg">{task.reflection}</div>
                       </div>
                     )}
-                    {!task.summary && !task.reflection && (
+                    {!task.reflection && (
                       <div className="text-sm text-gray-400 italic">尚無日記內容</div>
                     )}
                   </div>
