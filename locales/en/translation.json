@@ -141,6 +141,15 @@
   "taskCategory.MarketChange": "Market changes",
   "taskCategory.Other": "Other",
 
+  "taskCategory.Interview_hint": "For example: job interviews, internal role changes, performance reviews where you're worried about how you'll do.",
+  "taskCategory.CareerPlanning_hint": "For example: not knowing your next career step, thinking about changing jobs, grad school, or switching fields.",
+  "taskCategory.SelfConfusion_hint": "For example: feeling unclear about your strengths, interests, or values – not quite sure who you are or where you're heading.",
+  "taskCategory.ProgressAnxiety_hint": "For example: project deadlines, job search progress, or learning goals that feel behind your expected timeline.",
+  "taskCategory.ExpectationPressure_hint": "For example: expectations from family, managers, or peers that make you feel you must live up to a certain standard.",
+  "taskCategory.FinancialPressure_hint": "For example: unstable income, rent or loans, or family financial responsibilities that make money feel very tight.",
+  "taskCategory.MarketChange_hint": "For example: layoffs, industry downturns, AI or new technologies changing how work is done.",
+  "taskCategory.Other_hint": "If none of the above fit, you can describe the situation in your own words.",
+
   "taskWorry.Performance": "Worried about performance",
   "taskWorry.Rejection": "Afraid of rejection",
   "taskWorry.OthersThoughts": "Concerned about others' opinions",
@@ -151,9 +160,23 @@
   "taskWorry.Uncertainty": "Uncertain about the future",
   "taskWorry.Other": "Other",
 
+  "taskWorry.Performance_hint": "Worried you won't perform well enough, might make mistakes, or fall short of expectations (e.g. in an interview or presentation).",
+  "taskWorry.Rejection_hint": "Afraid of being turned down, ignored, or having your ideas rejected (e.g. job applications or proposals).",
+  "taskWorry.OthersThoughts_hint": "Concerned about what others think of you – for example, being seen as not capable, not hardworking, or not fitting in.",
+  "taskWorry.Pressure_hint": "You look fine on the surface, but feel a long-term sense of tension, fatigue, or emotional heaviness with no clear single cause.",
+  "taskWorry.Comparison_hint": "Often comparing yourself with peers, colleagues, or classmates and feeling like you're falling behind.",
+  "taskWorry.TimeStress_hint": "Feeling like there's never enough time, your schedule is packed, or you're worried you can't juggle all your roles.",
+  "taskWorry.Decision_hint": "Getting stuck between options, afraid of choosing wrong or missing a once-in-a-lifetime chance.",
+  "taskWorry.Uncertainty_hint": "Feeling unsure about your future direction, job stability, or life path – the road ahead looks blurry.",
+  "taskWorry.Other_hint": "If your concern is more unique, you can describe it in your own words.",
+
   "owner.Mine": "Within my control",
   "owner.Theirs": "Outside my control",
   "owner.Shared": "Shared influence",
+
+  "owner.Mine_hint": "For example: how much you prepare, which actions you take, or whether you reach out for help – things mostly up to you.",
+  "owner.Theirs_hint": "For example: company decisions, the other person's emotions and choices, or the overall economy – things you can't decide alone.",
+  "owner.Shared_hint": "For example: collaboration on a project, communication quality, or relationship patterns that usually need both sides to adjust.",
 
   "control.description.theirs": "This is mostly the other side's task; there is only so much you can directly change.",
   "control.description.shared": "This is a shared task - both you and the other side play a part.",

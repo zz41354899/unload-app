@@ -114,6 +114,20 @@ export const SelectionGrid: React.FC<SelectionGridProps> = ({ options, selected,
     }
   };
 
+  const getHint = (option: string) => {
+    switch (option) {
+      case TaskCategory.Interview: return t('taskCategory.Interview_hint');
+      case TaskCategory.CareerPlanning: return t('taskCategory.CareerPlanning_hint');
+      case TaskCategory.SelfConfusion: return t('taskCategory.SelfConfusion_hint');
+      case TaskCategory.ProgressAnxiety: return t('taskCategory.ProgressAnxiety_hint');
+      case TaskCategory.ExpectationPressure: return t('taskCategory.ExpectationPressure_hint');
+      case TaskCategory.FinancialPressure: return t('taskCategory.FinancialPressure_hint');
+      case TaskCategory.MarketChange: return t('taskCategory.MarketChange_hint');
+      case TaskCategory.Other: return t('taskCategory.Other_hint');
+      default: return '';
+    }
+  };
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       {options.map((option) => (
@@ -127,8 +141,14 @@ export const SelectionGrid: React.FC<SelectionGridProps> = ({ options, selected,
               : 'border-gray-200 hover:border-gray-300 bg-white text-gray-600'}
           `}
         >
-          {getLabel(option)}
-
+          <div className="flex flex-col">
+            <span>{getLabel(option)}</span>
+            {getHint(option) && (
+              <span className="mt-1 text-xs text-gray-400">
+                {getHint(option)}
+              </span>
+            )}
+          </div>
         </button>
       ))}
     </div>
@@ -175,6 +195,31 @@ export const MultiSelectGrid: React.FC<MultiSelectGridProps> = ({ options, selec
     }
   };
 
+  const getHint = (option: string) => {
+    switch (option) {
+      // 類別（Step1）提示
+      case TaskCategory.Interview: return t('taskCategory.Interview_hint');
+      case TaskCategory.CareerPlanning: return t('taskCategory.CareerPlanning_hint');
+      case TaskCategory.SelfConfusion: return t('taskCategory.SelfConfusion_hint');
+      case TaskCategory.ProgressAnxiety: return t('taskCategory.ProgressAnxiety_hint');
+      case TaskCategory.ExpectationPressure: return t('taskCategory.ExpectationPressure_hint');
+      case TaskCategory.FinancialPressure: return t('taskCategory.FinancialPressure_hint');
+      case TaskCategory.MarketChange: return t('taskCategory.MarketChange_hint');
+      case TaskCategory.Other: return t('taskCategory.Other_hint');
+      // 擔憂（Step2）提示
+      case TaskWorry.Performance: return t('taskWorry.Performance_hint');
+      case TaskWorry.Rejection: return t('taskWorry.Rejection_hint');
+      case TaskWorry.OthersThoughts: return t('taskWorry.OthersThoughts_hint');
+      case TaskWorry.Pressure: return t('taskWorry.Pressure_hint');
+      case TaskWorry.Comparison: return t('taskWorry.Comparison_hint');
+      case TaskWorry.TimeStress: return t('taskWorry.TimeStress_hint');
+      case TaskWorry.Decision: return t('taskWorry.Decision_hint');
+      case TaskWorry.Uncertainty: return t('taskWorry.Uncertainty_hint');
+      case TaskWorry.Other: return t('taskWorry.Other_hint');
+      default: return '';
+    }
+  };
+
   return (
     <div>
       {selected.length >= MAX_SELECTIONS && (
@@ -208,8 +253,14 @@ export const MultiSelectGrid: React.FC<MultiSelectGridProps> = ({ options, selec
                 </svg>
               )}
             </div>
-            <span>{getLabel(option)}</span>
-
+            <div className="flex flex-col">
+              <span>{getLabel(option)}</span>
+              {getHint(option) && (
+                <span className="mt-1 text-xs text-gray-400">
+                  {getHint(option)}
+                </span>
+              )}
+            </div>
           </button>
         ))}
       </div>
@@ -228,6 +279,15 @@ export const SelectionList: React.FC<SelectionGridProps> = ({ options, selected,
     }
   };
 
+  const getHint = (option: string) => {
+    switch (option) {
+      case ResponsibilityOwner.Mine: return t('owner.Mine_hint');
+      case ResponsibilityOwner.Theirs: return t('owner.Theirs_hint');
+      case ResponsibilityOwner.Shared: return t('owner.Shared_hint');
+      default: return '';
+    }
+  };
+
   return (
     <div className="flex flex-col gap-4">
       {options.map((option) => (
@@ -241,8 +301,14 @@ export const SelectionList: React.FC<SelectionGridProps> = ({ options, selected,
               : 'border-gray-200 hover:border-gray-300 bg-white text-gray-600'}
           `}
         >
-          {getLabel(option)}
-
+          <div className="flex flex-col">
+            <span>{getLabel(option)}</span>
+            {getHint(option) && (
+              <span className="mt-1 text-xs text-gray-400">
+                {getHint(option)}
+              </span>
+            )}
+          </div>
         </button>
       ))}
     </div>

@@ -141,6 +141,15 @@
   "taskCategory.MarketChange": "市場變動",
   "taskCategory.Other": "其他",
 
+  "taskCategory.Interview_hint": "例如：求職面試、內部調職面談、績效面談前後，對表現與結果感到壓力。",
+  "taskCategory.CareerPlanning_hint": "例如：不知道下一步職涯方向、是否要轉職、念研究所或換產業等長期選擇。",
+  "taskCategory.SelfConfusion_hint": "例如：對自己的能力、興趣、價值感到模糊，不確定「我是誰、要往哪裡去」。",
+  "taskCategory.ProgressAnxiety_hint": "例如：專案時程、求職進度、學習進度落後，擔心追不上預期的時間表。",
+  "taskCategory.ExpectationPressure_hint": "例如：來自家人、主管、同儕的期待，讓你感到必須達到某種標準。",
+  "taskCategory.FinancialPressure_hint": "例如：收入不穩、房租貸款、家庭經濟責任，讓你對金錢特別焦慮。",
+  "taskCategory.MarketChange_hint": "例如：產業不景氣、裁員風聲、AI 或新技術改變工作型態，讓你對未來不安。",
+  "taskCategory.Other_hint": "當上述分類都不太貼近時，可以用自己的語言描述這個情境。",
+
   "taskWorry.Performance": "擔心表現",
   "taskWorry.Rejection": "害怕拒絕",
   "taskWorry.OthersThoughts": "在意眼光",
@@ -151,9 +160,23 @@
   "taskWorry.Uncertainty": "未來不明",
   "taskWorry.Other": "其他",
 
+  "taskWorry.Performance_hint": "擔心自己表現不好、出錯或無法符合標準，例如簡報失常、面試狀態不佳。",
+  "taskWorry.Rejection_hint": "害怕被拒絕、被說不，或是被忽視，例如投履歷被刷掉、提案遭到否決。",
+  "taskWorry.OthersThoughts_hint": "在意別人怎麼看你，例如怕被覺得沒能力、不夠努力或是不合群。",
+  "taskWorry.Pressure_hint": "看起來沒事，但長期感到緊繃、疲憊或情緒被壓抑，卻說不出明確原因。",
+  "taskWorry.Comparison_hint": "常拿自己跟同儕、同事或同學比較，覺得自己落後、不夠好。",
+  "taskWorry.TimeStress_hint": "覺得時間不夠用、事情排太滿，擔心會來不及或顧不好各種角色。",
+  "taskWorry.Decision_hint": "面對多個選項時卡住，很怕做錯選擇、錯過唯一的機會。",
+  "taskWorry.Uncertainty_hint": "對未來走向、工作穩定度或人生方向感到茫然，看不清前面的路。",
+  "taskWorry.Other_hint": "如果你的擔憂比較獨特，可以用自己的語言補充說明。",
+
   "owner.Mine": "我能掌控的部分",
   "owner.Theirs": "不在我範圍內的部分",
   "owner.Shared": "共同的影響部分",
+
+  "owner.Mine_hint": "例如：你的準備程度、行動選擇、是否主動尋求幫助，這些多半取決於你自己。",
+  "owner.Theirs_hint": "例如：公司決策、對方的情緒與選擇、整體景氣，這些多半不由你單方面決定。",
+  "owner.Shared_hint": "例如：合作專案、溝通品質、關係互動模式，通常需要你和對方一起調整。",
 
   "control.description.theirs": "這主要是對方的課題，你真正能影響的部分較少。",
   "control.description.shared": "這是雙方共同影響的課題，你和對方都各自扮演一部分角色。",
