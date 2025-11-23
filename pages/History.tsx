@@ -1,8 +1,9 @@
 
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAppStore } from '../store';
 import { Search, Trash2, AlertCircle, ChevronDown } from 'lucide-react';
-import { TaskCategory, ResponsibilityOwner } from '../types';
+import { TaskCategory, TaskWorry, ResponsibilityOwner } from '../types';
 
 interface HistoryProps {
   navigate: (page: string) => void;
@@ -10,6 +11,7 @@ interface HistoryProps {
 
 export const History: React.FC<HistoryProps> = () => {
   const { tasks, deleteTask, showToast } = useAppStore();
+  const { t, i18n } = useTranslation();
   const [search, setSearch] = useState('');
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
@@ -79,7 +81,49 @@ export const History: React.FC<HistoryProps> = () => {
 
   const formatDate = (isoString: string) => {
     const date = new Date(isoString);
-    return `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
+    return date.toLocaleDateString(i18n.language, {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    });
+  };
+
+  const getCategoryLabel = (cat: string) => {
+    switch (cat) {
+      case TaskCategory.Interview: return t('taskCategory.Interview');
+      case TaskCategory.CareerPlanning: return t('taskCategory.CareerPlanning');
+      case TaskCategory.SelfConfusion: return t('taskCategory.SelfConfusion');
+      case TaskCategory.ProgressAnxiety: return t('taskCategory.ProgressAnxiety');
+      case TaskCategory.ExpectationPressure: return t('taskCategory.ExpectationPressure');
+      case TaskCategory.FinancialPressure: return t('taskCategory.FinancialPressure');
+      case TaskCategory.MarketChange: return t('taskCategory.MarketChange');
+      case TaskCategory.Other: return t('taskCategory.Other');
+      default: return cat;
+    }
+  };
+
+  const getWorryLabel = (w: string) => {
+    switch (w) {
+      case TaskWorry.Performance: return t('taskWorry.Performance');
+      case TaskWorry.Rejection: return t('taskWorry.Rejection');
+      case TaskWorry.OthersThoughts: return t('taskWorry.OthersThoughts');
+      case TaskWorry.Pressure: return t('taskWorry.Pressure');
+      case TaskWorry.Comparison: return t('taskWorry.Comparison');
+      case TaskWorry.TimeStress: return t('taskWorry.TimeStress');
+      case TaskWorry.Decision: return t('taskWorry.Decision');
+      case TaskWorry.Uncertainty: return t('taskWorry.Uncertainty');
+      case TaskWorry.Other: return t('taskWorry.Other');
+      default: return w;
+    }
+  };
+
+  const getOwnerLabel = (owner: string) => {
+    switch (owner) {
+      case ResponsibilityOwner.Mine: return t('owner.Mine');
+      case ResponsibilityOwner.Theirs: return t('owner.Theirs');
+      case ResponsibilityOwner.Shared: return t('owner.Shared');
+      default: return owner;
+    }
   };
 
   const getOwnerColor = (owner: string) => {
@@ -92,21 +136,21 @@ export const History: React.FC<HistoryProps> = () => {
     if (deleteId) {
       deleteTask(deleteId);
       setDeleteId(null);
-      showToast('紀錄已成功刪除', 'success');
+      showToast(t('history.toast.deleted'), 'success');
     }
   };
 
   return (
     <div className="max-w-6xl mx-auto">
       <div className="bg-white rounded-2xl md:rounded-3xl p-4 md:p-10 shadow-sm border border-gray-100 min-h-[600px]">
-          <h1 className="text-xl md:text-2xl font-bold mb-4 md:mb-8 tracking-wide text-text">歷史紀錄</h1>
+          <h1 className="text-xl md:text-2xl font-bold mb-4 md:mb-8 tracking-wide text-text">{t('history.title')}</h1>
 
           {/* Search Bar */}
           <div className="relative mb-4 md:mb-6">
             <Search className="absolute left-4 md:left-5 top-1/2 transform -translate-y-1/2 w-4 md:w-5 h-4 md:h-5 text-gray-300" />
             <input 
               type="text"
-              placeholder="搜尋你曾整理過的事件或困擾"
+              placeholder={t('history.search.placeholder')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full pl-11 md:pl-14 pr-4 py-2.5 md:py-4 rounded-lg md:rounded-xl border border-gray-200 bg-white focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-gray-700 placeholder-gray-300 shadow-sm text-sm md:text-base transition-shadow"
@@ -122,10 +166,10 @@ export const History: React.FC<HistoryProps> = () => {
                     onChange={(e) => setTimeFilter(e.target.value)}
                     className="w-full py-2 md:py-3 px-2 md:px-4 pr-8 md:pr-10 border border-gray-200 rounded-lg md:rounded-xl text-left text-gray-600 text-xs md:text-sm bg-white hover:bg-gray-50 transition-colors shadow-sm appearance-none cursor-pointer focus:outline-none focus:border-primary"
                  >
-                     <option value="all">所有時間</option>
-                     <option value="today">今天</option>
-                     <option value="week">過去 7 天</option>
-                     <option value="month">過去 30 天</option>
+                     <option value="all">{t('history.filter.time.all')}</option>
+                     <option value="today">{t('history.filter.time.today')}</option>
+                     <option value="week">{t('history.filter.time.week')}</option>
+                     <option value="month">{t('history.filter.time.month')}</option>
                  </select>
                  <ChevronDown className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 w-3 md:w-4 h-3 md:h-4 text-gray-400 pointer-events-none" />
              </div>
@@ -137,9 +181,9 @@ export const History: React.FC<HistoryProps> = () => {
                     onChange={(e) => setCategoryFilter(e.target.value)}
                     className="w-full py-2 md:py-3 px-2 md:px-4 pr-8 md:pr-10 border border-gray-200 rounded-lg md:rounded-xl text-left text-gray-600 text-xs md:text-sm bg-white hover:bg-gray-50 transition-colors shadow-sm appearance-none cursor-pointer focus:outline-none focus:border-primary"
                  >
-                     <option value="all">所有分類</option>
+                     <option value="all">{t('history.filter.category.all')}</option>
                      {Object.values(TaskCategory).map(cat => (
-                         <option key={cat} value={cat}>{cat}</option>
+                         <option key={cat} value={cat}>{getCategoryLabel(cat)}</option>
                      ))}
                  </select>
                  <ChevronDown className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 w-3 md:w-4 h-3 md:h-4 text-gray-400 pointer-events-none" />
@@ -152,9 +196,9 @@ export const History: React.FC<HistoryProps> = () => {
                     onChange={(e) => setOwnerFilter(e.target.value)}
                     className="w-full py-2 md:py-3 px-2 md:px-4 pr-8 md:pr-10 border border-gray-200 rounded-lg md:rounded-xl text-left text-gray-600 text-xs md:text-sm bg-white hover:bg-gray-50 transition-colors shadow-sm appearance-none cursor-pointer focus:outline-none focus:border-primary"
                  >
-                     <option value="all">所有課題類型</option>
+                     <option value="all">{t('history.filter.owner.all')}</option>
                      {Object.values(ResponsibilityOwner).map(owner => (
-                         <option key={owner} value={owner}>{owner}</option>
+                         <option key={owner} value={owner}>{getOwnerLabel(owner)}</option>
                      ))}
                  </select>
                  <ChevronDown className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 w-3 md:w-4 h-3 md:h-4 text-gray-400 pointer-events-none" />
@@ -167,8 +211,8 @@ export const History: React.FC<HistoryProps> = () => {
                     onChange={(e) => setSortOrder(e.target.value)}
                     className="w-full py-2 md:py-3 px-2 md:px-4 pr-8 md:pr-10 border border-gray-200 rounded-lg md:rounded-xl text-left text-gray-600 text-xs md:text-sm bg-white hover:bg-gray-50 transition-colors shadow-sm appearance-none cursor-pointer focus:outline-none focus:border-primary"
                  >
-                     <option value="newest">由新到舊</option>
-                     <option value="oldest">由舊到新</option>
+                     <option value="newest">{t('history.filter.sort.newest')}</option>
+                     <option value="oldest">{t('history.filter.sort.oldest')}</option>
                  </select>
                  <ChevronDown className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 w-3 md:w-4 h-3 md:h-4 text-gray-400 pointer-events-none" />
              </div>
@@ -187,19 +231,19 @@ export const History: React.FC<HistoryProps> = () => {
                     {Array.isArray(task.category) ? (
                       task.category.map((cat, idx) => (
                         <span key={idx} className="bg-[#E5E7EB] text-gray-700 px-3 md:px-4 py-1 md:py-1.5 rounded-lg text-xs md:text-sm font-medium tracking-wide">
-                          {cat}
+                          {getCategoryLabel(cat)}
                         </span>
                       ))
                     ) : (
                       <span className="bg-[#E5E7EB] text-gray-700 px-3 md:px-4 py-1 md:py-1.5 rounded-lg text-xs md:text-sm font-medium tracking-wide">
-                        {task.category}
+                        {getCategoryLabel(task.category)}
                       </span>
                     )}
                     <span 
                         className="px-3 md:px-4 py-1 md:py-1.5 rounded-lg text-xs md:text-sm font-medium text-white tracking-wide"
                         style={{ backgroundColor: getOwnerColor(task.owner) }}
                     >
-                      {task.owner}
+                      {getOwnerLabel(task.owner)}
                     </span>
                   </div>
                   <span className="text-xs md:text-sm text-gray-500 font-medium tracking-wide">
@@ -209,16 +253,18 @@ export const History: React.FC<HistoryProps> = () => {
 
                 {/* Worry Row */}
                 <div className="mb-3 md:mb-4">
-                  <p className="text-xs md:text-sm text-gray-600 font-medium mb-1">擔憂：</p>
+                  <p className="text-xs md:text-sm text-gray-600 font-medium mb-1">{t('history.worry.label')}</p>
                   <p className="text-xs md:text-sm text-gray-700">
-                    {Array.isArray(task.worry) ? task.worry.join('、') : task.worry}
+                    {Array.isArray(task.worry)
+                      ? task.worry.map(getWorryLabel).join('、')
+                      : getWorryLabel(task.worry as string)}
                   </p>
                 </div>
                 
                 {/* Bottom Row: Control Bar + Trash */}
                 <div className="flex items-center justify-between gap-3 md:gap-6">
                    <div className="flex items-center gap-2 md:gap-4 flex-1 min-w-0">
-                      <span className="text-xs md:text-sm font-bold text-text whitespace-nowrap tracking-wide">控制力</span>
+                      <span className="text-xs md:text-sm font-bold text-text whitespace-nowrap tracking-wide">{t('history.control.label')}</span>
                       <div className="flex-1 h-1.5 bg-gray-300/80 rounded-full overflow-hidden">
                           <div 
                             className="h-full bg-primary rounded-full transition-all duration-700 ease-out" 
@@ -243,7 +289,7 @@ export const History: React.FC<HistoryProps> = () => {
                     <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
                         <Search className="w-8 h-8 text-gray-300" />
                     </div>
-                    <p className="text-sm font-medium text-gray-500">沒有找到相關紀錄</p>
+                    <p className="text-sm font-medium text-gray-500">{t('history.empty.title')}</p>
                     {(timeFilter !== 'all' || categoryFilter !== 'all' || ownerFilter !== 'all' || search) && (
                         <button 
                             onClick={() => {
@@ -254,7 +300,7 @@ export const History: React.FC<HistoryProps> = () => {
                             }}
                             className="mt-4 text-primary text-sm hover:underline"
                         >
-                            清除所有篩選
+                            {t('history.empty.clearFilters')}
                         </button>
                     )}
                 </div>
@@ -270,22 +316,22 @@ export const History: React.FC<HistoryProps> = () => {
                    <div className="w-12 h-12 bg-red-50 rounded-full flex items-center justify-center mb-4">
                        <AlertCircle className="w-6 h-6 text-red-500" />
                    </div>
-                   <h3 className="text-xl font-bold text-text mb-2">確定要刪除此紀錄？</h3>
+                   <h3 className="text-xl font-bold text-text mb-2">{t('history.modal.title')}</h3>
                    <p className="text-gray-500 mb-8 text-sm leading-relaxed">
-                       此動作將無法復原，您確定要繼續嗎？
+                       {t('history.modal.message')}
                    </p>
                    <div className="flex w-full gap-3">
                        <button 
                            onClick={() => setDeleteId(null)}
                            className="flex-1 py-3 rounded-xl border border-gray-200 text-gray-600 font-bold hover:bg-gray-50 transition-colors text-sm"
                        >
-                           取消
+                           {t('history.modal.cancel')}
                        </button>
                        <button 
                            onClick={confirmDelete}
                            className="flex-1 py-3 rounded-xl bg-red-500 text-white font-bold hover:bg-red-600 transition-colors shadow-lg shadow-red-500/20 text-sm"
                        >
-                           刪除
+                           {t('history.modal.confirm')}
                        </button>
                    </div>
                </div>

@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
-import { Feather, LayoutDashboard, History, Menu, PanelLeft, LogOut, CheckCircle, Loader, BookOpen } from 'lucide-react';
+import { Feather, LayoutDashboard, History, Menu, PanelLeft, LogOut, CheckCircle, Loader, BookOpen, Globe2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useAppStore } from '../store';
 
 interface LayoutProps {
@@ -14,6 +15,8 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentPage, navigate 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [isLangOpen, setIsLangOpen] = useState(false);
+  const { t, i18n } = useTranslation();
 
   const handleLogout = async () => {
     setIsLoggingOut(true);
@@ -23,9 +26,9 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentPage, navigate 
   };
   
   const navItems = [
-    { id: 'dashboard', label: '儀錶板', icon: LayoutDashboard },
-    { id: 'journal', label: '反思日記', icon: BookOpen },
-    { id: 'history', label: '歷史記錄', icon: History },
+    { id: 'dashboard', label: t('layout.nav.dashboard'), icon: LayoutDashboard },
+    { id: 'journal', label: t('layout.nav.journal'), icon: BookOpen },
+    { id: 'history', label: t('layout.nav.history'), icon: History },
   ];
 
   return (
@@ -70,7 +73,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentPage, navigate 
             {/* Only show label when sidebar is open */}
             {isSidebarOpen && (
                 <div className="text-sm text-muted mb-4 pl-2">
-                    導覽
+                    {t('layout.nav.sectionTitle')}
                 </div>
             )}
             
@@ -108,7 +111,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentPage, navigate 
                         {isSidebarOpen && (
                             <div className="flex-1 min-w-0">
                                 <div className="text-sm font-bold text-text truncate">{user.name}</div>
-                                <div className="text-xs text-gray-400 truncate">Free Plan</div>
+                                <div className="text-xs text-gray-400 truncate">{t('layout.nav.plan.free')}</div>
                             </div>
                         )}
                     </div>
@@ -128,7 +131,11 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentPage, navigate 
                         ) : (
                             <LogOut className="w-5 h-5" />
                         )}
-                        {isSidebarOpen && <span className="text-base font-medium">{isLoggingOut ? '登出中...' : '登出'}</span>}
+                        {isSidebarOpen && (
+                          <span className="text-base font-medium">
+                            {isLoggingOut ? t('layout.logout.loading') : t('layout.logout.label')}
+                          </span>
+                        )}
                     </button>
                 </>
             )}
@@ -136,16 +143,56 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentPage, navigate 
       </aside>
 
       {/* Mobile Header */}
-      <div className="md:hidden fixed top-0 w-full bg-background z-50 px-6 py-4 flex justify-between items-center shadow-sm md:shadow-none">
+      <div className="md:hidden fixed top-0 w-full bg-background z-50 px-6 py-4 flex items-center justify-between shadow-sm md:shadow-none">
           <div 
             className="flex items-center gap-2 cursor-pointer" 
             onClick={() => navigate('dashboard')}
           >
              <img src="/logo.svg" alt="Unload Logo" className="h-10 object-contain" />
           </div>
-          <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
-              <Menu className="w-6 h-6" />
-          </button>
+          <div className="flex items-center gap-3">
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setIsLangOpen((open) => !open)}
+                className="p-1.5 rounded-full text-gray-500 hover:text-text hover:bg-gray-100 transition-colors"
+                aria-label="Toggle language menu"
+              >
+                <Globe2 className="w-5 h-5" />
+              </button>
+              {isLangOpen && (
+                <div className="absolute right-0 mt-2 w-28 rounded-xl bg-white border border-gray-200 shadow-lg py-1 text-xs z-[10000]">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      void i18n.changeLanguage('zh-TW');
+                      setIsLangOpen(false);
+                    }}
+                    className={`block w-full text-left px-3 py-1.5 hover:bg-gray-50 ${
+                      i18n.language === 'zh-TW' ? 'font-semibold text-text' : 'text-gray-600'
+                    }`}
+                  >
+                    {t('login.language.zh')}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      void i18n.changeLanguage('en');
+                      setIsLangOpen(false);
+                    }}
+                    className={`block w-full text-left px-3 py-1.5 hover:bg-gray-50 ${
+                      i18n.language === 'en' ? 'font-semibold text-text' : 'text-gray-600'
+                    }`}
+                  >
+                    {t('login.language.en')}
+                  </button>
+                </div>
+              )}
+            </div>
+            <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+                <Menu className="w-6 h-6" />
+            </button>
+          </div>
       </div>
 
       {/* Mobile Menu */}
@@ -193,9 +240,46 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentPage, navigate 
             ${isSidebarOpen ? 'md:ml-64' : 'md:ml-20'}
         `}
       >
-        {/* Top Header Area - Spacer primarily now */}
-        <header className="flex justify-end items-center mb-10 h-10">
-           {/* User info moved to sidebar */}
+        {/* Top Header Area (desktop only, mobile uses its own header) */}
+        <header className="hidden md:flex justify-end items-center mb-10 h-10">
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setIsLangOpen((open) => !open)}
+              className="p-2 rounded-full text-gray-500 hover:text-text hover:bg-gray-100 transition-colors"
+              aria-label="Toggle language menu"
+            >
+              <Globe2 className="w-5 h-5" />
+            </button>
+            {isLangOpen && (
+              <div className="absolute right-0 mt-2 w-32 rounded-xl bg-white border border-gray-200 shadow-lg py-1 text-xs z-[10000]">
+                <button
+                  type="button"
+                  onClick={() => {
+                    void i18n.changeLanguage('zh-TW');
+                    setIsLangOpen(false);
+                  }}
+                  className={`block w-full text-left px-3 py-1.5 hover:bg-gray-50 ${
+                    i18n.language === 'zh-TW' ? 'font-semibold text-text' : 'text-gray-600'
+                  }`}
+                >
+                  {t('login.language.zh')}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    void i18n.changeLanguage('en');
+                    setIsLangOpen(false);
+                  }}
+                  className={`block w-full text-left px-3 py-1.5 hover:bg-gray-50 ${
+                    i18n.language === 'en' ? 'font-semibold text-text' : 'text-gray-600'
+                  }`}
+                >
+                  {t('login.language.en')}
+                </button>
+              </div>
+            )}
+          </div>
         </header>
 
         {children}

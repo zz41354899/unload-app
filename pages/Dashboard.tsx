@@ -1,7 +1,8 @@
 
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAppStore } from '../store';
-import { ResponsibilityOwner } from '../types';
+import { ResponsibilityOwner, TaskWorry } from '../types';
 import { Smile, MessageSquare, Book, TrendingUp, Zap, Target, Brain, Lightbulb, Sparkles } from 'lucide-react';
 import { getDailyQuote } from '../lib/quotes';
 
@@ -11,6 +12,7 @@ interface DashboardProps {
 
 export const Dashboard: React.FC<DashboardProps> = ({ navigate }) => {
   const { tasks, user } = useAppStore();
+  const { t } = useTranslation();
   
   // Date Helper
   const today = new Date();
@@ -43,6 +45,21 @@ export const Dashboard: React.FC<DashboardProps> = ({ navigate }) => {
 
   const topWorries = getTopWorries();
 
+  const getWorryLabel = (worry: string) => {
+    switch (worry) {
+      case TaskWorry.Performance: return t('taskWorry.Performance');
+      case TaskWorry.Rejection: return t('taskWorry.Rejection');
+      case TaskWorry.OthersThoughts: return t('taskWorry.OthersThoughts');
+      case TaskWorry.Pressure: return t('taskWorry.Pressure');
+      case TaskWorry.Comparison: return t('taskWorry.Comparison');
+      case TaskWorry.TimeStress: return t('taskWorry.TimeStress');
+      case TaskWorry.Decision: return t('taskWorry.Decision');
+      case TaskWorry.Uncertainty: return t('taskWorry.Uncertainty');
+      case TaskWorry.Other: return t('taskWorry.Other');
+      default: return worry;
+    }
+  };
+
   return (
     <div className="max-w-6xl mx-auto space-y-6 md:space-y-8 pb-12 px-4 md:px-0">
       
@@ -50,8 +67,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ navigate }) => {
       <div className="bg-white rounded-2xl p-6 md:p-12 shadow-sm border border-gray-100">
          <div className="flex justify-between items-start gap-4 mb-6">
             <div className="flex-1 min-w-0">
-                <h1 className="text-xl md:text-2xl font-bold mb-2 md:mb-4">今天，先照顧好自己的選擇</h1>
-                <p className="text-gray-600 text-sm md:text-base mb-6 md:mb-8">外在的標準裡，哪些是真正屬於你的？</p>
+                <h1 className="text-xl md:text-2xl font-bold mb-2 md:mb-4">{t('dashboard.header.title')}</h1>
+                <p className="text-gray-600 text-sm md:text-base mb-6 md:mb-8">{t('dashboard.header.subtitle')}</p>
             </div>
             <div className="text-right hidden md:block shrink-0">
                 <div className="text-3xl font-bold text-primary/20">{currentYear}</div>
@@ -62,7 +79,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ navigate }) => {
             onClick={() => navigate('new-task')}
             className="w-full md:w-auto bg-primary text-white px-6 md:px-8 py-3 rounded-full hover:bg-[#1e2b1e] transition-all shadow-lg shadow-primary/20 hover:shadow-primary/40 text-sm md:text-base font-medium"
          >
-            開始釐清脈絡
+            {t('dashboard.header.cta')}
          </button>
       </div>
 
@@ -71,7 +88,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ navigate }) => {
         <div className="flex items-start gap-3 md:gap-4">
           <Sparkles className="w-5 md:w-6 h-5 md:h-6 text-primary shrink-0 mt-0.5 md:mt-1" />
           <div className="flex-1 min-w-0">
-            <p className="text-xs md:text-sm text-primary/60 font-medium mb-1 md:mb-2">今日語錄</p>
+            <p className="text-xs md:text-sm text-primary/60 font-medium mb-1 md:mb-2">{t('journal.dailyQuote.title')}</p>
             <p className="text-sm md:text-lg leading-relaxed text-text font-medium">
               "{getDailyQuote()}"
             </p>
@@ -82,10 +99,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ navigate }) => {
       {/* Stats Row */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
         {[
-            { label: '釐清次數', value: totalTasks, icon: TrendingUp, delay: 0 },
-            { label: '我能掌控的部分', value: myTasks, icon: Book, delay: 100 },
-            { label: '不在我範圍內的部分', value: theirTasks, icon: MessageSquare, delay: 200 },
-            { label: '共同的影響部分', value: sharedTasks, icon: Smile, delay: 300 },
+            { label: t('dashboard.stats.total'), value: totalTasks, icon: TrendingUp, delay: 0 },
+            { label: t('dashboard.stats.mine'), value: myTasks, icon: Book, delay: 100 },
+            { label: t('dashboard.stats.theirs'), value: theirTasks, icon: MessageSquare, delay: 200 },
+            { label: t('dashboard.stats.shared'), value: sharedTasks, icon: Smile, delay: 300 },
         ].map((stat, idx) => (
             <div 
                 key={stat.label} 
@@ -108,7 +125,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ navigate }) => {
         <div className="bg-white rounded-2xl p-4 md:p-8 shadow-sm border border-gray-100">
           <div className="flex items-center gap-2 mb-6">
             <Zap className="w-5 h-5 text-primary" />
-            <h3 className="font-bold text-lg">掌控力概況</h3>
+            <h3 className="font-bold text-lg">{t('dashboard.quick.title')}</h3>
           </div>
           
           {tasks.length > 0 ? (
@@ -119,7 +136,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ navigate }) => {
                 return (
                   <>
                     <div className="bg-gradient-to-br from-primary/10 to-accent/10 rounded-lg p-6 border border-primary/20">
-                      <div className="text-sm text-gray-600 mb-2">平均掌控力</div>
+                      <div className="text-sm text-gray-600 mb-2">{t('dashboard.quick.avg')}</div>
                       <div className="text-4xl font-bold text-primary mb-2">{avgControl}%</div>
                       <div className="w-full bg-gray-200 rounded-full h-2">
                         <div 
@@ -131,10 +148,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ navigate }) => {
                     
                     <p className="text-sm text-gray-600 leading-relaxed">
                       {avgControl >= 70 
-                        ? '你傾向掌控局面，記得也要信任他人。'
+                        ? t('dashboard.quick.hint.high')
                         : avgControl >= 40
-                        ? '你能很好地平衡掌控與放手。'
-                        : '你傾向接納，可以嘗試更多主動行動。'}
+                        ? t('dashboard.quick.hint.mid')
+                        : t('dashboard.quick.hint.low')}
                     </p>
                   </>
                 );
@@ -143,7 +160,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ navigate }) => {
           ) : (
             <div className="flex flex-col items-center justify-center text-gray-400 py-8">
               <Zap className="w-8 h-8 mb-2 opacity-20" />
-              <span className="text-sm">尚無資料</span>
+              <span className="text-sm">{t('dashboard.quick.empty')}</span>
             </div>
           )}
         </div>
@@ -152,7 +169,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ navigate }) => {
         <div className="bg-white rounded-2xl p-4 md:p-8 shadow-sm border border-gray-100">
           <div className="flex items-center gap-2 mb-6">
             <Brain className="w-5 h-5 text-primary" />
-            <h3 className="font-bold text-lg">今日洞察</h3>
+            <h3 className="font-bold text-lg">{t('dashboard.insight.title')}</h3>
           </div>
           
           {tasks.length > 0 ? (
@@ -166,7 +183,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ navigate }) => {
                     <div className="flex gap-3 p-3 bg-gray-50 rounded-lg">
                       <Target className="w-5 h-5 text-primary shrink-0 mt-0.5" />
                       <p className="text-sm text-gray-700">
-                        <strong>課題分布：</strong> {myTasks} 個我的課題，{sharedTasks} 個共同課題，{theirTasks} 個他人課題
+                        {t('dashboard.insight.distribution', { mine: myTasks, shared: sharedTasks, theirs: theirTasks })}
                       </p>
                     </div>
                     
@@ -174,7 +191,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ navigate }) => {
                       <div className="flex gap-3 p-3 bg-gray-50 rounded-lg">
                         <Lightbulb className="w-5 h-5 text-primary shrink-0 mt-0.5" />
                         <p className="text-sm text-gray-700">
-                          <strong>主要困擾：</strong> 「{topWorry}」
+                          {t('dashboard.insight.mainWorry', { worry: getWorryLabel(topWorry as string) })}
                         </p>
                       </div>
                     )}
@@ -183,7 +200,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ navigate }) => {
                       onClick={() => navigate('journal')}
                       className="w-full mt-4 px-4 py-2 bg-primary/10 text-primary rounded-lg hover:bg-primary/20 transition-colors text-sm font-medium"
                     >
-                      查看詳細分析 →
+                      {t('dashboard.insight.viewMore')}
                     </button>
                   </>
                 );
@@ -192,7 +209,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ navigate }) => {
           ) : (
             <div className="flex flex-col items-center justify-center text-gray-400 py-8">
               <Brain className="w-8 h-8 mb-2 opacity-20" />
-              <span className="text-sm">尚無資料</span>
+              <span className="text-sm">{t('dashboard.insight.empty')}</span>
             </div>
           )}
         </div>

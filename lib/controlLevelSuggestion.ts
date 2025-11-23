@@ -1,4 +1,5 @@
 import { TaskCategory, TaskWorry, ResponsibilityOwner } from '../types';
+import i18n from '../i18n';
 
 interface ControlLevelSuggestion {
   min: number;
@@ -22,7 +23,7 @@ export function getControlLevelSuggestion(
     return {
       min: 0,
       max: 20,
-      description: '這主要是對方的課題，你的控制力應該在 0-20% 之間'
+      description: i18n.t('control.description.theirs')
     };
   }
 
@@ -31,7 +32,7 @@ export function getControlLevelSuggestion(
     return {
       min: 20,
       max: 60,
-      description: '這是共同課題，你的控制力應該在 20-60% 之間'
+      description: i18n.t('control.description.shared')
     };
   }
 
@@ -40,7 +41,7 @@ export function getControlLevelSuggestion(
     return {
       min: 60,
       max: 100,
-      description: '這主要是你的課題，你的控制力應該在 60-100% 之間'
+      description: i18n.t('control.description.mine')
     };
   }
 
@@ -48,7 +49,7 @@ export function getControlLevelSuggestion(
   return {
     min: 0,
     max: 100,
-    description: '請先選擇責任歸屬'
+    description: i18n.t('control.description.unknown')
   };
 }
 
@@ -74,10 +75,18 @@ export function getControlLevelWarning(
   }
 
   if (controlLevel < suggestion.min) {
-    return `你的控制力 (${controlLevel}%) 低於建議範圍 (${suggestion.min}-${suggestion.max}%)。請重新考慮你對這個課題的掌控程度。`;
+    return i18n.t('control.warning.low', {
+      control: controlLevel,
+      min: suggestion.min,
+      max: suggestion.max,
+    });
   }
 
-  return `你的控制力 (${controlLevel}%) 高於建議範圍 (${suggestion.min}-${suggestion.max}%)。請重新考慮你對這個課題的掌控程度。`;
+  return i18n.t('control.warning.high', {
+    control: controlLevel,
+    min: suggestion.min,
+    max: suggestion.max,
+  });
 }
 
 /**
@@ -86,5 +95,9 @@ export function getControlLevelWarning(
 export function getControlLevelAdvice(
   suggestion: ControlLevelSuggestion
 ): string {
-  return `建議範圍：${suggestion.min}-${suggestion.max}%。${suggestion.description}`;
+  return i18n.t('control.advice', {
+    min: suggestion.min,
+    max: suggestion.max,
+    description: suggestion.description,
+  });
 }

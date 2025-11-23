@@ -1,5 +1,7 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { ArrowLeft } from 'lucide-react';
+import { TaskCategory, TaskWorry, ResponsibilityOwner } from '../types';
 
 interface WizardLayoutProps {
   title: string;
@@ -21,11 +23,14 @@ export const WizardLayout: React.FC<WizardLayoutProps> = ({
   children,
   onNext,
   nextDisabled,
-  nextLabel = "下一步",
+  nextLabel,
   showNext = true,
   currentStep,
   totalSteps = 4
 }) => {
+  const { t } = useTranslation();
+  const resolvedNextLabel = nextLabel ?? t('wizard.next');
+
   return (
     <div className="max-w-3xl mx-auto mt-4">
       <button 
@@ -33,7 +38,7 @@ export const WizardLayout: React.FC<WizardLayoutProps> = ({
         className="flex items-center gap-2 text-gray-500 hover:text-text mb-6 transition-colors text-sm"
       >
         <ArrowLeft className="w-4 h-4" />
-        <span>返回</span>
+        <span>{t('wizard.back')}</span>
       </button>
 
       {/* Progress Bar */}
@@ -61,7 +66,7 @@ export const WizardLayout: React.FC<WizardLayoutProps> = ({
             disabled={nextDisabled}
             className="bg-primary text-white px-10 py-3 rounded-full font-medium hover:bg-[#1e2b1e] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
         >
-            {nextLabel}
+            {resolvedNextLabel}
         </button>
       )}
     </div>
@@ -81,6 +86,34 @@ interface MultiSelectGridProps {
 }
 
 export const SelectionGrid: React.FC<SelectionGridProps> = ({ options, selected, onSelect }) => {
+  const { t } = useTranslation();
+
+  const getLabel = (option: string) => {
+    switch (option) {
+      case TaskCategory.Interview: return t('taskCategory.Interview');
+      case TaskCategory.CareerPlanning: return t('taskCategory.CareerPlanning');
+      case TaskCategory.SelfConfusion: return t('taskCategory.SelfConfusion');
+      case TaskCategory.ProgressAnxiety: return t('taskCategory.ProgressAnxiety');
+      case TaskCategory.ExpectationPressure: return t('taskCategory.ExpectationPressure');
+      case TaskCategory.FinancialPressure: return t('taskCategory.FinancialPressure');
+      case TaskCategory.MarketChange: return t('taskCategory.MarketChange');
+      case TaskCategory.Other: return t('taskCategory.Other');
+      case TaskWorry.Performance: return t('taskWorry.Performance');
+      case TaskWorry.Rejection: return t('taskWorry.Rejection');
+      case TaskWorry.OthersThoughts: return t('taskWorry.OthersThoughts');
+      case TaskWorry.Pressure: return t('taskWorry.Pressure');
+      case TaskWorry.Comparison: return t('taskWorry.Comparison');
+      case TaskWorry.TimeStress: return t('taskWorry.TimeStress');
+      case TaskWorry.Decision: return t('taskWorry.Decision');
+      case TaskWorry.Uncertainty: return t('taskWorry.Uncertainty');
+      case TaskWorry.Other: return t('taskWorry.Other');
+      case ResponsibilityOwner.Mine: return t('owner.Mine');
+      case ResponsibilityOwner.Theirs: return t('owner.Theirs');
+      case ResponsibilityOwner.Shared: return t('owner.Shared');
+      default: return option;
+    }
+  };
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       {options.map((option) => (
@@ -94,7 +127,8 @@ export const SelectionGrid: React.FC<SelectionGridProps> = ({ options, selected,
               : 'border-gray-200 hover:border-gray-300 bg-white text-gray-600'}
           `}
         >
-          {option}
+          {getLabel(option)}
+
         </button>
       ))}
     </div>
@@ -103,6 +137,7 @@ export const SelectionGrid: React.FC<SelectionGridProps> = ({ options, selected,
 
 export const MultiSelectGrid: React.FC<MultiSelectGridProps> = ({ options, selected, onSelect }) => {
   const MAX_SELECTIONS = 2;
+  const { t } = useTranslation();
 
   const toggleOption = (option: string) => {
     if (selected.includes(option)) {
@@ -114,11 +149,37 @@ export const MultiSelectGrid: React.FC<MultiSelectGridProps> = ({ options, selec
     }
   };
 
+  const getLabel = (option: string) => {
+    switch (option) {
+      case TaskCategory.Interview: return t('taskCategory.Interview');
+      case TaskCategory.CareerPlanning: return t('taskCategory.CareerPlanning');
+      case TaskCategory.SelfConfusion: return t('taskCategory.SelfConfusion');
+      case TaskCategory.ProgressAnxiety: return t('taskCategory.ProgressAnxiety');
+      case TaskCategory.ExpectationPressure: return t('taskCategory.ExpectationPressure');
+      case TaskCategory.FinancialPressure: return t('taskCategory.FinancialPressure');
+      case TaskCategory.MarketChange: return t('taskCategory.MarketChange');
+      case TaskCategory.Other: return t('taskCategory.Other');
+      case TaskWorry.Performance: return t('taskWorry.Performance');
+      case TaskWorry.Rejection: return t('taskWorry.Rejection');
+      case TaskWorry.OthersThoughts: return t('taskWorry.OthersThoughts');
+      case TaskWorry.Pressure: return t('taskWorry.Pressure');
+      case TaskWorry.Comparison: return t('taskWorry.Comparison');
+      case TaskWorry.TimeStress: return t('taskWorry.TimeStress');
+      case TaskWorry.Decision: return t('taskWorry.Decision');
+      case TaskWorry.Uncertainty: return t('taskWorry.Uncertainty');
+      case TaskWorry.Other: return t('taskWorry.Other');
+      case ResponsibilityOwner.Mine: return t('owner.Mine');
+      case ResponsibilityOwner.Theirs: return t('owner.Theirs');
+      case ResponsibilityOwner.Shared: return t('owner.Shared');
+      default: return option;
+    }
+  };
+
   return (
     <div>
       {selected.length >= MAX_SELECTIONS && (
         <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4 flex gap-2">
-          <span className="text-sm text-amber-800">最多只能選擇 {MAX_SELECTIONS} 筆</span>
+          <span className="text-sm text-amber-800">{t('wizard.maxSelections', { count: MAX_SELECTIONS })}</span>
         </div>
       )}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -147,7 +208,8 @@ export const MultiSelectGrid: React.FC<MultiSelectGridProps> = ({ options, selec
                 </svg>
               )}
             </div>
-            <span>{option}</span>
+            <span>{getLabel(option)}</span>
+
           </button>
         ))}
       </div>
@@ -156,22 +218,33 @@ export const MultiSelectGrid: React.FC<MultiSelectGridProps> = ({ options, selec
 };
 
 export const SelectionList: React.FC<SelectionGridProps> = ({ options, selected, onSelect }) => {
-    return (
-      <div className="flex flex-col gap-4">
-        {options.map((option) => (
-          <button
-            key={option}
-            onClick={() => onSelect(option)}
-            className={`
-              p-5 text-left rounded-lg border transition-all duration-200 w-full
-              ${selected === option 
-                ? 'border-accent text-accent bg-accent/5 font-medium ring-1 ring-accent' 
-                : 'border-gray-200 hover:border-gray-300 bg-white text-gray-600'}
-            `}
-          >
-            {option}
-          </button>
-        ))}
-      </div>
-    );
+  const { t } = useTranslation();
+  const getLabel = (option: string) => {
+    switch (option) {
+      case ResponsibilityOwner.Mine: return t('owner.Mine');
+      case ResponsibilityOwner.Theirs: return t('owner.Theirs');
+      case ResponsibilityOwner.Shared: return t('owner.Shared');
+      default: return option;
+    }
   };
+
+  return (
+    <div className="flex flex-col gap-4">
+      {options.map((option) => (
+        <button
+          key={option}
+          onClick={() => onSelect(option)}
+          className={`
+            p-5 text-left rounded-lg border transition-all duration-200 w-full
+            ${selected === option 
+              ? 'border-accent text-accent bg-accent/5 font-medium ring-1 ring-accent' 
+              : 'border-gray-200 hover:border-gray-300 bg-white text-gray-600'}
+          `}
+        >
+          {getLabel(option)}
+
+        </button>
+      ))}
+    </div>
+  );
+};

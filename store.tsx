@@ -12,6 +12,9 @@ interface AppContextType {
   updateTask: (id: string, updates: Partial<Task>) => void;
   showToast: (message: string, type?: 'success' | 'error') => void;
   toast: { message: string; type: 'success' | 'error' } | null;
+  shouldShowNps: boolean;
+  openNps: () => void;
+  closeNps: () => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -20,6 +23,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [user, setUser] = useState<User | null>(null);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+  const [shouldShowNps, setShouldShowNps] = useState(false);
 
   useEffect(() => {
     // Load from local storage
@@ -78,8 +82,31 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setTimeout(() => setToast(null), 3000);
   };
 
+  const openNps = () => {
+    setShouldShowNps(true);
+  };
+
+  const closeNps = () => {
+    setShouldShowNps(false);
+  };
+
   return (
-    <AppContext.Provider value={{ user, login, logout, tasks, addTask, deleteTask, updateTask, showToast, toast }}>
+    <AppContext.Provider
+      value={{
+        user,
+        login,
+        logout,
+        tasks,
+        addTask,
+        deleteTask,
+        updateTask,
+        showToast,
+        toast,
+        shouldShowNps,
+        openNps,
+        closeNps,
+      }}
+    >
       {children}
     </AppContext.Provider>
   );

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAppStore } from '../store';
-import { Task, ResponsibilityOwner } from '../types';
+import { Task, ResponsibilityOwner, TaskCategory, TaskWorry } from '../types';
 import { Calendar, BookOpen, Lightbulb, TrendingUp, ChevronDown, Edit2, Save, X, Sparkles } from 'lucide-react';
 import { getDailyQuote } from '../lib/quotes';
 
@@ -10,6 +11,7 @@ interface JournalProps {
 
 export const Journal: React.FC<JournalProps> = ({ navigate }) => {
   const { tasks, updateTask, showToast } = useAppStore();
+  const { t, i18n } = useTranslation();
   const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingReflection, setEditingReflection] = useState<string>('');
@@ -91,11 +93,49 @@ export const Journal: React.FC<JournalProps> = ({ navigate }) => {
 
   const topWorries = getTopWorries();
 
+  const getCategoryLabel = (cat: string) => {
+    switch (cat) {
+      case TaskCategory.Interview: return t('taskCategory.Interview');
+      case TaskCategory.CareerPlanning: return t('taskCategory.CareerPlanning');
+      case TaskCategory.SelfConfusion: return t('taskCategory.SelfConfusion');
+      case TaskCategory.ProgressAnxiety: return t('taskCategory.ProgressAnxiety');
+      case TaskCategory.ExpectationPressure: return t('taskCategory.ExpectationPressure');
+      case TaskCategory.FinancialPressure: return t('taskCategory.FinancialPressure');
+      case TaskCategory.MarketChange: return t('taskCategory.MarketChange');
+      case TaskCategory.Other: return t('taskCategory.Other');
+      default: return cat;
+    }
+  };
+
+  const getWorryLabel = (w: string) => {
+    switch (w) {
+      case TaskWorry.Performance: return t('taskWorry.Performance');
+      case TaskWorry.Rejection: return t('taskWorry.Rejection');
+      case TaskWorry.OthersThoughts: return t('taskWorry.OthersThoughts');
+      case TaskWorry.Pressure: return t('taskWorry.Pressure');
+      case TaskWorry.Comparison: return t('taskWorry.Comparison');
+      case TaskWorry.TimeStress: return t('taskWorry.TimeStress');
+      case TaskWorry.Decision: return t('taskWorry.Decision');
+      case TaskWorry.Uncertainty: return t('taskWorry.Uncertainty');
+      case TaskWorry.Other: return t('taskWorry.Other');
+      default: return w;
+    }
+  };
+
+  const getOwnerLabel = (owner: ResponsibilityOwner) => {
+    switch (owner) {
+      case ResponsibilityOwner.Mine: return t('owner.Mine');
+      case ResponsibilityOwner.Theirs: return t('owner.Theirs');
+      case ResponsibilityOwner.Shared: return t('owner.Shared');
+      default: return owner;
+    }
+  };
+
   const handleSaveJournal = (taskId: string) => {
     updateTask(taskId, {
       reflection: editingReflection
     });
-    showToast('日記已保存');
+    showToast(t('journal.toast.saved'));
     setEditingId(null);
   };
 
@@ -105,8 +145,8 @@ export const Journal: React.FC<JournalProps> = ({ navigate }) => {
       {/* Header */}
       <div className="bg-white rounded-2xl p-6 md:p-12 shadow-sm border border-gray-100">
         <div className="mb-6">
-          <h1 className="text-xl md:text-2xl font-bold mb-2">反思日記</h1>
-          <p className="text-gray-600 text-sm md:text-base">記錄每日的課題與反思，追蹤自己的成長</p>
+          <h1 className="text-xl md:text-2xl font-bold mb-2">{t('journal.title')}</h1>
+          <p className="text-gray-600 text-sm md:text-base">{t('journal.subtitle')}</p>
         </div>
 
         {/* Date Picker */}
@@ -118,7 +158,7 @@ export const Journal: React.FC<JournalProps> = ({ navigate }) => {
             className="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 text-sm"
           />
           <span className="text-xs sm:text-sm text-gray-500 whitespace-nowrap">
-            {new Date(selectedDate).toLocaleDateString('zh-TW', { 
+            {new Date(selectedDate).toLocaleDateString(i18n.language, { 
               weekday: 'long', 
               year: 'numeric', 
               month: 'long', 
@@ -132,7 +172,7 @@ export const Journal: React.FC<JournalProps> = ({ navigate }) => {
           <div className="flex items-start gap-3">
             <Sparkles className="w-4 md:w-5 h-4 md:h-5 text-primary shrink-0 mt-0.5" />
             <div className="flex-1 min-w-0">
-              <p className="text-xs md:text-sm text-primary/60 font-medium mb-1">今日語錄</p>
+              <p className="text-xs md:text-sm text-primary/60 font-medium mb-1">{t('journal.dailyQuote.title')}</p>
               <p className="text-sm md:text-base leading-relaxed text-text font-medium">
                 "{getDailyQuote()}"
               </p>
@@ -147,15 +187,15 @@ export const Journal: React.FC<JournalProps> = ({ navigate }) => {
         <div className="bg-white rounded-2xl p-4 md:p-6 shadow-sm border border-gray-100">
           <div className="flex items-center gap-2 mb-4">
             <Calendar className="w-4 md:w-5 h-4 md:h-5 text-primary" />
-            <h3 className="font-bold text-sm md:text-base">今日摘要</h3>
+            <h3 className="font-bold text-sm md:text-base">{t('journal.stats.today.title')}</h3>
           </div>
           <div className="space-y-3">
             <div className="flex justify-between items-center">
-              <span className="text-gray-600 text-xs md:text-sm">課題總數</span>
+              <span className="text-gray-600 text-xs md:text-sm">{t('journal.stats.today.total')}</span>
               <span className="text-xl md:text-2xl font-bold text-text">{todayTasks.length}</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-gray-600 text-xs md:text-sm">平均掌控力</span>
+              <span className="text-gray-600 text-xs md:text-sm">{t('journal.stats.today.avgControl')}</span>
               <span className="text-xl md:text-2xl font-bold text-accent">
                 {todayTasks.length > 0 
                   ? Math.round(todayTasks.reduce((sum, t) => sum + t.controlLevel, 0) / todayTasks.length)
@@ -164,15 +204,15 @@ export const Journal: React.FC<JournalProps> = ({ navigate }) => {
             </div>
             <div className="pt-3 border-t border-gray-100">
               <div className="flex justify-between text-xs text-gray-500 mb-2">
-                <span>我的課題</span>
+                <span>{t('journal.stats.today.mine')}</span>
                 <span>{todayTasks.filter(t => t.owner === ResponsibilityOwner.Mine).length}</span>
               </div>
               <div className="flex justify-between text-xs text-gray-500 mb-2">
-                <span>共同課題</span>
+                <span>{t('journal.stats.today.shared')}</span>
                 <span>{todayTasks.filter(t => t.owner === ResponsibilityOwner.Shared).length}</span>
               </div>
               <div className="flex justify-between text-xs text-gray-500">
-                <span>他人課題</span>
+                <span>{t('journal.stats.today.theirs')}</span>
                 <span>{todayTasks.filter(t => t.owner === ResponsibilityOwner.Theirs).length}</span>
               </div>
             </div>
@@ -183,28 +223,28 @@ export const Journal: React.FC<JournalProps> = ({ navigate }) => {
         <div className="bg-white rounded-2xl p-4 md:p-6 shadow-sm border border-gray-100">
           <div className="flex items-center gap-2 mb-4">
             <TrendingUp className="w-4 md:w-5 h-4 md:h-5 text-primary" />
-            <h3 className="font-bold text-sm md:text-base">本週統計</h3>
+            <h3 className="font-bold text-sm md:text-base">{t('journal.stats.week.title')}</h3>
           </div>
           <div className="space-y-3">
             <div className="flex justify-between items-center">
-              <span className="text-gray-600 text-xs md:text-sm">課題總數</span>
+              <span className="text-gray-600 text-xs md:text-sm">{t('journal.stats.week.total')}</span>
               <span className="text-xl md:text-2xl font-bold text-text">{weekStats.total}</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-gray-600 text-xs md:text-sm">平均掌控力</span>
+              <span className="text-gray-600 text-xs md:text-sm">{t('journal.stats.week.avgControl')}</span>
               <span className="text-xl md:text-2xl font-bold text-accent">{weekStats.avgControl}%</span>
             </div>
             <div className="pt-3 border-t border-gray-100">
               <div className="flex justify-between text-xs text-gray-500 mb-2">
-                <span>我的課題</span>
+                <span>{t('journal.stats.week.mine')}</span>
                 <span>{weekStats.mine}</span>
               </div>
               <div className="flex justify-between text-xs text-gray-500 mb-2">
-                <span>共同課題</span>
+                <span>{t('journal.stats.week.shared')}</span>
                 <span>{weekStats.shared}</span>
               </div>
               <div className="flex justify-between text-xs text-gray-500">
-                <span>他人課題</span>
+                <span>{t('journal.stats.week.theirs')}</span>
                 <span>{weekStats.theirs}</span>
               </div>
             </div>
@@ -215,7 +255,7 @@ export const Journal: React.FC<JournalProps> = ({ navigate }) => {
         <div className="bg-white rounded-2xl p-4 md:p-6 shadow-sm border border-gray-100">
           <div className="flex items-center gap-2 mb-4">
             <BookOpen className="w-4 md:w-5 h-4 md:h-5 text-primary" />
-            <h3 className="font-bold text-sm md:text-base">本月統計</h3>
+            <h3 className="font-bold text-sm md:text-base">{t('journal.stats.month.title')}</h3>
           </div>
           <div className="space-y-3">
             <div className="flex justify-between items-center">
@@ -249,7 +289,7 @@ export const Journal: React.FC<JournalProps> = ({ navigate }) => {
         <div className="bg-white rounded-2xl p-4 md:p-8 shadow-sm border border-gray-100">
           <div className="flex items-center gap-2 mb-6">
             <Lightbulb className="w-4 md:w-5 h-4 md:h-5 text-primary" />
-            <h3 className="font-bold text-base md:text-lg">今日主要困擾</h3>
+            <h3 className="font-bold text-base md:text-lg">{t('journal.topWorries.title')}</h3>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
             {topWorries.map(([worry, count], idx) => (
@@ -259,8 +299,8 @@ export const Journal: React.FC<JournalProps> = ({ navigate }) => {
                     {idx + 1}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="font-bold text-text mb-1 text-sm">{worry}</div>
-                    <div className="text-xs text-gray-500">{count} 個課題</div>
+                    <div className="font-bold text-text mb-1 text-sm">{getWorryLabel(worry as string)}</div>
+                    <div className="text-xs text-gray-500">{t('journal.topWorries.countLabel', { count })}</div>
                   </div>
                 </div>
               </div>
@@ -272,7 +312,7 @@ export const Journal: React.FC<JournalProps> = ({ navigate }) => {
       {/* Today's Tasks with Journal */}
       <div className="bg-white rounded-2xl p-4 md:p-8 shadow-sm border border-gray-100">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-          <h3 className="font-bold text-base md:text-lg">今日課題詳情</h3>
+          <h3 className="font-bold text-base md:text-lg">{t('journal.details.title')}</h3>
           {todayTasks.length > 0 && (
             <div className="relative w-full sm:w-auto">
               <select 
@@ -280,10 +320,10 @@ export const Journal: React.FC<JournalProps> = ({ navigate }) => {
                 onChange={(e) => setFilterOwner(e.target.value || null)}
                 className="appearance-none w-full sm:w-auto bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 pr-8 text-xs md:text-sm font-medium text-gray-700 cursor-pointer hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-primary/20"
               >
-                <option value="">全部課題</option>
-                <option value={ResponsibilityOwner.Mine}>我的課題</option>
-                <option value={ResponsibilityOwner.Shared}>共同課題</option>
-                <option value={ResponsibilityOwner.Theirs}>他人課題</option>
+                <option value="">{t('journal.details.filter.all')}</option>
+                <option value={ResponsibilityOwner.Mine}>{t('journal.details.filter.mine')}</option>
+                <option value={ResponsibilityOwner.Shared}>{t('journal.details.filter.shared')}</option>
+                <option value={ResponsibilityOwner.Theirs}>{t('journal.details.filter.theirs')}</option>
               </select>
               <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
             </div>
@@ -298,16 +338,19 @@ export const Journal: React.FC<JournalProps> = ({ navigate }) => {
                 <div className="flex items-start justify-between gap-3 mb-4">
                   <div className="flex-1 min-w-0">
                     <div className="font-bold text-text mb-1 text-sm md:text-base break-words">
-                      {Array.isArray(task.category) ? task.category.join(', ') : task.category}
+                      {Array.isArray(task.category)
+                        ? task.category.map(getCategoryLabel).join(', ')
+                        : getCategoryLabel(task.category as string)}
                     </div>
                     <div className="text-xs md:text-sm text-gray-500 mb-2 break-words">
-                      {Array.isArray(task.worry) ? task.worry.join(', ') : task.worry}
+                      {Array.isArray(task.worry)
+                        ? task.worry.map(getWorryLabel).join(', ')
+                        : getWorryLabel(task.worry as string)}
                     </div>
                     <div className="flex flex-wrap items-center gap-2 md:gap-4 text-xs text-gray-500">
-                      <span className="whitespace-nowrap">掌控力：{task.controlLevel}%</span>
+                      <span className="whitespace-nowrap">{t('journal.task.control', { value: task.controlLevel })}</span>
                       <span className="px-2 py-1 bg-gray-100 rounded-full whitespace-nowrap">
-                        {task.owner === ResponsibilityOwner.Mine ? '我的課題' : 
-                         task.owner === ResponsibilityOwner.Shared ? '共同課題' : '他人課題'}
+                        {getOwnerLabel(task.owner as ResponsibilityOwner)}
                       </span>
                     </div>
                   </div>
@@ -334,11 +377,11 @@ export const Journal: React.FC<JournalProps> = ({ navigate }) => {
                 {editingId === task.id ? (
                   <div className="space-y-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">反思日記</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">{t('journal.edit.label')}</label>
                       <textarea
                         value={editingReflection}
                         onChange={(e) => setEditingReflection(e.target.value)}
-                        placeholder="記錄你的反思與學習..."
+                        placeholder={t('journal.edit.placeholder')}
                         className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none"
                         rows={3}
                       />
@@ -348,19 +391,19 @@ export const Journal: React.FC<JournalProps> = ({ navigate }) => {
                       className="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-lg hover:bg-[#1e2b1e] transition-colors"
                     >
                       <Save className="w-4 h-4" />
-                      保存日記
+                      {t('journal.edit.save')}
                     </button>
                   </div>
                 ) : (
                   <div className="space-y-3 pt-4 border-t border-gray-100">
                     {task.reflection && (
                       <div>
-                        <div className="text-xs font-medium text-gray-500 mb-1">反思日記</div>
+                        <div className="text-xs font-medium text-gray-500 mb-1">{t('journal.view.label')}</div>
                         <div className="text-sm text-gray-700 bg-gray-50 p-3 rounded-lg">{task.reflection}</div>
                       </div>
                     )}
                     {!task.reflection && (
-                      <div className="text-sm text-gray-400 italic">尚無日記內容</div>
+                      <div className="text-sm text-gray-400 italic">{t('journal.view.empty')}</div>
                     )}
                   </div>
                 )}
@@ -370,7 +413,7 @@ export const Journal: React.FC<JournalProps> = ({ navigate }) => {
         ) : (
           <div className="text-center py-12 text-gray-400">
             <BookOpen className="w-12 h-12 mx-auto mb-4 opacity-20" />
-            <p className="text-sm">{selectedDate} 尚無課題記錄</p>
+            <p className="text-sm">{t('journal.empty', { date: selectedDate })}</p>
           </div>
         )}
       </div>

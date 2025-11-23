@@ -1,4 +1,6 @@
-export const quotes = [
+import i18n from '../i18n';
+
+const quotesZh = [
   // 關於接納與放手
   '有些事情不在你的掌控中，但你學會接納它們的勇氣令人敬佩。',
   '放手不是放棄，而是智慧的選擇——你把能量用在真正能改變的事情上。',
@@ -48,37 +50,121 @@ export const quotes = [
   '最好的時刻，就是現在。而你已經在這裡了。',
 ];
 
+const quotesEn = [
+  // Acceptance & letting go
+  'Some things are outside your control, but your courage to accept them is admirable.',
+  'Letting go is not giving up — it is choosing wisely where to place your energy.',
+  'You cannot control what others think, but you can always choose your response.',
+  'Accepting reality is exactly when your strength shows.',
+
+  // Action & agency
+  'When you focus on what you can control, you are already making the smartest move.',
+  'Every small action is the beginning of changing your world.',
+  'You are more capable than you think — trust yourself.',
+  'Change starts with seeing things clearly, and you have already taken that first step.',
+
+  // Task separation
+  'Once you know what is your task and what is not, you have already won.',
+  'Separating tasks is not coldness — it is respect for yourself and others.',
+  "You do not have to take responsibility for others' choices.",
+  'When you take care of yourself, you can show up better for the people you care about.',
+
+  // Growth & reflection
+  'Every time you clarify a situation, you become stronger.',
+  'Reflection is not blaming yourself — it is understanding and caring for yourself.',
+  'You are becoming clearer and more resilient, and that process is beautiful.',
+  'Through this, you are learning the most important thing — how to be kind to yourself.',
+
+  // Anxiety & pressure
+  'Anxiety often comes from uncertainty; by clarifying, you are creating certainty for yourself.',
+  'Take a deep breath. You are already doing what you can, and that is enough for now.',
+  'Not every weight is yours to carry; you are allowed to put some of it down.',
+  'Your feelings are real, and your efforts deserve to be seen.',
+
+  // Decisions & direction
+  'There is no perfect choice, but the choice you make can still be good enough.',
+  'Trust your intuition — it is often wiser than you think.',
+  'Every decision is a chance to learn; you are becoming more experienced each time.',
+  'Direction matters more than speed, and you are already finding your way.',
+
+  // Self-worth
+  'Your worth is not defined by others — you are valuable as you are.',
+  'You are already enough, truly.',
+  'Stop comparing yourself to others; compare with who you were yesterday — you are growing.',
+  'You deserve gentleness, especially from yourself. You are doing well.',
+
+  // Future
+  'The future is full of possibilities, and your actions today are shaping it.',
+  'Do not be scared by the unknown — you have handled so much already.',
+  'The choices you make today shape who you become tomorrow.',
+  'The best time is now — and you are already here.',
+];
+
+const getCurrentQuotes = () => {
+  const lang = i18n.language;
+  if (lang.startsWith('en')) return quotesEn;
+  return quotesZh;
+};
+
+export const quotes = getCurrentQuotes();
+
 export const getRandomQuote = (): string => {
-  return quotes[Math.floor(Math.random() * quotes.length)];
+  const list = getCurrentQuotes();
+  return list[Math.floor(Math.random() * list.length)];
 };
 
 export const getQuoteByControlLevel = (controlLevel: number): string => {
+  const lang = i18n.language;
   if (controlLevel < 20) {
-    const lowControlQuotes = [
-      '有些事情不在你的掌控中，但你學會接納它們的勇氣令人敬佩。',
-      '放手不是放棄，而是智慧的選擇——你把能量用在真正能改變的事情上。',
-      '你無法控制他人的想法，但你已經掌握了最重要的——控制自己的反應。',
-      '接納現實，正是你展現力量的時刻。',
-      '不是所有的壓力都需要你承擔，你有權放下。',
-    ];
+    const lowControlQuotes = lang.startsWith('en')
+      ? [
+          'Some things are outside your control — accepting this is already a form of strength.',
+          'Letting go is not giving up; it is choosing where your energy truly matters.',
+          'You cannot control others, but you can always choose how you respond.',
+          'Accepting what you cannot change is the beginning of real peace.',
+          'Not every burden is yours to carry; you are allowed to put some down.',
+        ]
+      : [
+          '有些事情不在你的掌控中，但你學會接納它們的勇氣令人敬佩。',
+          '放手不是放棄，而是智慧的選擇——你把能量用在真正能改變的事情上。',
+          '你無法控制他人的想法，但你已經掌握了最重要的——控制自己的反應。',
+          '接納現實，正是你展現力量的時刻。',
+          '不是所有的壓力都需要你承擔，你有權放下。',
+        ];
     return lowControlQuotes[Math.floor(Math.random() * lowControlQuotes.length)];
   } else if (controlLevel < 60) {
-    const mediumControlQuotes = [
-      '分清楚這是你的課題還是別人的，你就贏了。',
-      '課題分離不是冷漠，而是你對自己和他人的尊重。',
-      '溝通和協作是解決共同課題的鑰匙，而你正在學會這一點。',
-      '平衡掌控與放手，你正在學會這個藝術——你做得很好。',
-      '每一次釐清，都是你變得更強大的證明。',
-    ];
+    const mediumControlQuotes = lang.startsWith('en')
+      ? [
+          'When you see clearly which part is yours and which part is others’, you gain real freedom.',
+          'Separating tasks is not distance — it is a respectful boundary for both sides.',
+          'For shared tasks, communication and collaboration are your strongest tools.',
+          'You are learning the art of balancing control and letting go — that is not easy, and you are doing it.',
+          'Every time you clarify things, you grow stronger and calmer.',
+        ]
+      : [
+          '分清楚這是你的課題還是別人的，你就贏了。',
+          '課題分離不是冷漠，而是你對自己和他人的尊重。',
+          '溝通和協作是解決共同課題的鑰匙，而你正在學會這一點。',
+          '平衡掌控與放手，你正在學會這個藝術——你做得很好。',
+          '每一次釐清，都是你變得更強大的證明。',
+        ];
     return mediumControlQuotes[Math.floor(Math.random() * mediumControlQuotes.length)];
   } else {
-    const highControlQuotes = [
-      '專注於你能控制的部分，你已經在做最聰明的事了。',
-      '每一個小行動，都是你改變世界的開始。',
-      '你比你想像的更有力量——相信自己。',
-      '改變從認清現實開始，而你已經踏出了第一步。',
-      '相信你的直覺，它通常是對的——你比自己想像的更聰慧。',
-    ];
+    const highControlQuotes = lang.startsWith('en')
+      ? [
+          'You are focusing on what you can change — that is powerful.',
+          'Every small step you take is moving your life forward.',
+          'You have more influence than you give yourself credit for.',
+          'Change begins when you face reality honestly — and you already have.',
+          'Trust your sense of direction; you have learned a lot to get here.',
+        ]
+      : [
+          '專注於你能控制的部分，你已經在做最聰明的事了。',
+          '每一個小行動，都是你改變世界的開始。',
+          '你比你想像的更有力量——相信自己。',
+          '改變從認清現實開始，而你已經踏出了第一步。',
+          '相信你的直覺，它通常是對的——你比自己想像的更聰慧。',
+        ];
     return highControlQuotes[Math.floor(Math.random() * highControlQuotes.length)];
   }
 };
@@ -87,6 +173,7 @@ export const getQuoteByControlLevel = (controlLevel: number): string => {
 export const getDailyQuote = (): string => {
   const today = new Date();
   const dayOfYear = Math.floor((today.getTime() - new Date(today.getFullYear(), 0, 0).getTime()) / 86400000);
-  const quoteIndex = dayOfYear % quotes.length;
-  return quotes[quoteIndex];
+  const list = getCurrentQuotes();
+  const quoteIndex = dayOfYear % list.length;
+  return list[quoteIndex];
 };

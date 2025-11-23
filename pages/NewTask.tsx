@@ -1,5 +1,6 @@
 
 import React, { useState, useRef, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { WizardLayout, SelectionGrid, SelectionList, MultiSelectGrid } from '../components/StepWizard';
 import { TaskCategory, TaskWorry, ResponsibilityOwner } from '../types';
 import { useAppStore } from '../store';
@@ -12,9 +13,10 @@ interface NewTaskProps {
 }
 
 export const NewTask: React.FC<NewTaskProps> = ({ navigate }) => {
-  const { addTask, showToast } = useAppStore();
+  const { addTask, showToast, openNps } = useAppStore();
   const [step, setStep] = useState(1);
   const [resultQuote, setResultQuote] = useState<string>('');
+  const { t } = useTranslation();
   
   const [categories, setCategories] = useState<string[]>([]);
   const [customCategory, setCustomCategory] = useState<string>('');
@@ -117,7 +119,7 @@ export const NewTask: React.FC<NewTaskProps> = ({ navigate }) => {
       
       // 檢查控制力是否符合建議
       if (!isControlLevelValid(control, suggestion)) {
-        showToast('控制力範圍不符合建議，請調整後再提交', 'error');
+        showToast(t('newTask.error.controlInvalid'), 'error');
         return;
       }
 
@@ -141,8 +143,8 @@ export const NewTask: React.FC<NewTaskProps> = ({ navigate }) => {
 
     return (
       <WizardLayout
-        title="發生了什麼事了？"
-        subtitle="請選擇最貼近你現在的狀態"
+        title={t('newTask.step1.title')}
+        subtitle={t('newTask.step1.subtitle')}
         onBack={handleBack}
         onNext={handleNext}
         nextDisabled={!isValid}
@@ -161,7 +163,7 @@ export const NewTask: React.FC<NewTaskProps> = ({ navigate }) => {
                 <div>
                     <input
                         type="text"
-                        placeholder="請輸入具體分類..."
+                        placeholder={t('newTask.step1.customPlaceholder')}
                         value={customCategory}
                         onChange={(e) => setCustomCategory(e.target.value)}
                         className="w-full mt-4 p-4 rounded-xl border border-gray-200 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all bg-white text-text placeholder-gray-300"
@@ -181,8 +183,8 @@ export const NewTask: React.FC<NewTaskProps> = ({ navigate }) => {
 
     return (
       <WizardLayout
-        title="這件事情讓你擔心什麼？"
-        subtitle="請選出最貼近的外在因素"
+        title={t('newTask.step2.title')}
+        subtitle={t('newTask.step2.subtitle')}
         onBack={handleBack}
         onNext={handleNext}
         nextDisabled={!isValid}
@@ -201,7 +203,7 @@ export const NewTask: React.FC<NewTaskProps> = ({ navigate }) => {
                 <div>
                     <input
                         type="text"
-                        placeholder="請輸入具體擔憂..."
+                        placeholder={t('newTask.step2.customPlaceholder')}
                         value={customWorry}
                         onChange={(e) => setCustomWorry(e.target.value)}
                         className="w-full mt-4 p-4 rounded-xl border border-gray-200 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all bg-white text-text placeholder-gray-300"
@@ -218,8 +220,8 @@ export const NewTask: React.FC<NewTaskProps> = ({ navigate }) => {
   if (step === 3) {
     return (
       <WizardLayout
-        title="最終這件事情的結果，由誰承擔？"
-        subtitle="從這個步驟開始，學會課題分離吧。"
+        title={t('newTask.step3.title')}
+        subtitle={t('newTask.step3.subtitle')}
         onBack={handleBack}
         onNext={handleNext}
         nextDisabled={!owner}
@@ -245,11 +247,11 @@ export const NewTask: React.FC<NewTaskProps> = ({ navigate }) => {
 
     return (
       <WizardLayout
-        title="你對這個情況有多少控制力？"
-        subtitle="這件事情，你能掌控多少？又有哪些並不取決於你？"
+        title={t('newTask.step4.title')}
+        subtitle={t('newTask.step4.subtitle')}
         onBack={handleBack}
         onNext={handleSubmit}
-        nextLabel="完成課題"
+        nextLabel={t('newTask.step4.nextLabel')}
         nextDisabled={!isValid}
         currentStep={4}
       >
@@ -343,16 +345,16 @@ export const NewTask: React.FC<NewTaskProps> = ({ navigate }) => {
             </div>
 
             <div className="flex justify-between text-sm text-gray-600 mb-12">
-                <span>0%：無法控制</span>
-                <span>100%：完全控制</span>
+                <span>{t('newTask.step4.scaleMin')}</span>
+                <span>{t('newTask.step4.scaleMax')}</span>
             </div>
 
             <div className="bg-white p-6 rounded-lg border border-gray-100 shadow-sm">
-                <h4 className="font-bold mb-2 text-sm">判斷提示：</h4>
+                <h4 className="font-bold mb-2 text-sm">{t('newTask.step4.hintTitle')}</h4>
                 <ul className="list-disc pl-5 text-sm text-gray-600 space-y-2">
-                    <li>如果你的控制力落在 0至20% 左右，多半屬於「對方的課題」（例如公司流程、錄取決定）。</li>
-                    <li>如果介於 20至60% 之間，代表這件事是雙方共同影響的課題（例如面試互動、溝通是否清楚）。</li>
-                    <li>如果超過 60%，這部分比較屬於「我的課題」（例如準備程度、投遞履歷、方向選擇）。</li>
+                    <li>{t('newTask.step4.hint1')}</li>
+                    <li>{t('newTask.step4.hint2')}</li>
+                    <li>{t('newTask.step4.hint3')}</li>
                 </ul>
             </div>
             </div>
@@ -369,11 +371,11 @@ export const NewTask: React.FC<NewTaskProps> = ({ navigate }) => {
       const worryStr = Array.isArray(worries) ? worries.join('、') : worries;
       
       if (control < 20) {
-        return `你識別出「${categoryStr}」這個課題，主要擔憂是「${worryStr}」。控制力在${control}%，這表示許多因素超出你的掌控。接納這些不可控的部分，會幫助你減少不必要的焦慮。`;
+        return t('newTask.result.feedback.low', { category: categoryStr, worry: worryStr, control });
       } else if (control < 60) {
-        return `你識別出「${categoryStr}」這個課題，主要擔憂是「${worryStr}」。控制力在${control}%，這是一個共同課題。關鍵是找到你能影響的部分，並與相關人員進行有效溝通。`;
+        return t('newTask.result.feedback.mid', { category: categoryStr, worry: worryStr, control });
       } else {
-        return `你識別出「${categoryStr}」這個課題，主要擔憂是「${worryStr}」。控制力達到${control}%，這主要是你的課題。你已經掌握了大部分的主導權，現在是時候制定具體的行動計畫了。`;
+        return t('newTask.result.feedback.high', { category: categoryStr, worry: worryStr, control });
       }
     };
 
@@ -391,8 +393,8 @@ export const NewTask: React.FC<NewTaskProps> = ({ navigate }) => {
             </div>
 
             {/* Success Message */}
-            <h1 className="text-2xl md:text-3xl font-bold text-center mb-1 md:mb-2 text-text">課題已成功建立</h1>
-            <p className="text-center text-gray-500 text-sm md:text-base mb-6 md:mb-12">你已經完成了第一步的釐清</p>
+            <h1 className="text-2xl md:text-3xl font-bold text-center mb-1 md:mb-2 text-text">{t('newTask.result.title')}</h1>
+            <p className="text-center text-gray-500 text-sm md:text-base mb-6 md:mb-12">{t('newTask.result.subtitle')}</p>
 
             {/* Quote Section */}
             <div className="bg-gradient-to-br from-primary/5 to-accent/5 rounded-xl md:rounded-2xl p-4 md:p-8 mb-6 md:mb-12 border border-primary/10">
@@ -412,36 +414,43 @@ export const NewTask: React.FC<NewTaskProps> = ({ navigate }) => {
             <div className="bg-gray-50 rounded-lg md:rounded-xl p-4 md:p-6 mb-8 md:mb-12">
               <div className="flex gap-2 mb-2">
                 <Brain className="w-4 h-4 text-primary shrink-0 mt-0.5" />
-                <p className="text-xs md:text-sm text-gray-600"><strong>反思提示：</strong></p>
+                <p className="text-xs md:text-sm text-gray-600"><strong>{t('newTask.result.reflectionTitle')}</strong></p>
               </div>
               <p className="text-xs md:text-sm text-gray-700 leading-relaxed">
                 {control < 20 
-                  ? '這個課題中，有哪些部分是你真正無法控制的？接納它，會帶給你平靜。'
+                  ? t('newTask.result.reflection.low')
                   : control < 60
-                  ? '在這個共同課題中，你可以如何與對方更好地溝通和協作？'
-                  : '你已經掌握了大部分的控制權。現在，你準備好採取行動了嗎？'}
+                  ? t('newTask.result.reflection.mid')
+                  : t('newTask.result.reflection.high')}
               </p>
             </div>
 
             {/* Action Buttons */}
             <div className="flex flex-col gap-2 md:gap-3">
               <button 
-                onClick={() => navigate('journal')}
+                onClick={() => {
+                  openNps();
+                  navigate('journal');
+                }}
                 className="w-full bg-primary text-white px-4 md:px-6 py-3 md:py-4 rounded-lg md:rounded-xl hover:bg-[#1e2b1e] transition-all font-medium flex items-center justify-center gap-2 shadow-lg shadow-primary/20 text-sm md:text-base"
               >
                 <CheckCircle className="w-4 md:w-5 h-4 md:h-5" />
-                前往反思日記
+                {t('newTask.result.toJournal')}
               </button>
               <button 
-                onClick={() => navigate('dashboard')}
+                onClick={() => {
+                  openNps();
+                  navigate('dashboard');
+                }}
                 className="w-full bg-gray-100 text-text px-4 md:px-6 py-3 md:py-4 rounded-lg md:rounded-xl hover:bg-gray-200 transition-all font-medium flex items-center justify-center gap-2 text-sm md:text-base"
               >
                 <ArrowRight className="w-4 md:w-5 h-4 md:h-5" />
-                返回儀錶板
+                {t('newTask.result.toDashboard')}
               </button>
             </div>
           </div>
         </div>
+
       </div>
     );
   }
