@@ -71,8 +71,8 @@ const AppContent: React.FC = () => {
         </div>
       )}
 
-      {/* Global NPS Toast */}
-      {shouldShowNps && (
+      {/* Global NPS Toast (temporarily disabled for preview interviews) */}
+      {false && shouldShowNps && (
         <div className="fixed bottom-6 right-6 z-[9999] w-full max-w-sm">
           <div className="bg-white border border-gray-200 rounded-2xl shadow-2xl p-4 space-y-3">
             <div className="flex items-start gap-2">
