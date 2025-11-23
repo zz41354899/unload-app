@@ -12,12 +12,12 @@ interface DashboardProps {
 
 export const Dashboard: React.FC<DashboardProps> = ({ navigate }) => {
   const { tasks, user } = useAppStore();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   
   // Date Helper
   const today = new Date();
   const currentYear = today.getFullYear();
-  const currentMonth = today.getMonth() + 1;
+  const currentMonthLabel = today.toLocaleString(i18n.language, { month: 'long' });
 
   // Stats Calculation
   const totalTasks = tasks.length;
@@ -72,7 +72,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ navigate }) => {
             </div>
             <div className="text-right hidden md:block shrink-0">
                 <div className="text-3xl font-bold text-primary/20">{currentYear}</div>
-                <div className="text-xl font-medium text-primary/40">{currentMonth} 月</div>
+                <div className="text-xl font-medium text-primary/40">{currentMonthLabel}</div>
             </div>
          </div>
          <button 

@@ -259,24 +259,24 @@ export const Journal: React.FC<JournalProps> = ({ navigate }) => {
           </div>
           <div className="space-y-3">
             <div className="flex justify-between items-center">
-              <span className="text-gray-600 text-xs md:text-sm">課題總數</span>
+              <span className="text-gray-600 text-xs md:text-sm">{t('journal.stats.month.total')}</span>
               <span className="text-xl md:text-2xl font-bold text-text">{monthStats.total}</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-gray-600 text-xs md:text-sm">平均掌控力</span>
+              <span className="text-gray-600 text-xs md:text-sm">{t('journal.stats.month.avgControl')}</span>
               <span className="text-xl md:text-2xl font-bold text-accent">{monthStats.avgControl}%</span>
             </div>
             <div className="pt-3 border-t border-gray-100">
               <div className="flex justify-between text-xs text-gray-500 mb-2">
-                <span>我的課題</span>
+                <span>{t('journal.stats.month.mine')}</span>
                 <span>{monthStats.mine}</span>
               </div>
               <div className="flex justify-between text-xs text-gray-500 mb-2">
-                <span>共同課題</span>
+                <span>{t('journal.stats.month.shared')}</span>
                 <span>{monthStats.shared}</span>
               </div>
               <div className="flex justify-between text-xs text-gray-500">
-                <span>他人課題</span>
+                <span>{t('journal.stats.month.theirs')}</span>
                 <span>{monthStats.theirs}</span>
               </div>
             </div>

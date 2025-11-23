@@ -15,7 +15,7 @@ const AppContent: React.FC = () => {
   const [currentPage, setCurrentPage] = useState('login');
   const [npsScore, setNpsScore] = useReactState<number | null>(null);
   const [npsComment, setNpsComment] = useReactState('');
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   // Simple Route Protection
   useEffect(() => {
@@ -27,6 +27,13 @@ const AppContent: React.FC = () => {
         setCurrentPage('login');
     }
   }, [user, currentPage]);
+
+  // Keep <html lang="..."> in sync with current language (affects native date pickers)
+  useEffect(() => {
+    if (typeof document !== 'undefined') {
+      document.documentElement.lang = i18n.language;
+    }
+  }, [i18n.language]);
 
   if (!user && currentPage === 'login') {
     return <Login navigate={setCurrentPage} />;
