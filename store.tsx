@@ -15,6 +15,7 @@ interface AppContextType {
   shouldShowNps: boolean;
   openNps: () => void;
   closeNps: () => void;
+  completeOnboarding: () => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -31,7 +32,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (storedUser) {
       setUser(JSON.parse(storedUser));
     }
-    
+
     const storedTasks = localStorage.getItem('unload_tasks');
     if (storedTasks) {
       setTasks(JSON.parse(storedTasks));
@@ -49,15 +50,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const dummyUser: User = {
       name: 'Sarah Chen',
       email: 'sarah@example.com',
-      avatar: 'https://picsum.photos/seed/unloadUser/200'
+
+      avatar: 'https://picsum.photos/seed/unloadUser/200',
+      hasOnboarded: false
     };
     setUser(dummyUser);
     localStorage.setItem('unload_user', JSON.stringify(dummyUser));
   };
 
   const logout = () => {
+    // 清空使用者與本地儲存的登入資訊
     setUser(null);
     localStorage.removeItem('unload_user');
+
+    // 同時清空任務資料，讓每次登入都是乾淨狀態
+    setTasks([]);
+    localStorage.removeItem('unload_tasks');
   };
 
   const addTask = (taskData: Omit<Task, 'id' | 'date'>) => {
@@ -90,6 +98,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setShouldShowNps(false);
   };
 
+  const completeOnboarding = () => {
+    if (user) {
+      const updatedUser = { ...user, hasOnboarded: true };
+      setUser(updatedUser);
+      localStorage.setItem('unload_user', JSON.stringify(updatedUser));
+    }
+  };
+
   return (
     <AppContext.Provider
       value={{
@@ -105,6 +121,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         shouldShowNps,
         openNps,
         closeNps,
+        completeOnboarding,
       }}
     >
       {children}

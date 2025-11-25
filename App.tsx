@@ -9,6 +9,7 @@ import { Dashboard } from './pages/Dashboard';
 import { History } from './pages/History';
 import { NewTask } from './pages/NewTask';
 import { Journal } from './pages/Journal';
+import { Onboarding } from './pages/Onboarding';
 
 const AppContent: React.FC = () => {
   const { user, toast, shouldShowNps, closeNps } = useAppStore();
@@ -20,11 +21,15 @@ const AppContent: React.FC = () => {
   // Simple Route Protection
   useEffect(() => {
     if (user) {
-        if (currentPage === 'login') {
-            setCurrentPage('dashboard');
+      if (currentPage === 'login') {
+        if (user.hasOnboarded) {
+          setCurrentPage('dashboard');
+        } else {
+          setCurrentPage('onboarding');
         }
+      }
     } else {
-        setCurrentPage('login');
+      setCurrentPage('login');
     }
   }, [user, currentPage]);
 
@@ -35,7 +40,8 @@ const AppContent: React.FC = () => {
     }
   }, [i18n.language]);
 
-  if (!user && currentPage === 'login') {
+  // 若尚未登入，直接顯示登入頁（避免登出後還停留在舊頁面，需要手動重整）
+  if (!user) {
     return <Login navigate={setCurrentPage} />;
   }
 
@@ -51,6 +57,29 @@ const AppContent: React.FC = () => {
     closeNps();
   };
 
+  // Special-case onboarding: full-screen without app layout / sidebar
+  if (currentPage === 'onboarding') {
+    return (
+      <>
+        <Onboarding navigate={setCurrentPage} />
+
+        {/* Toast Notification */}
+        {toast && (
+          <div className="fixed bottom-8 right-8 z-[9999]">
+            <div
+              className={`px-6 py-4 rounded-lg shadow-2xl font-medium ${toast.type === 'success'
+                  ? 'bg-white text-green-500'
+                  : 'bg-white text-red-500'
+                }`}
+            >
+              {toast.message}
+            </div>
+          </div>
+        )}
+      </>
+    );
+  }
+
   return (
     <>
       <Layout currentPage={currentPage} navigate={setCurrentPage}>
@@ -59,13 +88,12 @@ const AppContent: React.FC = () => {
         {currentPage === 'new-task' && <NewTask navigate={setCurrentPage} />}
         {currentPage === 'journal' && <Journal navigate={setCurrentPage} />}
       </Layout>
-      
+
       {/* Toast Notification */}
       {toast && (
         <div className="fixed bottom-8 right-8 z-[9999]">
-          <div className={`px-6 py-4 rounded-lg shadow-2xl font-medium ${
-            toast.type === 'success' ? 'bg-white text-green-500' : 'bg-white text-red-500'
-          }`}>
+          <div className={`px-6 py-4 rounded-lg shadow-2xl font-medium ${toast.type === 'success' ? 'bg-white text-green-500' : 'bg-white text-red-500'
+            }`}>
             {toast.message}
           </div>
         </div>
@@ -88,11 +116,10 @@ const AppContent: React.FC = () => {
                   key={score}
                   type="button"
                   onClick={() => setNpsScore(score)}
-                  className={`w-8 h-8 rounded-full text-xs font-medium border transition-colors flex items-center justify-center ${
-                    npsScore === score
+                  className={`w-8 h-8 rounded-full text-xs font-medium border transition-colors flex items-center justify-center ${npsScore === score
                       ? 'bg-primary text-white border-primary'
                       : 'bg-white text-text border-gray-200 hover:border-gray-300'
-                  }`}
+                    }`}
                 >
                   {score}
                 </button>

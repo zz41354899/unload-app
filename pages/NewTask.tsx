@@ -367,8 +367,14 @@ export const NewTask: React.FC<NewTaskProps> = ({ navigate }) => {
   if (step === 5) {
     // 獲取課題相關的回饋訊息
     const getResultFeedback = (): string => {
-      const categoryStr = Array.isArray(categories) ? categories.join('、') : categories;
-      const worryStr = Array.isArray(worries) ? worries.join('、') : worries;
+      const categoryLabels = (Array.isArray(categories) ? categories : [categories]).map((cat) =>
+        cat ? t(`taskCategory.${cat}`) : ''
+      );
+      const worryLabels = (Array.isArray(worries) ? worries : [worries]).map((worry) =>
+        worry ? t(`taskWorry.${worry}`) : ''
+      );
+      const categoryStr = categoryLabels.filter(Boolean).join('\u3001');
+      const worryStr = worryLabels.filter(Boolean).join('\u3001');
       
       if (control < 20) {
         return t('newTask.result.feedback.low', { category: categoryStr, worry: worryStr, control });
@@ -429,7 +435,7 @@ export const NewTask: React.FC<NewTaskProps> = ({ navigate }) => {
             <div className="flex flex-col gap-2 md:gap-3">
               <button 
                 onClick={() => {
-
+                  navigate('journal');
                 }}
                 className="w-full bg-primary text-white px-4 md:px-6 py-3 md:py-4 rounded-lg md:rounded-xl hover:bg-[#1e2b1e] transition-all font-medium flex items-center justify-center gap-2 shadow-lg shadow-primary/20 text-sm md:text-base"
               >
