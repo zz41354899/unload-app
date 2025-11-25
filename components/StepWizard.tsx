@@ -26,7 +26,7 @@ export const WizardLayout: React.FC<WizardLayoutProps> = ({
   nextLabel,
   showNext = true,
   currentStep,
-  totalSteps = 4
+  totalSteps = 4,
 }) => {
   const { t } = useTranslation();
   const resolvedNextLabel = nextLabel ?? t('wizard.next');
@@ -75,6 +75,32 @@ export const WizardLayout: React.FC<WizardLayoutProps> = ({
   );
 };
 
+const getOptionLabel = (t: (key: string) => string, option: string) => {
+  switch (option) {
+    case TaskCategory.Interview: return t('taskCategory.Interview');
+    case TaskCategory.CareerPlanning: return t('taskCategory.CareerPlanning');
+    case TaskCategory.SelfConfusion: return t('taskCategory.SelfConfusion');
+    case TaskCategory.ProgressAnxiety: return t('taskCategory.ProgressAnxiety');
+    case TaskCategory.ExpectationPressure: return t('taskCategory.ExpectationPressure');
+    case TaskCategory.FinancialPressure: return t('taskCategory.FinancialPressure');
+    case TaskCategory.MarketChange: return t('taskCategory.MarketChange');
+    case TaskCategory.Other: return t('taskCategory.Other');
+    case TaskWorry.Performance: return t('taskWorry.Performance');
+    case TaskWorry.Rejection: return t('taskWorry.Rejection');
+    case TaskWorry.OthersThoughts: return t('taskWorry.OthersThoughts');
+    case TaskWorry.Pressure: return t('taskWorry.Pressure');
+    case TaskWorry.Comparison: return t('taskWorry.Comparison');
+    case TaskWorry.TimeStress: return t('taskWorry.TimeStress');
+    case TaskWorry.Decision: return t('taskWorry.Decision');
+    case TaskWorry.Uncertainty: return t('taskWorry.Uncertainty');
+    case TaskWorry.Other: return t('taskWorry.Other');
+    case ResponsibilityOwner.Mine: return t('owner.Mine');
+    case ResponsibilityOwner.Theirs: return t('owner.Theirs');
+    case ResponsibilityOwner.Shared: return t('owner.Shared');
+    default: return option;
+  }
+};
+
 interface SelectionGridProps {
   options: string[];
   selected: string | null;
@@ -89,32 +115,6 @@ interface MultiSelectGridProps {
 
 export const SelectionGrid: React.FC<SelectionGridProps> = ({ options, selected, onSelect }) => {
   const { t } = useTranslation();
-
-  const getLabel = (option: string) => {
-    switch (option) {
-      case TaskCategory.Interview: return t('taskCategory.Interview');
-      case TaskCategory.CareerPlanning: return t('taskCategory.CareerPlanning');
-      case TaskCategory.SelfConfusion: return t('taskCategory.SelfConfusion');
-      case TaskCategory.ProgressAnxiety: return t('taskCategory.ProgressAnxiety');
-      case TaskCategory.ExpectationPressure: return t('taskCategory.ExpectationPressure');
-      case TaskCategory.FinancialPressure: return t('taskCategory.FinancialPressure');
-      case TaskCategory.MarketChange: return t('taskCategory.MarketChange');
-      case TaskCategory.Other: return t('taskCategory.Other');
-      case TaskWorry.Performance: return t('taskWorry.Performance');
-      case TaskWorry.Rejection: return t('taskWorry.Rejection');
-      case TaskWorry.OthersThoughts: return t('taskWorry.OthersThoughts');
-      case TaskWorry.Pressure: return t('taskWorry.Pressure');
-      case TaskWorry.Comparison: return t('taskWorry.Comparison');
-      case TaskWorry.TimeStress: return t('taskWorry.TimeStress');
-      case TaskWorry.Decision: return t('taskWorry.Decision');
-      case TaskWorry.Uncertainty: return t('taskWorry.Uncertainty');
-      case TaskWorry.Other: return t('taskWorry.Other');
-      case ResponsibilityOwner.Mine: return t('owner.Mine');
-      case ResponsibilityOwner.Theirs: return t('owner.Theirs');
-      case ResponsibilityOwner.Shared: return t('owner.Shared');
-      default: return option;
-    }
-  };
 
   const getHint = (option: string) => {
     switch (option) {
@@ -144,7 +144,7 @@ export const SelectionGrid: React.FC<SelectionGridProps> = ({ options, selected,
           `}
         >
           <div className="flex flex-col">
-            <span>{getLabel(option)}</span>
+            <span>{getOptionLabel(t, option)}</span>
             {getHint(option) && (
               <span className="mt-1 text-xs text-gray-400">
                 {getHint(option)}
@@ -165,32 +165,6 @@ export const MultiSelectGrid: React.FC<MultiSelectGridProps> = ({ options, selec
       onSelect(selected.filter(item => item !== option));
     } else {
       onSelect([...selected, option]);
-    }
-  };
-
-  const getLabel = (option: string) => {
-    switch (option) {
-      case TaskCategory.Interview: return t('taskCategory.Interview');
-      case TaskCategory.CareerPlanning: return t('taskCategory.CareerPlanning');
-      case TaskCategory.SelfConfusion: return t('taskCategory.SelfConfusion');
-      case TaskCategory.ProgressAnxiety: return t('taskCategory.ProgressAnxiety');
-      case TaskCategory.ExpectationPressure: return t('taskCategory.ExpectationPressure');
-      case TaskCategory.FinancialPressure: return t('taskCategory.FinancialPressure');
-      case TaskCategory.MarketChange: return t('taskCategory.MarketChange');
-      case TaskCategory.Other: return t('taskCategory.Other');
-      case TaskWorry.Performance: return t('taskWorry.Performance');
-      case TaskWorry.Rejection: return t('taskWorry.Rejection');
-      case TaskWorry.OthersThoughts: return t('taskWorry.OthersThoughts');
-      case TaskWorry.Pressure: return t('taskWorry.Pressure');
-      case TaskWorry.Comparison: return t('taskWorry.Comparison');
-      case TaskWorry.TimeStress: return t('taskWorry.TimeStress');
-      case TaskWorry.Decision: return t('taskWorry.Decision');
-      case TaskWorry.Uncertainty: return t('taskWorry.Uncertainty');
-      case TaskWorry.Other: return t('taskWorry.Other');
-      case ResponsibilityOwner.Mine: return t('owner.Mine');
-      case ResponsibilityOwner.Theirs: return t('owner.Theirs');
-      case ResponsibilityOwner.Shared: return t('owner.Shared');
-      default: return option;
     }
   };
 
@@ -243,7 +217,7 @@ export const MultiSelectGrid: React.FC<MultiSelectGridProps> = ({ options, selec
               )}
             </div>
             <div className="flex flex-col">
-              <span>{getLabel(option)}</span>
+              <span>{getOptionLabel(t, option)}</span>
               {getHint(option) && (
                 <span className="mt-1 text-xs text-gray-400">
                   {getHint(option)}
@@ -259,14 +233,6 @@ export const MultiSelectGrid: React.FC<MultiSelectGridProps> = ({ options, selec
 
 export const SelectionList: React.FC<SelectionGridProps> = ({ options, selected, onSelect }) => {
   const { t } = useTranslation();
-  const getLabel = (option: string) => {
-    switch (option) {
-      case ResponsibilityOwner.Mine: return t('owner.Mine');
-      case ResponsibilityOwner.Theirs: return t('owner.Theirs');
-      case ResponsibilityOwner.Shared: return t('owner.Shared');
-      default: return option;
-    }
-  };
 
   const getHint = (option: string) => {
     switch (option) {
@@ -291,7 +257,7 @@ export const SelectionList: React.FC<SelectionGridProps> = ({ options, selected,
           `}
         >
           <div className="flex flex-col">
-            <span>{getLabel(option)}</span>
+            <span>{getOptionLabel(t, option)}</span>
             {getHint(option) && (
               <span className="mt-1 text-xs text-gray-400">
                 {getHint(option)}

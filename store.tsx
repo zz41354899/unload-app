@@ -7,7 +7,7 @@ interface AppContextType {
   login: () => void;
   logout: () => void;
   tasks: Task[];
-  addTask: (task: Omit<Task, 'id' | 'date'>) => void;
+  addTask: (task: Omit<Task, 'id' | 'date'>) => string;
   deleteTask: (id: string) => void;
   updateTask: (id: string, updates: Partial<Task>) => void;
   showToast: (message: string, type?: 'success' | 'error') => void;
@@ -69,14 +69,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const addTask = (taskData: Omit<Task, 'id' | 'date'>) => {
-    const id = Date.now().toString();
     const newTask: Task = {
       ...taskData,
-      id,
+      id: Date.now().toString(),
       date: new Date().toISOString(),
     };
     setTasks(prev => [newTask, ...prev]);
-    return id;
+    return newTask.id;
   };
 
   const deleteTask = (id: string) => {
