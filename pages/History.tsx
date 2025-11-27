@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppStore } from '../store';
 import { Search, Trash2, AlertCircle, ChevronDown, Edit2, Save, X } from 'lucide-react';
@@ -10,26 +10,16 @@ interface HistoryProps {
 }
 
 export const History: React.FC<HistoryProps> = () => {
-  const { tasks, deleteTask, updateTask, showToast } = useAppStore();
+  const { tasks, deleteTask, showToast } = useAppStore();
   const { t, i18n } = useTranslation();
   const [search, setSearch] = useState('');
   const [deleteId, setDeleteId] = useState<string | null>(null);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [editingReflection, setEditingReflection] = useState<string>('');
-  const [editingCategories, setEditingCategories] = useState<string[]>([]);
-  const [editingWorries, setEditingWorries] = useState<string[]>([]);
-  const [editingOwner, setEditingOwner] = useState<string | null>(null);
-  const [editingControl, setEditingControl] = useState<number>(0);
-  const [editingPolarity, setEditingPolarity] = useState<TaskPolarity | null>(null);
-  const [customCategory, setCustomCategory] = useState<string>('');
-  const [customWorry, setCustomWorry] = useState<string>('');
 
   // Filter States
   const [timeFilter, setTimeFilter] = useState('all');
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [ownerFilter, setOwnerFilter] = useState('all');
   const [sortOrder, setSortOrder] = useState('newest');
-  const [polarityFilter, setPolarityFilter] = useState<'all' | 'positive' | 'negative'>('all');
 
   // Helper to identify standard categories
   const standardCategories = Object.values(TaskCategory).filter(c => c !== TaskCategory.Other) as string[];
@@ -81,14 +71,6 @@ export const History: React.FC<HistoryProps> = () => {
       return false;
     }
 
-    // 5. Polarity Filter
-    if (polarityFilter !== 'all') {
-      const effectivePolarity = task.polarity ?? TaskPolarity.Negative;
-      if (effectivePolarity !== polarityFilter) {
-        return false;
-      }
-    }
-
     return true;
   }).sort((a, b) => {
     // 6. Sort Order
@@ -105,21 +87,8 @@ export const History: React.FC<HistoryProps> = () => {
       day: 'numeric',
     });
   };
-
-  const isPositiveView = polarityFilter === 'positive';
-
-  const getCategoryLabel = (cat: string, polarity?: TaskPolarity | null) => {
-    const usePositive = polarity != null ? polarity === TaskPolarity.Positive : isPositiveView;
-
+  const getCategoryLabel = (cat: string) => {
     const keyFor = (suffix: string) => {
-      if (usePositive) {
-        const positiveKey = `taskCategoryPositive.${suffix}`;
-        const positiveLabel = t(positiveKey);
-        if (positiveLabel !== positiveKey) {
-          return positiveLabel;
-        }
-      }
-
       const defaultKey = `taskCategory.${suffix}`;
       const defaultLabel = t(defaultKey);
       return defaultLabel !== defaultKey ? defaultLabel : suffix;
@@ -138,18 +107,8 @@ export const History: React.FC<HistoryProps> = () => {
     }
   };
 
-  const getWorryLabel = (w: string, polarity?: TaskPolarity | null) => {
-    const usePositive = polarity != null ? polarity === TaskPolarity.Positive : isPositiveView;
-
+  const getWorryLabel = (w: string) => {
     const keyFor = (suffix: string) => {
-      if (usePositive) {
-        const positiveKey = `taskWorryPositive.${suffix}`;
-        const positiveLabel = t(positiveKey);
-        if (positiveLabel !== positiveKey) {
-          return positiveLabel;
-        }
-      }
-
       const defaultKey = `taskWorry.${suffix}`;
       const defaultLabel = t(defaultKey);
       return defaultLabel !== defaultKey ? defaultLabel : suffix;
@@ -169,9 +128,8 @@ export const History: React.FC<HistoryProps> = () => {
     }
   };
 
-  const getWorryTitle = (polarity?: TaskPolarity | null) => {
-    const isPositive = polarity === TaskPolarity.Positive;
-    return isPositive ? t('history.worry.highlightLabel') : t('history.worry.label');
+  const getWorryTitle = () => {
+    return t('history.worry.label');
   };
 
   const getOwnerLabel = (owner: string) => {
@@ -189,50 +147,21 @@ export const History: React.FC<HistoryProps> = () => {
     return '#9CA3AF'; // Theirs
   };
 
-  const handleToggleCategory = (value: string) => {
-    setEditingCategories(prev =>
-      prev.includes(value) ? prev.filter(v => v !== value) : [...prev, value]
-    );
-  };
+  const extractFinalMessage = (reflection?: string | null) => {
+    if (!reflection) return '';
 
-  const handleAddCustomCategory = () => {
-    if (customCategory.trim()) {
-      setEditingCategories(prev => [...prev.filter(c => c !== TaskCategory.Other), customCategory.trim()]);
-      setCustomCategory('');
-    }
-  };
+    const blocks = reflection.split('\n\n');
+    const finalLabel = t('newTask.finalMessage.label');
 
-  const handleToggleWorry = (value: string) => {
-    setEditingWorries(prev =>
-      prev.includes(value) ? prev.filter(v => v !== value) : [...prev, value]
-    );
-  };
-
-  const handleAddCustomWorry = () => {
-    if (customWorry.trim()) {
-      setEditingWorries(prev => [...prev.filter(w => w !== TaskWorry.Other), customWorry.trim()]);
-      setCustomWorry('');
-    }
-  };
-
-  const handleSaveTask = (taskId: string) => {
-    if (!editingOwner) {
-      return;
+    for (const block of blocks) {
+      const lines = block.split('\n');
+      if (!lines.length) continue;
+      const [title, ...rest] = lines;
+      if (title === finalLabel) {
+        return rest.join('\n').trim();
+      }
     }
 
-    const nextCategories = editingCategories.length === 1 ? editingCategories[0] : editingCategories;
-    const nextWorries = editingWorries.length === 1 ? editingWorries[0] : editingWorries;
-
-    updateTask(taskId, {
-      category: nextCategories,
-      worry: nextWorries,
-      owner: editingOwner as ResponsibilityOwner,
-      controlLevel: editingControl,
-      reflection: editingReflection,
-      polarity: editingPolarity ?? undefined,
-    });
-    showToast(t('journal.toast.saved'));
-    setEditingId(null);
   };
 
   const confirmDelete = () => {
@@ -261,7 +190,7 @@ export const History: React.FC<HistoryProps> = () => {
         </div>
 
         {/* Filters */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2 md:gap-4 mb-4 md:mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 md:gap-4 mb-4 md:mb-8">
           {/* Time Filter */}
           <div className="relative">
             <select
@@ -273,20 +202,6 @@ export const History: React.FC<HistoryProps> = () => {
               <option value="today">{t('history.filter.time.today')}</option>
               <option value="week">{t('history.filter.time.week')}</option>
               <option value="month">{t('history.filter.time.month')}</option>
-            </select>
-            <ChevronDown className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 w-3 md:w-4 h-3 md:h-4 text-gray-400 pointer-events-none" />
-          </div>
-
-          {/* Polarity Filter */}
-          <div className="relative">
-            <select
-              value={polarityFilter}
-              onChange={(e) => setPolarityFilter(e.target.value as 'all' | 'positive' | 'negative')}
-              className="w-full py-2 md:py-3 px-2 md:px-4 pr-8 md:pr-10 border border-gray-200 rounded-lg md:rounded-xl text-left text-gray-600 text-xs md:text-sm bg-white hover:bg-gray-50 transition-colors shadow-sm appearance-none cursor-pointer focus:outline-none focus:border-primary"
-            >
-              <option value="all">{t('history.filter.polarity.all')}</option>
-              <option value="positive">{t('history.filter.polarity.positive')}</option>
-              <option value="negative">{t('history.filter.polarity.negative')}</option>
             </select>
             <ChevronDown className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 w-3 md:w-4 h-3 md:h-4 text-gray-400 pointer-events-none" />
           </div>
@@ -306,7 +221,7 @@ export const History: React.FC<HistoryProps> = () => {
             <ChevronDown className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 w-3 md:w-4 h-3 md:h-4 text-gray-400 pointer-events-none" />
           </div>
 
-          {/* Owner Filter */}
+          {/* Owner / Boundary Filter */}
           <div className="relative">
             <select
               value={ownerFilter}
@@ -351,12 +266,12 @@ export const History: React.FC<HistoryProps> = () => {
                         key={idx}
                         className="bg-[#E5E7EB] text-gray-700 px-3 md:px-4 py-1 md:py-1.5 rounded-lg text-xs md:text-sm font-medium tracking-wide"
                       >
-                        {getCategoryLabel(cat, task.polarity)}
+                        {getCategoryLabel(cat)}
                       </span>
                     ))
                   ) : (
                     <span className="bg-[#E5E7EB] text-gray-700 px-3 md:px-4 py-1 md:py-1.5 rounded-lg text-xs md:text-sm font-medium tracking-wide">
-                      {getCategoryLabel(task.category, task.polarity)}
+                      {getCategoryLabel(task.category)}
                     </span>
                   )}
                   <span
@@ -365,247 +280,43 @@ export const History: React.FC<HistoryProps> = () => {
                   >
                     {getOwnerLabel(task.owner)}
                   </span>
-                  <span
-                    className={`px-3 md:px-4 py-1 md:py-1.5 rounded-lg text-xs md:text-sm font-medium tracking-wide ${
-                      (task.polarity ?? TaskPolarity.Negative) === TaskPolarity.Positive
-                        ? 'bg-green-100 text-green-700'
-                        : 'bg-red-100 text-red-700'
-                    }`}
-                  >
-                    {t(
-                      (task.polarity ?? TaskPolarity.Negative) === TaskPolarity.Positive
-                        ? 'polarity.positive'
-                        : 'polarity.negative'
-                    )}
-                  </span>
                 </div>
                 <span className="text-xs md:text-sm text-gray-500 font-medium tracking-wide self-start md:self-center">
                   {formatDate(task.date)}
                 </span>
               </div>
 
-              {/* Bottom Row: Control Bar + Actions */}
+              {/* Bottom Row: Worry summary + Final message + Actions */}
               <div className="flex flex-col gap-4">
-                <div className="flex items-center justify-between gap-3 md:gap-6">
-                  <div className="flex items-center gap-2 md:gap-4 flex-1 min-w-0">
-                    <span className="text-xs md:text-sm font-bold text-text whitespace-nowrap tracking-wide">{t('history.control.label')}</span>
-                    <div className="flex-1 h-1.5 bg-gray-300/80 rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-primary rounded-full transition-all duration-700 ease-out"
-                        style={{ width: `${task.controlLevel}%` }}
-                      ></div>
+                <div className="flex items-start justify-between gap-3 md:gap-4">
+                  <div className="flex-1 min-w-0 space-y-2">
+                    <div className="space-y-1">
+                      <div className="text-xs font-medium text-gray-500">{getWorryTitle()}</div>
+                      <div className="text-xs md:text-sm text-gray-700">
+                        {Array.isArray(task.worry)
+                          ? task.worry.map(w => getWorryLabel(w as string)).join('、')
+                          : getWorryLabel(task.worry as string)}
+                      </div>
                     </div>
-                    <span className="text-xs md:text-sm font-bold text-text w-10 md:w-12 text-right">{task.controlLevel}%</span>
+
+                    {task.reflection && (
+                      <div className="pt-2 border-t border-gray-200 space-y-1">
+                        <div className="text-[11px] md:text-xs font-medium text-gray-500">
+                          {t('history.finalMessage.label')}
+                        </div>
+                        <div className="text-xs md:text-sm text-gray-700 whitespace-pre-line leading-relaxed">
+                          {extractFinalMessage(task.reflection) || t('history.finalMessage.placeholder')}
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   <button
                     onClick={() => setDeleteId(task.id)}
-                    className="text-gray-400 hover:text-red-500 transition-colors p-2 md:p-2 rounded-full hover:bg-white/50 flex-shrink-0"
+                    className="text-gray-400 hover:text-red-500 transition-colors p-2 md:p-2 rounded-full hover:bg-white/50 flex-shrink-0 self-start"
                   >
                     <Trash2 className="w-5 md:w-5 h-5 md:h-5" />
                   </button>
-                </div>
-
-                {/* Edit / View Task Fields */}
-                <div className="pt-3 border-t border-gray-200 space-y-3">
-                  {editingId === task.id ? (
-                    <div className="space-y-4">
-                      {/* Category */}
-                      <div className="space-y-1">
-                        <div className="text-xs md:text-sm font-medium text-gray-700">
-                          {t('history.filter.category.all')}
-                        </div>
-                        <div className="flex flex-wrap gap-2">
-                          {Object.values(TaskCategory).filter(cat => cat !== TaskCategory.Other).map((cat) => (
-                            <button
-                              key={cat}
-                              type="button"
-                              onClick={() => handleToggleCategory(cat)}
-                              className={`px-3 py-1 rounded-full text-xs md:text-sm border transition-colors ${editingCategories.includes(cat)
-                                ? 'border-accent bg-accent/10 text-accent'
-                                : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300'
-                                }`}
-                            >
-                              {getCategoryLabel(cat, editingPolarity)}
-                            </button>
-                          ))}
-                        </div>
-                        {/* Custom Category Input */}
-                        <div className="mt-2">
-                          <input
-                            type="text"
-                            value={customCategory}
-                            onChange={(e) => setCustomCategory(e.target.value)}
-                            onKeyDown={(e) => {
-                              if (e.key === 'Enter') {
-                                e.preventDefault();
-                                handleAddCustomCategory();
-                              }
-                            }}
-                            placeholder={t('taskCategory.Other')}
-                            className="w-full px-3 py-1.5 border border-gray-200 rounded-lg text-xs md:text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
-                          />
-                        </div>
-                      </div>
-
-                      {/* Worry */}
-                      <div className="space-y-1">
-                        <div className="text-xs md:text-sm font-medium text-gray-700">
-                          {t('history.worry.label')}
-                        </div>
-                        <div className="flex flex-wrap gap-2">
-                          {Object.values(TaskWorry).filter(w => w !== TaskWorry.Other).map((w) => (
-                            <button
-                              key={w}
-                              type="button"
-                              onClick={() => handleToggleWorry(w)}
-                              className={`px-3 py-1 rounded-full text-xs md:text-sm border transition-colors ${editingWorries.includes(w)
-                                ? 'border-accent bg-accent/10 text-accent'
-                                : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300'
-                                }`}
-                            >
-                              {getWorryLabel(w, editingPolarity)}
-                            </button>
-                          ))}
-                        </div>
-                        {/* Custom Worry Input */}
-                        <div className="mt-2">
-                          <input
-                            type="text"
-                            value={customWorry}
-                            onChange={(e) => setCustomWorry(e.target.value)}
-                            onKeyDown={(e) => {
-                              if (e.key === 'Enter') {
-                                e.preventDefault();
-                                handleAddCustomWorry();
-                              }
-                            }}
-                            placeholder={t('taskWorry.Other')}
-                            className="w-full px-3 py-1.5 border border-gray-200 rounded-lg text-xs md:text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
-                          />
-                        </div>
-                      </div>
-
-                      {/* Polarity + Owner & Control */}
-                      <div className="space-y-3">
-                        <div className="space-y-1">
-                          <div className="text-xs md:text-sm font-medium text-gray-700">
-                            {t('history.polarity.label')}
-                          </div>
-                          <div className="flex flex-wrap gap-2">
-                            <button
-                              type="button"
-                              onClick={() => setEditingPolarity(TaskPolarity.Positive)}
-                              className={`px-3 py-1 rounded-full text-xs md:text-sm border transition-colors ${editingPolarity === TaskPolarity.Positive
-                                ? 'border-primary bg-primary text-white'
-                                : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300'
-                                }`}
-                            >
-                              {t('polarity.positive')}
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => setEditingPolarity(TaskPolarity.Negative)}
-                              className={`px-3 py-1 rounded-full text-xs md:text-sm border transition-colors ${editingPolarity === TaskPolarity.Negative
-                                ? 'border-primary bg-primary text-white'
-                                : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300'
-                                }`}
-                            >
-                              {t('polarity.negative')}
-                            </button>
-                          </div>
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                          <div className="space-y-1">
-                            <div className="text-xs md:text-sm font-medium text-gray-700">
-                              {t('history.filter.owner.all')}
-                            </div>
-                            <div className="relative">
-                              <select
-                                value={editingOwner ?? ''}
-                                onChange={(e) => setEditingOwner(e.target.value || null)}
-                                className="w-full py-2 px-2 pr-7 border border-gray-200 rounded-lg text-xs md:text-sm bg-white hover:bg-gray-50 transition-colors appearance-none focus:outline-none focus:ring-2 focus:ring-primary/20"
-                              >
-                                {Object.values(ResponsibilityOwner).map((owner) => (
-                                  <option key={owner} value={owner}>
-                                    {getOwnerLabel(owner)}
-                                  </option>
-                                ))}
-                              </select>
-                              <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-400 pointer-events-none" />
-                            </div>
-                          </div>
-
-                          <div className="space-y-1">
-                            <div className="text-xs md:text-sm font-medium text-gray-700">
-                              {t('history.control.label')}
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <input
-                                type="number"
-                                min={0}
-                                max={100}
-                                value={editingControl}
-                                onChange={(e) => setEditingControl(Number(e.target.value) || 0)}
-                                className="w-20 px-2 py-1 border border-gray-200 rounded-lg text-xs md:text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
-                              />
-                              <span className="text-xs text-gray-500">%</span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="flex gap-2 justify-end">
-                        <button
-                          onClick={() => setEditingId(null)}
-                          className="px-3 py-1.5 rounded-lg border border-gray-200 text-xs md:text-sm text-gray-500 hover:bg-gray-50 flex items-center gap-1"
-                        >
-                          <X className="w-3 h-3" />
-                          {t('history.modal.cancel')}
-                        </button>
-                        <button
-                          onClick={() => handleSaveTask(task.id)}
-                          className="px-3 py-1.5 rounded-lg bg-primary text-white text-xs md:text-sm hover:bg-[#1e2b1e] flex items-center gap-1"
-                        >
-                          <Save className="w-3 h-3" />
-                          {t('journal.edit.save')}
-                        </button>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="space-y-3">
-                      {/* Summary view */}
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="flex-1 min-w-0 space-y-1">
-                          <div className="text-xs font-medium text-gray-500">{getWorryTitle(task.polarity)}</div>
-                          <div className="text-xs md:text-sm text-gray-700">
-                            {Array.isArray(task.worry)
-                              ? task.worry.map(w => getWorryLabel(w as string, task.polarity)).join('、')
-                              : getWorryLabel(task.worry as string, task.polarity)}
-                          </div>
-                        </div>
-                        <button
-                          onClick={() => {
-                            if (editingId === task.id) {
-                              setEditingId(null);
-                            } else {
-                              setEditingId(task.id);
-                              setEditingCategories(Array.isArray(task.category) ? task.category : [task.category]);
-                              setEditingWorries(Array.isArray(task.worry) ? task.worry : [task.worry]);
-                              setEditingOwner(task.owner);
-                              setEditingControl(task.controlLevel);
-                              setEditingReflection(task.reflection || '');
-                              setEditingPolarity(task.polarity ?? TaskPolarity.Negative);
-                            }
-                          }}
-                          className="p-2 hover:bg-gray-100 rounded-lg transition-colors flex-shrink-0"
-                        >
-                          <Edit2 className="w-4 h-4 md:w-5 md:h-5 text-gray-400" />
-                        </button>
-                      </div>
-                    </div>
-                  )}
                 </div>
               </div>
             </div>

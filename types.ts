@@ -41,6 +41,8 @@ export interface Task {
   controlLevel: number;
   reflection?: string; // 反思日記
   polarity?: TaskPolarity; // 正向 / 負向，舊資料可能沒有
+  perspective?: 'reality' | 'distance' | 'value'; // 探索角度（多元視角）
+  finalMessage?: string; // 最後一句話（Step 5）
 }
 
 export interface User {

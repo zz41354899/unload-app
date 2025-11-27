@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppStore } from '../store';
 import { Task, ResponsibilityOwner, TaskCategory, TaskWorry, TaskPolarity } from '../types';
-import { Calendar, BookOpen, Lightbulb, TrendingUp, ChevronDown, Edit2, Save, X, Sparkles } from 'lucide-react';
+import { Calendar, BookOpen, Lightbulb, TrendingUp, ChevronDown, Sparkles, Pencil, Save, X } from 'lucide-react';
 import { getDailyQuote } from '../lib/quotes';
 
 interface JournalProps {
@@ -14,7 +14,12 @@ export const Journal: React.FC<JournalProps> = ({ navigate }) => {
   const { t, i18n } = useTranslation();
   const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [editingReflection, setEditingReflection] = useState<string>('');
+  const [editingFocusSentence, setEditingFocusSentence] = useState<string>('');
+  const [editingNote, setEditingNote] = useState<string>('');
+  const [editingReality, setEditingReality] = useState<string>('');
+  const [editingDistance, setEditingDistance] = useState<string>('');
+  const [editingValue, setEditingValue] = useState<string>('');
+  const [editingFinalMessage, setEditingFinalMessage] = useState<string>('');
   const [filterOwner, setFilterOwner] = useState<string | null>(null);
   const [polarityFilter, setPolarityFilter] = useState<'all' | 'positive' | 'negative'>('all');
 
@@ -38,9 +43,6 @@ export const Journal: React.FC<JournalProps> = ({ navigate }) => {
       mine: rangedTasks.filter(t => t.owner === ResponsibilityOwner.Mine).length,
       theirs: rangedTasks.filter(t => t.owner === ResponsibilityOwner.Theirs).length,
       shared: rangedTasks.filter(t => t.owner === ResponsibilityOwner.Shared).length,
-      avgControl: rangedTasks.length > 0
-        ? Math.round(rangedTasks.reduce((sum, t) => sum + t.controlLevel, 0) / rangedTasks.length)
-        : 0
     };
   };
 
@@ -74,9 +76,6 @@ export const Journal: React.FC<JournalProps> = ({ navigate }) => {
   const todayTasks = polarityFilter === 'all'
     ? todayTasksRaw
     : todayTasksRaw.filter(t => (t.polarity ?? TaskPolarity.Negative) === polarityFilter);
-  const allPositiveToday =
-    todayTasks.length > 0 &&
-    todayTasks.every(t => (t.polarity ?? TaskPolarity.Negative) === TaskPolarity.Positive);
   const weekStats = getWeekStats();
   const monthStats = getMonthStats();
 
@@ -202,9 +201,115 @@ export const Journal: React.FC<JournalProps> = ({ navigate }) => {
     }
   };
 
+  // Known headings in different languages for reflection blocks
+  const STEP2_HEADINGS = [
+    t('newTask.step2.title'),
+    '用一句話，描述今天的情緒',
+    'In one sentence, describe how you feel today',
+  ];
+
+  const REALITY_HEADINGS = [
+    t('newTask.perspective.reality.title'),
+    '視角 A — 現實層面',
+    'Perspective A — Reality',
+  ];
+
+  const DISTANCE_HEADINGS = [
+    t('newTask.perspective.distance.title'),
+    '視角 B — 距離層面',
+    'Perspective B — Distance',
+  ];
+
+  const VALUE_HEADINGS = [
+    t('newTask.perspective.value.title'),
+    '視角 C — 價值層面',
+    'Perspective C — Values',
+  ];
+
+  const FINAL_MESSAGE_HEADINGS = [
+    t('newTask.finalMessage.label'),
+    '最後一句話（選填）',
+    'One last sentence to yourself (optional)',
+  ];
+
+  const startEditing = (task: Task) => {
+    setEditingId(task.id);
+
+    let focusSentence = '';
+    let note = '';
+    let reality = '';
+    let distance = '';
+    let value = '';
+    let finalMessage = task.finalMessage ?? '';
+
+    if (task.reflection) {
+      const blocks = task.reflection.split(/\n\n+/);
+
+      blocks.forEach((block) => {
+        const lines = block.split('\n');
+        const heading = lines[0];
+        const body = lines.slice(1).join('\n').trim();
+
+        if (STEP2_HEADINGS.includes(heading)) {
+          focusSentence = body || focusSentence;
+        } else if (REALITY_HEADINGS.includes(heading)) {
+          reality = body || reality;
+        } else if (DISTANCE_HEADINGS.includes(heading)) {
+          distance = body || distance;
+        } else if (VALUE_HEADINGS.includes(heading)) {
+          value = body || value;
+        } else if (FINAL_MESSAGE_HEADINGS.includes(heading)) {
+          if (!finalMessage && body) {
+            finalMessage = body;
+          }
+        } else {
+          const trimmed = block.trim();
+          if (trimmed) {
+            note = note ? `${note}\n\n${trimmed}` : trimmed;
+          }
+        }
+      });
+    }
+
+    setEditingFocusSentence(focusSentence);
+    setEditingNote(note);
+    setEditingReality(reality);
+    setEditingDistance(distance);
+    setEditingValue(value);
+    setEditingFinalMessage(finalMessage);
+  };
+
   const handleSaveJournal = (taskId: string) => {
+    const parts: string[] = [];
+
+    if (editingFocusSentence.trim()) {
+      parts.push(`${t('newTask.step2.title')}\n${editingFocusSentence.trim()}`);
+    }
+    if (editingNote.trim()) {
+      parts.push(editingNote.trim());
+    }
+    if (editingReality.trim()) {
+      parts.push(`${t('newTask.perspective.reality.title')}\n${editingReality.trim()}`);
+    }
+    if (editingDistance.trim()) {
+      parts.push(`${t('newTask.perspective.distance.title')}\n${editingDistance.trim()}`);
+    }
+    if (editingValue.trim()) {
+      parts.push(`${t('newTask.perspective.value.title')}\n${editingValue.trim()}`);
+    }
+    if (editingFinalMessage.trim()) {
+      parts.push(`${t('newTask.finalMessage.label')}\n${editingFinalMessage.trim()}`);
+    }
+
+    const combinedReflection = parts.length > 0 ? parts.join('\n\n') : undefined;
+
+    const trimmedFocus = editingFocusSentence.trim();
+
     updateTask(taskId, {
-      reflection: editingReflection
+      reflection: combinedReflection,
+      finalMessage: editingFinalMessage.trim() || undefined,
+      // 若有填寫新的焦點句，讓上方「當時的焦點」也改為這句話
+      ...(trimmedFocus ? { worry: trimmedFocus } : {}),
     });
     showToast(t('journal.toast.saved'));
     setEditingId(null);
@@ -265,14 +370,6 @@ export const Journal: React.FC<JournalProps> = ({ navigate }) => {
               <span className="text-gray-600 text-xs md:text-sm">{t('journal.stats.today.total')}</span>
               <span className="text-xl md:text-2xl font-bold text-text">{todayTasks.length}</span>
             </div>
-            <div className="flex justify-between items-center">
-              <span className="text-gray-600 text-xs md:text-sm">{t('journal.stats.today.avgControl')}</span>
-              <span className="text-xl md:text-2xl font-bold text-accent">
-                {todayTasks.length > 0
-                  ? Math.round(todayTasks.reduce((sum, t) => sum + t.controlLevel, 0) / todayTasks.length)
-                  : 0}%
-              </span>
-            </div>
             <div className="pt-3 border-t border-gray-100">
               <div className="flex justify-between text-xs text-gray-500 mb-2">
                 <span>{t('journal.stats.today.mine')}</span>
@@ -294,28 +391,28 @@ export const Journal: React.FC<JournalProps> = ({ navigate }) => {
         <div className="bg-white rounded-2xl p-4 md:p-6 shadow-sm border border-gray-100">
           <div className="flex items-center gap-2 mb-4">
             <TrendingUp className="w-4 md:w-5 h-4 md:h-5 text-primary" />
-            <h3 className="font-bold text-sm md:text-base">{t('journal.stats.week.title')}</h3>
+            <h3 className="font-bold text-sm md:text-base">
+              {t('journal.stats.week.title', { defaultValue: '本週思維探索趨勢' })}
+            </h3>
           </div>
           <div className="space-y-3">
             <div className="flex justify-between items-center">
-              <span className="text-gray-600 text-xs md:text-sm">{t('journal.stats.week.total')}</span>
+              <span className="text-gray-600 text-xs md:text-sm">
+                {t('journal.stats.week.total', { defaultValue: '本週記錄數' })}
+              </span>
               <span className="text-xl md:text-2xl font-bold text-text">{weekStats.total}</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-gray-600 text-xs md:text-sm">{t('journal.stats.week.avgControl')}</span>
-              <span className="text-xl md:text-2xl font-bold text-accent">{weekStats.avgControl}%</span>
             </div>
             <div className="pt-3 border-t border-gray-100">
               <div className="flex justify-between text-xs text-gray-500 mb-2">
-                <span>{t('journal.stats.week.mine')}</span>
+                <span>{t('journal.stats.week.mine', { defaultValue: '聚焦於對自己的察覺' })}</span>
                 <span>{weekStats.mine}</span>
               </div>
               <div className="flex justify-between text-xs text-gray-500 mb-2">
-                <span>{t('journal.stats.week.shared')}</span>
+                <span>{t('journal.stats.week.shared', { defaultValue: '聚焦於對彼此互動的察覺' })}</span>
                 <span>{weekStats.shared}</span>
               </div>
               <div className="flex justify-between text-xs text-gray-500">
-                <span>{t('journal.stats.week.theirs')}</span>
+                <span>{t('journal.stats.week.theirs', { defaultValue: '聚焦於對他人狀態的察覺' })}</span>
                 <span>{weekStats.theirs}</span>
               </div>
             </div>
@@ -326,28 +423,28 @@ export const Journal: React.FC<JournalProps> = ({ navigate }) => {
         <div className="bg-white rounded-2xl p-4 md:p-6 shadow-sm border border-gray-100">
           <div className="flex items-center gap-2 mb-4">
             <BookOpen className="w-4 md:w-5 h-4 md:h-5 text-primary" />
-            <h3 className="font-bold text-sm md:text-base">{t('journal.stats.month.title')}</h3>
+            <h3 className="font-bold text-sm md:text-base">
+              {t('journal.stats.month.title', { defaultValue: '本月情緒焦點' })}
+            </h3>
           </div>
           <div className="space-y-3">
             <div className="flex justify-between items-center">
-              <span className="text-gray-600 text-xs md:text-sm">{t('journal.stats.month.total')}</span>
+              <span className="text-gray-600 text-xs md:text-sm">
+                {t('journal.stats.month.total', { defaultValue: '本月記錄數' })}
+              </span>
               <span className="text-xl md:text-2xl font-bold text-text">{monthStats.total}</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-gray-600 text-xs md:text-sm">{t('journal.stats.month.avgControl')}</span>
-              <span className="text-xl md:text-2xl font-bold text-accent">{monthStats.avgControl}%</span>
             </div>
             <div className="pt-3 border-t border-gray-100">
               <div className="flex justify-between text-xs text-gray-500 mb-2">
-                <span>{t('journal.stats.month.mine')}</span>
+                <span>{t('journal.stats.month.mine', { defaultValue: '聚焦於對自己的察覺' })}</span>
                 <span>{monthStats.mine}</span>
               </div>
               <div className="flex justify-between text-xs text-gray-500 mb-2">
-                <span>{t('journal.stats.month.shared')}</span>
+                <span>{t('journal.stats.month.shared', { defaultValue: '聚焦於對彼此互動的察覺' })}</span>
                 <span>{monthStats.shared}</span>
               </div>
               <div className="flex justify-between text-xs text-gray-500">
-                <span>{t('journal.stats.month.theirs')}</span>
+                <span>{t('journal.stats.month.theirs', { defaultValue: '聚焦於對他人狀態的察覺' })}</span>
                 <span>{monthStats.theirs}</span>
               </div>
             </div>
@@ -358,29 +455,11 @@ export const Journal: React.FC<JournalProps> = ({ navigate }) => {
       {/* Top Worries */}
       {topWorries.length > 0 && (
         <div className="bg-white rounded-2xl p-4 md:p-8 shadow-sm border border-gray-100">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 mb-4 md:mb-6">
-            <div className="flex items-center gap-2">
-              <Lightbulb className="w-4 md:w-5 h-4 md:h-5 text-primary" />
-              <h3 className="font-bold text-base md:text-lg">
-                {polarityFilter === 'positive'
-                  ? t('journal.topWorries.title.positive')
-                  : polarityFilter === 'negative'
-                    ? t('journal.topWorries.title.negative')
-                    : t('journal.topWorries.title.all')}
-              </h3>
-            </div>
-            <div className="relative w-full sm:w-auto">
-              <select
-                value={polarityFilter}
-                onChange={(e) => setPolarityFilter(e.target.value as 'all' | 'positive' | 'negative')}
-                className="appearance-none w-full sm:w-auto bg-gray-50 border border-gray-200 rounded-lg px-3 py-1.5 pr-7 text-xs md:text-sm text-gray-700 cursor-pointer hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-primary/20"
-              >
-                <option value="all">{t('polarity.all')}</option>
-                <option value="positive">{t('polarity.positive')}</option>
-                <option value="negative">{t('polarity.negative')}</option>
-              </select>
-              <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 w-3 h-3 text-gray-400 pointer-events-none" />
-            </div>
+          <div className="flex items-center gap-2 mb-4 md:mb-6">
+            <Lightbulb className="w-4 md:w-5 h-4 md:h-5 text-primary" />
+            <h3 className="font-bold text-base md:text-lg">
+              {t('journal.topWorries.title.all')}
+            </h3>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
             {topWorries.map((item, idx) => (
@@ -425,79 +504,198 @@ export const Journal: React.FC<JournalProps> = ({ navigate }) => {
           <div className="space-y-3 md:space-y-4">
             {filteredTasks.map((task) => (
               <div key={task.id} className="border border-gray-100 rounded-lg p-4 md:p-6 hover:shadow-md transition-shadow">
-                {/* Task Header */}
-                <div className="flex items-start justify-between gap-3 mb-4">
-                  <div className="flex-1 min-w-0">
-                    <div className="font-bold text-text mb-1 text-sm md:text-base break-words">
-                      {Array.isArray(task.category)
-                        ? task.category.map((cat) => getCategoryLabel(cat, (task.polarity ?? TaskPolarity.Negative) === TaskPolarity.Positive)).join(', ')
-                        : getCategoryLabel(task.category as string, (task.polarity ?? TaskPolarity.Negative) === TaskPolarity.Positive)}
-                    </div>
-                    <div className="text-xs md:text-sm text-gray-500 mb-2 break-words">
-                      {Array.isArray(task.worry)
-                        ? task.worry.map((w) => getWorryLabel(w, (task.polarity ?? TaskPolarity.Negative) === TaskPolarity.Positive)).join(', ')
-                        : getWorryLabel(task.worry as string, (task.polarity ?? TaskPolarity.Negative) === TaskPolarity.Positive)}
-                    </div>
-                    <div className="flex flex-wrap items-center gap-2 md:gap-4 text-xs text-gray-500">
-                      <span className="whitespace-nowrap">{t('journal.task.control', { value: task.controlLevel })}</span>
-                      <span className="px-2 py-1 bg-gray-100 rounded-full whitespace-nowrap">
-                        {getOwnerLabel(task.owner as ResponsibilityOwner)}
-                      </span>
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => {
-                      if (editingId === task.id) {
-                        setEditingId(null);
-                      } else {
-                        setEditingId(task.id);
-                        setEditingReflection(task.reflection || '');
-                      }
-                    }}
-                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors shrink-0"
-                  >
-                    {editingId === task.id ? (
-                      <X className="w-4 h-4 md:w-5 md:h-5 text-gray-400" />
-                    ) : (
-                      <Edit2 className="w-4 h-4 md:w-5 md:h-5 text-gray-400" />
-                    )}
-                  </button>
-                </div>
-
-                {/* Journal Content */}
-                {editingId === task.id ? (
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">{t('journal.edit.label')}</label>
-                      <textarea
-                        value={editingReflection}
-                        onChange={(e) => setEditingReflection(e.target.value)}
-                        placeholder={t('journal.edit.placeholder')}
-                        className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none"
-                        rows={3}
-                      />
-                    </div>
-                    <button
-                      onClick={() => handleSaveJournal(task.id)}
-                      className="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-lg hover:bg-[#1e2b1e] transition-colors"
-                    >
-                      <Save className="w-4 h-4" />
-                      {t('journal.edit.save')}
-                    </button>
-                  </div>
-                ) : (
-                  <div className="space-y-3 pt-4 border-t border-gray-100">
-                    {task.reflection && (
-                      <div>
-                        <div className="text-xs font-medium text-gray-500 mb-1">{t('journal.view.label')}</div>
-                        <div className="text-sm text-gray-700 bg-gray-50 p-3 rounded-lg">{task.reflection}</div>
+                {/* Task Header: four key elements */}
+                <div className="flex items-start gap-3 mb-4">
+                  <div className="flex-1 min-w-0 space-y-2">
+                    {/* Final message as main focus */}
+                    {task.finalMessage && (
+                      <div className="text-sm md:text-base font-semibold text-text break-words">
+                        {task.finalMessage}
                       </div>
                     )}
-                    {!task.reflection && (
-                      <div className="text-sm text-gray-400 italic">{t('journal.view.empty')}</div>
-                    )}
+
+                    {/* Emotion & boundary */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs md:text-sm text-gray-600">
+                      <div className="space-y-0.5">
+                        <div className="text-[11px] md:text-xs text-gray-400 uppercase tracking-wide">
+                          {t('journal.details.emotionLabel')}
+                        </div>
+                        <div className="font-medium break-words">
+                          {Array.isArray(task.category)
+                            ? task.category.map((cat) => getCategoryLabel(cat, (task.polarity ?? TaskPolarity.Negative) === TaskPolarity.Positive)).join(', ')
+                            : getCategoryLabel(task.category as string, (task.polarity ?? TaskPolarity.Negative) === TaskPolarity.Positive)}
+                        </div>
+                      </div>
+                      <div className="space-y-0.5">
+                        <div className="text-[11px] md:text-xs text-gray-400 uppercase tracking-wide">
+                          {t('journal.details.boundaryLabel')}
+                        </div>
+                        <div className="inline-flex items-center gap-2">
+                          <span className="px-2 py-1 bg-gray-100 rounded-full whitespace-nowrap text-xs md:text-sm">
+                            {getOwnerLabel(task.owner as ResponsibilityOwner)}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Perspective & worry focus */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs md:text-sm text-gray-600">
+                      <div className="space-y-0.5">
+                        <div className="text-[11px] md:text-xs text-gray-400 uppercase tracking-wide">
+                          {t('journal.details.perspectiveLabel')}
+                        </div>
+                        <div className="font-medium break-words">
+                          {task.perspective === 'reality' && t('journal.perspective.reality')}
+                          {task.perspective === 'distance' && t('journal.perspective.distance')}
+                          {task.perspective === 'value' && t('journal.perspective.value')}
+                          {!task.perspective && <span className="text-gray-400">{t('journal.perspective.empty')}</span>}
+                        </div>
+                      </div>
+                      <div className="space-y-0.5">
+                        <div className="text-[11px] md:text-xs text-gray-400 uppercase tracking-wide">
+                          {t('journal.details.focusLabel')}
+                        </div>
+                        <div className="break-words">
+                          {Array.isArray(task.worry)
+                            ? task.worry.map((w) => getWorryLabel(w, (task.polarity ?? TaskPolarity.Negative) === TaskPolarity.Positive)).join(', ')
+                            : getWorryLabel(task.worry as string, (task.polarity ?? TaskPolarity.Negative) === TaskPolarity.Positive)}
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                )}
+                </div>
+
+                {/* Journal Content - editable reflection */}
+                <div className="space-y-3 pt-4 border-t border-gray-100">
+                  {editingId === task.id ? (
+                    <div className="space-y-4">
+                      {/* 區塊標題：反思日記 */}
+                      <div>
+                        <div className="text-xs font-semibold text-gray-500 mb-1">
+                          {t('journal.edit.label')}
+                        </div>
+                      </div>
+
+                      {/* 一句話情緒 */}
+                      <div className="space-y-1">
+                        <label className="block text-xs font-medium text-gray-500">
+                          {t('newTask.step2.title')}
+                        </label>
+                        <input
+                          type="text"
+                          value={editingFocusSentence}
+                          onChange={(e) => setEditingFocusSentence(e.target.value)}
+                          className="w-full p-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 text-sm"
+                        />
+                      </div>
+
+                      {/* 三個視角 */}
+                      <div className="space-y-3">
+                        <div className="space-y-1">
+                          <label className="block text-xs font-medium text-gray-500">
+                            {t('newTask.perspective.reality.title')}
+                          </label>
+                          <textarea
+                            value={editingReality}
+                            onChange={(e) => setEditingReality(e.target.value)}
+                            className="w-full p-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none text-xs min-h-[72px]"
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="block text-xs font-medium text-gray-500">
+                            {t('newTask.perspective.distance.title')}
+                          </label>
+                          <textarea
+                            value={editingDistance}
+                            onChange={(e) => setEditingDistance(e.target.value)}
+                            className="w-full p-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none text-xs min-h-[72px]"
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="block text-xs font-medium text-gray-500">
+                            {t('newTask.perspective.value.title')}
+                          </label>
+                          <textarea
+                            value={editingValue}
+                            onChange={(e) => setEditingValue(e.target.value)}
+                            className="w-full p-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none text-xs min-h-[72px]"
+                          />
+                        </div>
+                      </div>
+
+                      {/* 最後一句話（同時作為整體反思收斂） */}
+                      <div className="space-y-1">
+                        <label className="block text-xs font-medium text-gray-500">
+                          {t('newTask.finalMessage.label')}
+                        </label>
+                        <textarea
+                          value={editingFinalMessage}
+                          onChange={(e) => setEditingFinalMessage(e.target.value)}
+                          placeholder={t('journal.edit.placeholder')}
+                          className="w-full p-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none text-sm min-h-[56px]"
+                        />
+                      </div>
+                      <div className="flex items-center gap-2 justify-end">
+                        <button
+                          type="button"
+                          onClick={() => setEditingId(null)}
+                          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-gray-200 text-xs md:text-sm text-gray-500 hover:bg-gray-50"
+                        >
+                          <X className="w-3 h-3" />
+                          {t('history.modal.cancel')}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleSaveJournal(task.id)}
+                          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-primary text-white text-xs md:text-sm hover:bg-[#1e2b1e]"
+                        >
+                          <Save className="w-3 h-3" />
+                          {t('journal.edit.save')}
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {task.reflection && (
+                        <div>
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="text-xs font-medium text-gray-500">{t('journal.view.label')}</span>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                startEditing(task);
+                              }}
+                              className="p-2 hover:bg-gray-100 rounded-lg transition-colors flex-shrink-0"
+                            >
+                              <Pencil className="w-4 h-4 md:w-5 md:h-5 text-gray-400" />
+                            </button>
+                          </div>
+                          <div className="text-sm text-gray-700 bg-gray-50 p-3 rounded-lg whitespace-pre-line">{task.reflection}</div>
+                        </div>
+                      )}
+                      {!task.reflection && (
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-gray-400 italic">{t('journal.view.empty')}</span>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setEditingId(task.id);
+                              setEditingFocusSentence('');
+                              setEditingNote('');
+                              setEditingReality('');
+                              setEditingDistance('');
+                              setEditingValue('');
+                              setEditingFinalMessage('');
+                            }}
+                            className="p-2 hover:bg-gray-100 rounded-lg transition-colors flex-shrink-0"
+                          >
+                            <Pencil className="w-4 h-4 md:w-5 md:h-5 text-gray-400" />
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
               </div>
             ))}
           </div>

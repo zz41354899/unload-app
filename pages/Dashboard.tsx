@@ -2,8 +2,8 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppStore } from '../store';
-import { ResponsibilityOwner, TaskWorry, TaskPolarity } from '../types';
-import { Smile, MessageSquare, Book, TrendingUp, Zap, Target, Brain, Lightbulb, Sparkles, ChevronDown } from 'lucide-react';
+import { ResponsibilityOwner, TaskWorry } from '../types';
+import { Smile, MessageSquare, Book, TrendingUp, Target, Sparkles } from 'lucide-react';
 import { getDailyQuote } from '../lib/quotes';
 
 interface DashboardProps {
@@ -14,51 +14,36 @@ export const Dashboard: React.FC<DashboardProps> = ({ navigate }) => {
   const { tasks, user } = useAppStore();
   const { t, i18n } = useTranslation();
 
-  const [polarityFilter, setPolarityFilter] = React.useState<'all' | 'positive' | 'negative'>('all');
-
   // Date Helper
   const today = new Date();
   const currentYear = today.getFullYear();
   const currentMonthLabel = today.toLocaleString(i18n.language, { month: 'long' });
 
-  const filteredTasks = React.useMemo(
-    () =>
-      tasks.filter(task => {
-        if (!polarityFilter || polarityFilter === 'all') return true;
-        const effectivePolarity = task.polarity ?? TaskPolarity.Negative;
-        return effectivePolarity === polarityFilter;
-      }),
-    [tasks, polarityFilter],
-  );
-
-  const totalTasks = filteredTasks.length;
-  const myTasks = filteredTasks.filter(t => t.owner === ResponsibilityOwner.Mine).length;
-  const theirTasks = filteredTasks.filter(t => t.owner === ResponsibilityOwner.Theirs).length;
-  const sharedTasks = filteredTasks.filter(t => t.owner === ResponsibilityOwner.Shared).length;
-
-  const hasFilteredTasks = filteredTasks.length > 0;
-  const avgControl = hasFilteredTasks
-    ? Math.round(filteredTasks.reduce((sum, t) => sum + t.controlLevel, 0) / filteredTasks.length)
-    : 0;
+  const totalTasks = tasks.length;
+  const myTasks = tasks.filter(t => t.owner === ResponsibilityOwner.Mine).length;
+  const theirTasks = tasks.filter(t => t.owner === ResponsibilityOwner.Theirs).length;
+  const sharedTasks = tasks.filter(t => t.owner === ResponsibilityOwner.Shared).length;
 
   // Get top worries
-  const getTopWorries = () => {
-    if (filteredTasks.length === 0) return [];
+  const getTopEmotion = () => {
+    if (tasks.length === 0) return null;
 
     const counts: Record<string, number> = {};
-    filteredTasks.forEach(t => {
+    tasks.forEach(t => {
       const worries = Array.isArray(t.worry) ? t.worry : [t.worry];
       worries.forEach(worry => {
         counts[worry] = (counts[worry] || 0) + 1;
       });
     });
 
-    return Object.entries(counts)
-      .sort((a, b) => b[1] - a[1])
-      .map(([name, count]) => ({ name, count }));
+    const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+    if (sorted.length === 0) return null;
+
+    const [worryKey, count] = sorted[0];
+    return { worryKey, count };
   };
 
-  const topWorries = getTopWorries();
+  const topEmotion = getTopEmotion();
 
   const getWorryLabel = (worry: string, isPositive: boolean) => {
     const keyFor = (suffix: string) => {
@@ -146,134 +131,89 @@ export const Dashboard: React.FC<DashboardProps> = ({ navigate }) => {
         ))}
       </div>
 
-      {/* Quick Stats & Personal Insights */}
+      {/* Focus Cards: Emotion & Perspective */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
 
-        {/* Quick Stats */}
-        <div className="bg-white rounded-2xl p-4 md:p-8 shadow-sm border border-gray-100">
-          <div className="flex items-center gap-2 mb-6">
-            <Zap className="w-5 h-5 text-primary" />
-            <h3 className="font-bold text-lg">{t('dashboard.quick.title')}</h3>
-          </div>
-
-          {hasFilteredTasks ? (
-            <div className="space-y-4">
-              <div className="bg-gradient-to-br from-primary/10 to-accent/10 rounded-lg p-6 border border-primary/20">
-                <div className="text-sm text-gray-600 mb-2">{t('dashboard.quick.avg')}</div>
-                <div className="text-4xl font-bold text-primary mb-2">{avgControl}%</div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div
-                    className="bg-primary h-2 rounded-full transition-all duration-500"
-                    style={{ width: `${avgControl}%` }}
-                  ></div>
+        {/* Most explored emotion */}
+        <div className="bg-white rounded-2xl p-4 md:p-6 shadow-sm border border-gray-100 flex flex-col justify-between">
+          <div>
+            <div className="flex items-center gap-2 mb-3">
+              <Target className="w-5 h-5 text-primary" />
+              <h3 className="font-bold text-sm md:text-base">{t('dashboard.focus.emotion.title')}</h3>
+            </div>
+            {topEmotion && totalTasks > 0 ? (
+              <>
+                <div className="text-2xl md:text-3xl font-bold text-text mb-1 break-words">
+                  {getWorryLabel(topEmotion.worryKey, false)}
                 </div>
-              </div>
-
-              <p className="text-sm text-gray-600 leading-relaxed">
-                {avgControl >= 70
-                  ? t('dashboard.quick.hint.high')
-                  : avgControl >= 40
-                    ? t('dashboard.quick.hint.mid')
-                    : t('dashboard.quick.hint.low')}
-              </p>
-            </div>
-          ) : (
-            <div className="flex flex-col items-center justify-center text-gray-400 py-8">
-              <Zap className="w-8 h-8 mb-2 opacity-20" />
-              <span className="text-sm">{t('dashboard.quick.empty')}</span>
-            </div>
-          )}
+                <p className="text-xs md:text-sm text-gray-500">
+                  {t('dashboard.focus.emotion.subtitle', { count: topEmotion.count })}
+                </p>
+              </>
+            ) : (
+              <p className="text-xs md:text-sm text-gray-400">{t('dashboard.focus.empty')}</p>
+            )}
+          </div>
         </div>
 
-        {/* Personal Insights */}
-        <div className="bg-white rounded-2xl p-4 md:p-8 shadow-sm border border-gray-100">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 mb-4 md:mb-6">
-            <div className="flex items-center gap-2">
-              <Brain className="w-5 h-5 text-primary" />
-              <h3 className="font-bold text-lg">{t('dashboard.insight.title')}</h3>
+        {/* Most used perspective */}
+        <div className="bg-white rounded-2xl p-4 md:p-6 shadow-sm border border-gray-100 flex flex-col justify-between">
+          <div>
+            <div className="flex items-center gap-2 mb-3">
+              <Target className="w-5 h-5 text-primary" />
+              <h3 className="font-bold text-sm md:text-base">{t('dashboard.focus.view.title')}</h3>
             </div>
-            <div className="relative w-full sm:w-auto">
-              <select
-                value={polarityFilter}
-                onChange={(e) => setPolarityFilter(e.target.value as 'all' | 'positive' | 'negative')}
-                className="appearance-none w-full sm:w-auto bg-gray-50 border border-gray-200 rounded-lg px-3 py-1.5 pr-7 text-xs md:text-sm text-gray-700 cursor-pointer hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-primary/20"
-              >
-                <option value="all">{t('polarity.all')}</option>
-                <option value="positive">{t('polarity.positive')}</option>
-                <option value="negative">{t('polarity.negative')}</option>
-              </select>
-              <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 w-3 h-3 text-gray-400 pointer-events-none" />
-            </div>
-          </div>
+            {totalTasks > 0 ? (
+              (() => {
+                const counts: Record<string, number> = { reality: 0, distance: 0, value: 0 };
+                tasks.forEach(task => {
+                  if (task.perspective && counts[task.perspective] != null) {
+                    counts[task.perspective] += 1;
+                  }
+                });
+                const totalWithPerspective = counts.reality + counts.distance + counts.value;
+                if (totalWithPerspective === 0) {
+                  return <p className="text-xs md:text-sm text-gray-400">{t('dashboard.focus.empty')}</p>;
+                }
 
-          {filteredTasks.length > 0 ? (
-            <div className="space-y-3">
-              {(() => {
-                const positiveTasks = tasks.filter(t => (t.polarity ?? TaskPolarity.Negative) === TaskPolarity.Positive);
-                const negativeTasks = tasks.filter(t => (t.polarity ?? TaskPolarity.Negative) === TaskPolarity.Negative);
+                const realityRatio = Math.round((counts.reality / totalWithPerspective) * 100);
+                const distanceRatio = Math.round((counts.distance / totalWithPerspective) * 100);
+                const valueRatio = Math.max(0, 100 - realityRatio - distanceRatio);
 
-                const getTopFromList = (source: typeof tasks) => {
-                  if (source.length === 0) return null;
-                  const counts: Record<string, number> = {};
-                  source.forEach(t => {
-                    const worries = Array.isArray(t.worry) ? t.worry : [t.worry];
-                    worries.forEach(w => {
-                      counts[w] = (counts[w] || 0) + 1;
-                    });
-                  });
-                  const top = Object.entries(counts).sort((a, b) => b[1] - a[1])[0];
-                  return top ? top[0] : null;
-                };
+                let mainKey: 'reality' | 'distance' | 'value' = 'reality';
+                if (counts.distance >= counts.reality && counts.distance >= counts.value) mainKey = 'distance';
+                if (counts.value >= counts.reality && counts.value >= counts.distance) mainKey = 'value';
 
-                const positiveTopWorry = getTopFromList(positiveTasks);
-                const negativeTopWorry = getTopFromList(negativeTasks);
-
-                const showPositive = polarityFilter === 'all' || polarityFilter === 'positive';
-                const showNegative = polarityFilter === 'all' || polarityFilter === 'negative';
+                const mainLabelKey =
+                  mainKey === 'reality'
+                    ? 'newTask.perspective.reality.title'
+                    : mainKey === 'distance'
+                      ? 'newTask.perspective.distance.title'
+                      : 'newTask.perspective.value.title';
 
                 return (
                   <>
-                    <div className="flex gap-3 p-3 bg-gray-50 rounded-lg">
-                      <Target className="w-5 h-5 text-primary shrink-0 mt-0.5" />
-                      <p className="text-sm text-gray-700">
-                        {t('dashboard.insight.distribution', { mine: myTasks, shared: sharedTasks, theirs: theirTasks })}
-                      </p>
+                    <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden mb-3 flex">
+                      {realityRatio > 0 && (
+                        <div className="bg-primary/80 h-full" style={{ width: `${realityRatio}%` }} />
+                      )}
+                      {distanceRatio > 0 && (
+                        <div className="bg-accent/80 h-full" style={{ width: `${distanceRatio}%` }} />
+                      )}
+                      {valueRatio > 0 && (
+                        <div className="bg-primary/30 h-full" style={{ width: `${valueRatio}%` }} />
+                      )}
                     </div>
-
-                    {showPositive && positiveTopWorry && (
-                      <div className="flex gap-3 p-3 bg-gray-50 rounded-lg">
-                        <Lightbulb className="w-5 h-5 text-primary shrink-0 mt-0.5" />
-                        <p className="text-sm text-gray-700">
-                          {t('dashboard.insight.mainHighlight', { worry: getWorryLabel(positiveTopWorry as string, true) })}
-                        </p>
-                      </div>
-                    )}
-
-                    {showNegative && negativeTopWorry && (
-                      <div className="flex gap-3 p-3 bg-gray-50 rounded-lg">
-                        <Lightbulb className="w-5 h-5 text-primary shrink-0 mt-0.5" />
-                        <p className="text-sm text-gray-700">
-                          {t('dashboard.insight.mainWorry', { worry: getWorryLabel(negativeTopWorry as string, false) })}
-                        </p>
-                      </div>
-                    )}
-
-                    <button
-                      onClick={() => navigate('journal')}
-                      className="w-full mt-4 px-4 py-2 bg-primary/10 text-primary rounded-lg hover:bg-primary/20 transition-colors text-sm font-medium"
-                    >
-                      {t('dashboard.insight.viewMore')}
-                    </button>
+                    <p className="text-xs md:text-sm text-gray-600 mb-1">
+                      {t('dashboard.focus.view.subtitle', { label: t(mainLabelKey) })}
+                    </p>
                   </>
                 );
-              })()}
-            </div>
-          ) : (
-            <div className="flex flex-col items-center justify-center text-gray-400 py-8">
-              <Brain className="w-8 h-8 mb-2 opacity-20" />
-              <span className="text-sm">{t('dashboard.insight.empty')}</span>
-            </div>
-          )}
+              })()
+            ) : (
+              <p className="text-xs md:text-sm text-gray-400">{t('dashboard.focus.empty')}</p>
+            )}
+          </div>
         </div>
 
       </div>

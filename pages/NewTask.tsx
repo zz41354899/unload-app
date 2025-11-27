@@ -1,12 +1,11 @@
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { WizardLayout, SelectionGrid, SelectionList, MultiSelectGrid } from '../components/StepWizard';
 import { TaskCategory, TaskWorry, ResponsibilityOwner, TaskPolarity } from '../types';
 import { useAppStore } from '../store';
 import { getQuoteByControlLevel } from '../lib/quotes';
-import { getControlLevelSuggestion, isControlLevelValid, getControlLevelWarning, getControlLevelAdvice } from '../lib/controlLevelSuggestion';
-import { CheckCircle, ArrowRight, Brain, AlertCircle } from 'lucide-react';
+import { CheckCircle, ArrowRight, Brain } from 'lucide-react';
 
 interface NewTaskProps {
   navigate: (page: string) => void;
@@ -15,84 +14,29 @@ interface NewTaskProps {
 export const NewTask: React.FC<NewTaskProps> = ({ navigate }) => {
   const { addTask, showToast, openNps } = useAppStore();
   const [step, setStep] = useState(1);
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   const [categories, setCategories] = useState<string[]>([]);
+  const [categoryLimitMessage, setCategoryLimitMessage] = useState<string | null>(null);
   const [customCategory, setCustomCategory] = useState<string>('');
 
   const [worries, setWorries] = useState<string[]>([]);
   const [customWorry, setCustomWorry] = useState<string>('');
+  const [focusSentence, setFocusSentence] = useState<string>('');
 
   const [owner, setOwner] = useState<string | null>(null);
-  const [control, setControl] = useState<number>(0);
+  const [control] = useState<number>(0);
   const [reflectionNote, setReflectionNote] = useState<string>('');
+  const [reflectionReality, setReflectionReality] = useState<string>('');
+  const [reflectionDistance, setReflectionDistance] = useState<string>('');
+  const [reflectionValue, setReflectionValue] = useState<string>('');
+  const [finalMessage, setFinalMessage] = useState<string>('');
+  const [selectedPerspective, setSelectedPerspective] = useState<'reality' | 'distance' | 'value' | null>(null);
   const [polarity, setPolarity] = useState<TaskPolarity>(TaskPolarity.Negative);
-  const sliderRef = useRef<HTMLDivElement>(null);
-  const isDraggingRef = useRef(false);
-  const pendingValueRef = useRef<number>(0);
-  const rafRef = useRef<number | null>(null);
 
-  // 處理滑桿拖曳 - 使用 requestAnimationFrame 優化性能
-  const handleSliderChange = (clientX: number) => {
-    if (!sliderRef.current) return;
-
-    const rect = sliderRef.current.getBoundingClientRect();
-    const x = clientX - rect.left;
-    const percentage = Math.max(0, Math.min(100, (x / rect.width) * 100));
-    pendingValueRef.current = Math.round(percentage);
-
-    // 使用 RAF 批量更新，避免頻繁重新渲染
-    if (rafRef.current !== null) {
-      cancelAnimationFrame(rafRef.current);
-    }
-
-    rafRef.current = requestAnimationFrame(() => {
-      setControl(pendingValueRef.current);
-      rafRef.current = null;
-    });
-  };
-
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      if (isDraggingRef.current) {
-        handleSliderChange(e.clientX);
-      }
-    };
-
-    const handleMouseUp = () => {
-      isDraggingRef.current = false;
-    };
-
-    const handleTouchMove = (e: TouchEvent) => {
-      if (isDraggingRef.current && e.touches.length > 0) {
-        e.preventDefault();
-        handleSliderChange(e.touches[0].clientX);
-      }
-    };
-
-    const handleTouchEnd = () => {
-      isDraggingRef.current = false;
-    };
-
-    document.addEventListener('mousemove', handleMouseMove, { passive: true });
-    document.addEventListener('mouseup', handleMouseUp, { passive: true });
-    document.addEventListener('touchmove', handleTouchMove, { passive: false });
-    document.addEventListener('touchend', handleTouchEnd, { passive: true });
-
-    return () => {
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
-      document.removeEventListener('touchmove', handleTouchMove);
-      document.removeEventListener('touchend', handleTouchEnd);
-      if (rafRef.current !== null) {
-        cancelAnimationFrame(rafRef.current);
-      }
-    };
-  }, []);
-
-  const handleMouseDown = () => {
-    isDraggingRef.current = true;
-  };
+  // Step 1 pseudo option: extra "Other" entry mapped to custom text
+  const CUSTOM_CATEGORY_KEY = '__custom__';
+  const categoryOptions: string[] = [...Object.values(TaskCategory), CUSTOM_CATEGORY_KEY];
 
   const handleNext = () => setStep(prev => prev + 1);
   const handleBack = () => {
@@ -103,43 +47,62 @@ export const NewTask: React.FC<NewTaskProps> = ({ navigate }) => {
   const handleSubmit = () => {
     // Determine final values: use custom input if '其他' is selected
     let finalCategories = [...categories];
-    if (categories.includes(TaskCategory.Other) && customCategory.trim()) {
-      finalCategories = finalCategories.filter(c => c !== TaskCategory.Other);
+    if (categories.includes(CUSTOM_CATEGORY_KEY) && customCategory.trim()) {
+      finalCategories = finalCategories.filter(c => c !== CUSTOM_CATEGORY_KEY);
       finalCategories.push(customCategory.trim());
     }
 
     let finalWorries = [...worries];
-    if (worries.includes(TaskWorry.Other) && customWorry.trim()) {
+    if (focusSentence.trim()) {
+      finalWorries = [focusSentence.trim()];
+    } else if (worries.includes(TaskWorry.Other) && customWorry.trim()) {
       finalWorries = finalWorries.filter(w => w !== TaskWorry.Other);
       finalWorries.push(customWorry.trim());
     }
 
     if (finalCategories.length > 0 && finalWorries.length > 0 && owner) {
-      // 獲取控制力建議
-      const suggestion = getControlLevelSuggestion(finalCategories, finalWorries, owner);
+      const reflectionParts: string[] = [];
 
-      // 檢查控制力是否符合建議
-      if (!isControlLevelValid(control, suggestion)) {
-        showToast(t('newTask.error.controlInvalid'), 'error');
-        return;
+      if (focusSentence.trim()) {
+        reflectionParts.push(`${t('newTask.step2.title')}
+${focusSentence.trim()}`);
       }
+      if (reflectionNote.trim()) {
+        reflectionParts.push(reflectionNote.trim());
+      }
+      if (reflectionReality.trim()) {
+        reflectionParts.push(`${t('newTask.perspective.reality.title')}\n${reflectionReality.trim()}`);
+      }
+      if (reflectionDistance.trim()) {
+        reflectionParts.push(`${t('newTask.perspective.distance.title')}\n${reflectionDistance.trim()}`);
+      }
+      if (reflectionValue.trim()) {
+        reflectionParts.push(`${t('newTask.perspective.value.title')}\n${reflectionValue.trim()}`);
+      }
+      if (finalMessage.trim()) {
+        reflectionParts.push(`${t('newTask.finalMessage.label')}\n${finalMessage.trim()}`);
+      }
+
+      const combinedReflection = reflectionParts.length > 0 ? reflectionParts.join('\n\n') : undefined;
 
       addTask({
         category: finalCategories.length === 1 ? finalCategories[0] : finalCategories,
         worry: finalWorries.length === 1 ? finalWorries[0] : finalWorries,
         owner: owner as ResponsibilityOwner,
         controlLevel: control,
-        reflection: reflectionNote || undefined,
+        reflection: combinedReflection,
         polarity,
+        perspective: selectedPerspective ?? undefined,
+        finalMessage: finalMessage.trim() || undefined,
       });
-      // 進入結果頁面（語錄在 Step 5 依當前語言與控制力即時計算）
-      setStep(5);
+      // 進入結果頁面（語錄在結果頁依當前語言即時計算）
+      setStep(6);
     }
   };
 
   // Step 1: Category
   if (step === 1) {
-    const isOtherSelected = categories.includes(TaskCategory.Other);
+    const isOtherSelected = categories.includes(CUSTOM_CATEGORY_KEY);
     const isValid = categories.length > 0 && (!isOtherSelected || customCategory.trim().length > 0);
 
     return (
@@ -150,50 +113,42 @@ export const NewTask: React.FC<NewTaskProps> = ({ navigate }) => {
         onNext={handleNext}
         nextDisabled={!isValid}
         currentStep={1}
+        totalSteps={5}
       >
         <div key={step}>
-          <div className="mb-6 flex flex-wrap gap-2">
-            <button
-              type="button"
-              onClick={() => setPolarity(TaskPolarity.Positive)}
-              className={`px-3 py-1 rounded-full text-xs md:text-sm border ${
-                polarity === TaskPolarity.Positive
-                  ? 'bg-primary text-white border-primary'
-                  : 'bg-white text-gray-600 border-gray-200'
-              }`}
-            >
-              {t('polarity.positive')}
-            </button>
-            <button
-              type="button"
-              onClick={() => setPolarity(TaskPolarity.Negative)}
-              className={`px-3 py-1 rounded-full text-xs md:text-sm border ${
-                polarity === TaskPolarity.Negative
-                  ? 'bg-primary text-white border-primary'
-                  : 'bg-white text-gray-600 border-gray-200'
-              }`}
-            >
-              {t('polarity.negative')}
-            </button>
-          </div>
           <MultiSelectGrid
-            options={Object.values(TaskCategory)}
+            options={categoryOptions}
             selected={categories}
             onSelect={(vals) => {
-              setCategories(vals);
-              if (!vals.includes(TaskCategory.Other)) setCustomCategory('');
+              let next = vals;
+              if (vals.length > 2) {
+                // 僅保留最近選取的兩個情緒，並顯示提示文字
+                next = vals.slice(-2);
+                setCategoryLimitMessage(t('wizard.maxSelections', { count: 2 }));
+              } else {
+                setCategoryLimitMessage(null);
+              }
+              setCategories(next);
+              if (!next.includes(CUSTOM_CATEGORY_KEY)) setCustomCategory('');
             }}
             getLabel={(option, translate) =>
-              polarity === TaskPolarity.Positive
-                ? translate(`taskCategoryPositive.${option}`)
-                : translate(`taskCategory.${option}`)
+              option === CUSTOM_CATEGORY_KEY
+                ? translate('taskCategory.Custom')
+                : polarity === TaskPolarity.Positive
+                  ? translate(`taskCategoryPositive.${option}`)
+                  : translate(`taskCategory.${option}`)
             }
             getHintOverride={(option, translate) =>
-              polarity === TaskPolarity.Positive
-                ? translate(`taskCategoryPositive.${option}_hint`)
-                : translate(`taskCategory.${option}_hint`)
+              option === CUSTOM_CATEGORY_KEY
+                ? translate('taskCategory.Custom_hint')
+                : polarity === TaskPolarity.Positive
+                  ? translate(`taskCategoryPositive.${option}_hint`)
+                  : translate(`taskCategory.${option}_hint`)
             }
           />
+          {categoryLimitMessage && (
+            <p className="mt-3 text-xs text-red-500">{categoryLimitMessage}</p>
+          )}
           {isOtherSelected && (
             <div>
               <input
@@ -211,10 +166,40 @@ export const NewTask: React.FC<NewTaskProps> = ({ navigate }) => {
     );
   }
 
-  // Step 2: Worry
+  // Step 2: Focus sentence
   if (step === 2) {
-    const isOtherSelected = worries.includes(TaskWorry.Other);
-    const isValid = worries.length > 0 && (!isOtherSelected || customWorry.trim().length > 0);
+    const isValid = focusSentence.trim().length > 0;
+
+    const primaryKeys = categories.slice(0, 2);
+    const emotionLabels: string[] = [];
+
+    primaryKeys.forEach((key) => {
+      if (!key) return;
+      if (key === CUSTOM_CATEGORY_KEY) {
+        const label = customCategory.trim() || t('taskCategory.Custom');
+        if (label) emotionLabels.push(label);
+      } else {
+        const label =
+          polarity === TaskPolarity.Positive
+            ? t(`taskCategoryPositive.${key}`)
+            : t(`taskCategory.${key}`);
+        if (label) emotionLabels.push(label);
+      }
+    });
+
+    let selectedEmotionHint: string | null = null;
+    if (emotionLabels.length > 0) {
+      const joined = i18n.language === 'en'
+        ? emotionLabels.join(' and ')
+        : emotionLabels.join('、');
+
+      if (i18n.language === 'en') {
+        const plural = emotionLabels.length > 1 ? 'emotions' : 'emotion';
+        selectedEmotionHint = `You are currently focusing on the ${plural} "${joined}".`;
+      } else {
+        selectedEmotionHint = t('newTask.step2.selectedEmotionHint', { emotion: joined });
+      }
+    }
 
     return (
       <WizardLayout
@@ -224,38 +209,22 @@ export const NewTask: React.FC<NewTaskProps> = ({ navigate }) => {
         onNext={handleNext}
         nextDisabled={!isValid}
         currentStep={2}
+        totalSteps={5}
       >
         <div key={step}>
-          <MultiSelectGrid
-            options={Object.values(TaskWorry)}
-            selected={worries}
-            onSelect={(vals) => {
-              setWorries(vals);
-              if (!vals.includes(TaskWorry.Other)) setCustomWorry('');
-            }}
-            getLabel={(option, translate) =>
-              polarity === TaskPolarity.Positive
-                ? translate(`taskWorryPositive.${option}`)
-                : translate(`taskWorry.${option}`)
-            }
-            getHintOverride={(option, translate) =>
-              polarity === TaskPolarity.Positive
-                ? translate(`taskWorryPositive.${option}_hint`)
-                : translate(`taskWorry.${option}_hint`)
-            }
-          />
-          {isOtherSelected && (
-            <div>
-              <input
-                type="text"
-                placeholder={t('newTask.step2.customPlaceholder')}
-                value={customWorry}
-                onChange={(e) => setCustomWorry(e.target.value)}
-                className="w-full mt-4 p-4 rounded-xl border border-gray-200 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all bg-white text-text placeholder-gray-300"
-                autoFocus
-              />
-            </div>
-          )}
+          <div className="space-y-3">
+            {selectedEmotionHint && (
+              <p className="text-xs md:text-sm text-primary/60">
+                {selectedEmotionHint}
+              </p>
+            )}
+            <textarea
+              value={focusSentence}
+              onChange={(e) => setFocusSentence(e.target.value)}
+              placeholder={t('newTask.step2.customPlaceholder')}
+              className="w-full p-4 rounded-xl border border-gray-200 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all bg-white text-text placeholder-gray-300 resize-none min-h-[96px]"
+            />
+          </div>
         </div>
       </WizardLayout>
     );
@@ -271,6 +240,7 @@ export const NewTask: React.FC<NewTaskProps> = ({ navigate }) => {
         onNext={handleNext}
         nextDisabled={!owner}
         currentStep={3}
+        totalSteps={5}
       >
         <div key={step}>
           <SelectionList
@@ -278,144 +248,116 @@ export const NewTask: React.FC<NewTaskProps> = ({ navigate }) => {
             selected={owner}
             onSelect={setOwner}
           />
+          {owner && (
+            <p className="mt-4 text-sm text-gray-500">
+              {t('newTask.step3.boundaryReflection', {
+                boundary: t(`owner.${owner as ResponsibilityOwner}`),
+              })}
+            </p>
+          )}
         </div>
       </WizardLayout>
     );
   }
 
-  // Step 4: Control Slider
+  // Step 4: Multi-perspective choice (A/B/C)
   if (step === 4) {
-    const suggestion = getControlLevelSuggestion(categories, worries, owner);
-    const isValid = isControlLevelValid(control, suggestion);
-    const warning = getControlLevelWarning(control, suggestion);
-    const advice = getControlLevelAdvice(suggestion);
-
     return (
       <WizardLayout
         title={t('newTask.step4.title')}
         subtitle={t('newTask.step4.subtitle')}
         onBack={handleBack}
-        onNext={handleSubmit}
-        nextLabel={t('newTask.step4.nextLabel')}
-        nextDisabled={!isValid}
+        onNext={() => setStep(5)}
+        nextLabel={t('wizard.next')}
+        nextDisabled={!selectedPerspective}
         currentStep={4}
+        totalSteps={5}
       >
         <div key={step}>
-          <div className="py-12 px-4">
-            <div className="text-center text-6xl font-normal mb-12 text-text font-sans">
-              {control}%
-            </div>
-
-            {/* 建議範圍提示 */}
-            {advice && (
-              <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6">
-                <p className="text-sm text-blue-800">{advice}</p>
-              </div>
-            )}
-
-            {/* 警告訊息 */}
-            {warning && (
-              <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6 flex gap-3">
-                <AlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
-                <p className="text-sm text-amber-800">{warning}</p>
-              </div>
-            )}
-
-            <div className="mb-12">
-              {/* 刻度標記 */}
-              <div className="flex justify-between text-xs text-gray-400 mb-2 px-1">
-                {[0, 25, 50, 75, 100].map((mark) => (
-                  <span key={mark}>{mark}</span>
-                ))}
-              </div>
-
-              <div
-                ref={sliderRef}
-                className="relative h-10 flex items-center cursor-pointer group select-none"
-                onClick={(e) => {
-                  handleSliderChange(e.clientX);
-                }}
-                onMouseDown={(e) => {
-                  handleMouseDown();
-                }}
-                onTouchStart={(e) => {
-                  if (e.touches.length > 0) {
-                    handleMouseDown();
-                    handleSliderChange(e.touches[0].clientX);
-                  }
-                }}
-              >
-                {/* 刻度線 */}
-                <div className="absolute left-0 right-0 h-2 flex pointer-events-none">
-                  {[0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100].map((mark) => (
-                    <div
-                      key={mark}
-                      className="absolute w-px h-1 bg-gray-300"
-                      style={{ left: `${mark}%`, transform: 'translateX(-50%)' }}
-                    />
-                  ))}
-                </div>
-
-                {/* Visual Background Track (視覺軌道) */}
-                <div className="absolute left-0 right-0 h-2 bg-gray-200 rounded-full pointer-events-none">
-                  <div
-                    className="h-full bg-accent rounded-full"
-                    style={{ width: `${control}%` }}
-                  ></div>
-                </div>
-
-                {/* Custom Thumb Visual (跟隨數值的視覺圓點) */}
-                <div
-                  className="absolute top-1/2 -translate-y-1/2 w-7 h-7 bg-accent rounded-full shadow-lg flex items-center justify-center cursor-grab active:cursor-grabbing hover:scale-110"
-                  style={{
-                    left: `calc(${control}% - 14px)`,
-                    transition: isDraggingRef.current ? 'none' : 'all 75ms ease-out'
-                  }}
-                  onMouseDown={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    handleMouseDown();
-                  }}
-                  onTouchStart={(e) => {
-                    e.stopPropagation();
-                    if (e.touches.length > 0) {
-                      handleMouseDown();
-                      handleSliderChange(e.touches[0].clientX);
-                    }
-                  }}
+          <div className="py-4 px-4">
+            <div className="bg-white p-6 rounded-lg border border-gray-100 shadow-sm">
+              <div className="space-y-3">
+                <button
+                  type="button"
+                  onClick={() => setSelectedPerspective('reality')}
+                  className={`w-full text-left px-4 py-3 rounded-lg border text-sm transition-colors ${
+                    selectedPerspective === 'reality'
+                      ? 'border-primary bg-primary/5 text-primary'
+                      : 'border-gray-200 hover:border-gray-300'
+                  }`}
                 >
-                  <div className="w-3 h-3 bg-white rounded-full opacity-40"></div>
+                  <div className="font-semibold mb-1">{t('newTask.perspective.reality.title')}</div>
+                  <div className="text-gray-500 text-xs">{t('newTask.perspective.reality.q1')}</div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setSelectedPerspective('distance')}
+                  className={`w-full text-left px-4 py-3 rounded-lg border text-sm transition-colors ${
+                    selectedPerspective === 'distance'
+                      ? 'border-primary bg-primary/5 text-primary'
+                      : 'border-gray-200 hover:border-gray-300'
+                  }`}
+                >
+                  <div className="font-semibold mb-1">{t('newTask.perspective.distance.title')}</div>
+                  <div className="text-gray-500 text-xs">{t('newTask.perspective.distance.q1')}</div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setSelectedPerspective('value')}
+                  className={`w-full text-left px-4 py-3 rounded-lg border text-sm transition-colors ${
+                    selectedPerspective === 'value'
+                      ? 'border-primary bg-primary/5 text-primary'
+                      : 'border-gray-200 hover:border-gray-300'
+                  }`}
+                >
+                  <div className="font-semibold mb-1">{t('newTask.perspective.value.title')}</div>
+                  <div className="text-gray-500 text-xs">{t('newTask.perspective.value.q1')}</div>
+                </button>
+              </div>
+
+              {selectedPerspective === 'reality' && (
+                <div className="mt-6">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    {t('newTask.perspective.reality.title')}
+                  </label>
+                  <textarea
+                    value={reflectionReality}
+                    onChange={(e) => setReflectionReality(e.target.value)}
+                    placeholder={t('newTask.perspective.reality.q2')}
+                    className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 text-sm resize-none min-h-[96px]"
+                  />
                 </div>
-              </div>
-            </div>
+              )}
 
-            <div className="flex justify-between text-sm text-gray-600 mb-12">
-              <span>{t('newTask.step4.scaleMin')}</span>
-              <span>{t('newTask.step4.scaleMax')}</span>
-            </div>
+              {selectedPerspective === 'distance' && (
+                <div className="mt-6">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    {t('newTask.perspective.distance.title')}
+                  </label>
+                  <textarea
+                    value={reflectionDistance}
+                    onChange={(e) => setReflectionDistance(e.target.value)}
+                    placeholder={t('newTask.perspective.distance.q2')}
+                    className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 text-sm resize-none min-h-[96px]"
+                  />
+                </div>
+              )}
 
-            <div className="bg-white p-6 rounded-lg border border-gray-100 shadow-sm space-y-4">
-              <div>
-                <h4 className="font-bold mb-2 text-sm">{t('newTask.step4.hintTitle')}</h4>
-                <ul className="list-disc pl-5 text-sm text-gray-600 space-y-2">
-                  <li>{t('newTask.step4.hint1')}</li>
-                  <li>{t('newTask.step4.hint2')}</li>
-                  <li>{t('newTask.step4.hint3')}</li>
-                </ul>
-              </div>
-
-              <div className="pt-3 border-t border-gray-100 space-y-2">
-                <label className="block text-sm font-medium text-gray-700">
-                  {t('newTask.step4.reflectionLabel')}
-                </label>
-                <textarea
-                  value={reflectionNote}
-                  onChange={(e) => setReflectionNote(e.target.value)}
-                  placeholder={t('newTask.step4.reflectionPlaceholder')}
-                  className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 text-sm resize-none"
-                  rows={3}
-                />
-              </div>
+              {selectedPerspective === 'value' && (
+                <div className="mt-6">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    {t('newTask.perspective.value.title')}
+                  </label>
+                  <textarea
+                    value={reflectionValue}
+                    onChange={(e) => setReflectionValue(e.target.value)}
+                    placeholder={t('newTask.perspective.value.q2')}
+                    className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 text-sm resize-none min-h-[96px]"
+                  />
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -423,8 +365,35 @@ export const NewTask: React.FC<NewTaskProps> = ({ navigate }) => {
     );
   }
 
-  // Step 5: Result with Quote
+  // Step 5: Final message
   if (step === 5) {
+    const isValid = true;
+
+    return (
+      <WizardLayout
+        title={t('newTask.finalMessage.label')}
+        subtitle={t('newTask.finalMessage.placeholder')}
+        onBack={handleBack}
+        onNext={handleSubmit}
+        nextLabel={t('newTask.step4.nextLabel')}
+        nextDisabled={!isValid}
+        currentStep={5}
+        totalSteps={5}
+      >
+        <div key={step}>
+          <textarea
+            value={finalMessage}
+            onChange={(e) => setFinalMessage(e.target.value)}
+            placeholder={t('newTask.finalMessage.placeholder')}
+            className="w-full p-4 rounded-xl border border-gray-200 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all bg-white text-text placeholder-gray-300 resize-none min-h-[96px]"
+          />
+        </div>
+      </WizardLayout>
+    );
+  }
+
+  // Step 6: Result page
+  if (step === 6) {
     // 獲取課題相關的回饋訊息
     const getResultFeedback = (): string => {
       const categoryLabels = (Array.isArray(categories) ? categories : [categories]).map((cat) => {
@@ -504,38 +473,18 @@ export const NewTask: React.FC<NewTaskProps> = ({ navigate }) => {
             <p className="text-center text-gray-500 text-sm md:text-base mb-6 md:mb-12">{t('newTask.result.subtitle')}</p>
 
             {/* Quote Section */}
-            <div className="bg-gradient-to-br from-primary/5 to-accent/5 rounded-xl md:rounded-2xl p-4 md:p-8 mb-6 md:mb-12 border border-primary/10">
-              <p className="text-center text-base md:text-lg leading-relaxed text-text font-medium">
+            <div className="bg-gradient-to-br from-primary/5 to-accent/5 rounded-xl md:rounded-2xl p-4 md:p-8 mb-6 md:mb-8 border border-primary/10">
+              <p className="text-center text-base md:text-lg leading-relaxed text-text font-medium mb-3">
                 "{resultQuote}"
               </p>
-            </div>
-
-            {/* Result Feedback */}
-            <div className="bg-blue-50 rounded-lg md:rounded-xl p-4 md:p-6 mb-6 md:mb-8 border border-blue-100">
-              <p className="text-xs md:text-sm text-blue-900 leading-relaxed">
-                {getResultFeedback()}
+              <p className="text-center text-xs md:text-sm text-gray-600">
+                {t('newTask.closingQuote')}
               </p>
             </div>
 
-            {/* Reflection Prompt */}
-            <div className="bg-gray-50 rounded-lg md:rounded-xl p-4 md:p-6 mb-8 md:mb-12">
-              <div className="flex gap-2 mb-2">
-                <Brain className="w-4 h-4 text-primary shrink-0 mt-0.5" />
-                <p className="text-xs md:text-sm text-gray-600"><strong>{t('newTask.result.reflectionTitle')}</strong></p>
-              </div>
-              <p className="text-xs md:text-sm text-gray-700 leading-relaxed">
-                {polarity === TaskPolarity.Positive
-                  ? (control < 20
-                    ? t('newTask.result.reflectionPositive.low')
-                    : control < 60
-                      ? t('newTask.result.reflectionPositive.mid')
-                      : t('newTask.result.reflectionPositive.high'))
-                  : (control < 20
-                    ? t('newTask.result.reflection.low')
-                    : control < 60
-                      ? t('newTask.result.reflection.mid')
-                      : t('newTask.result.reflection.high'))}
-              </p>
+            {/* Closing Message */}
+            <div className="mb-8 md:mb-10 text-center text-xs md:text-sm text-gray-500">
+              {t('newTask.closingMessage')}
             </div>
 
             {/* Action Buttons */}
@@ -566,6 +515,5 @@ export const NewTask: React.FC<NewTaskProps> = ({ navigate }) => {
       </div>
     );
   }
-
   return null;
 }
