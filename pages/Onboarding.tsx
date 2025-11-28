@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useAppStore } from '../store';
 import { ArrowRight, CheckCircle, Feather, Layers, Zap, Sparkles, Globe2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { getDailyCue } from '../lib/quotes';
 
 interface OnboardingProps {
   navigate: (page: string) => void;
@@ -12,6 +13,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ navigate }) => {
   const [step, setStep] = useState(1);
   const { t, i18n } = useTranslation();
   const [isLangOpen, setIsLangOpen] = useState(false);
+  const dailyCue = getDailyCue();
 
   const handleSkip = () => {
     completeOnboarding();

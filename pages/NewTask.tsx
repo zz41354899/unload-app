@@ -31,8 +31,9 @@ export const NewTask: React.FC<NewTaskProps> = ({ navigate }) => {
   const [reflectionDistance, setReflectionDistance] = useState<string>('');
   const [reflectionValue, setReflectionValue] = useState<string>('');
   const [finalMessage, setFinalMessage] = useState<string>('');
-  const [selectedPerspective, setSelectedPerspective] = useState<'reality' | 'distance' | 'value' | null>(null);
+  const [selectedPerspective, setSelectedPerspective] = useState<'reality' | 'distance' | 'value' | 'observe' | null>(null);
   const [polarity, setPolarity] = useState<TaskPolarity>(TaskPolarity.Negative);
+  const [focusAspect, setFocusAspect] = useState<string | null>(null);
 
   // Step 1 pseudo option: extra "Other" entry mapped to custom text
   const CUSTOM_CATEGORY_KEY = '__custom__';
@@ -45,43 +46,50 @@ export const NewTask: React.FC<NewTaskProps> = ({ navigate }) => {
   };
 
   const handleSubmit = () => {
-    // Determine final values: use custom input if '其他' is selected
+    // Determine final values: use custom input if '其他' / 'Other' is selected
     let finalCategories = [...categories];
-    if (categories.includes(CUSTOM_CATEGORY_KEY) && customCategory.trim()) {
+    const trimmedCustomCategory = customCategory.trim();
+    const hasCustomCategory = categories.includes(CUSTOM_CATEGORY_KEY);
+    if (hasCustomCategory && trimmedCustomCategory) {
       finalCategories = finalCategories.filter(c => c !== CUSTOM_CATEGORY_KEY);
-      finalCategories.push(customCategory.trim());
+      finalCategories.push(trimmedCustomCategory);
     }
 
+    const trimmedFocus = focusSentence.trim();
+    const trimmedCustomWorry = customWorry.trim();
     let finalWorries = [...worries];
-    if (focusSentence.trim()) {
-      finalWorries = [focusSentence.trim()];
-    } else if (worries.includes(TaskWorry.Other) && customWorry.trim()) {
+    if (trimmedFocus) {
+      finalWorries = [trimmedFocus];
+    } else if (finalWorries.includes(TaskWorry.Other) && trimmedCustomWorry) {
       finalWorries = finalWorries.filter(w => w !== TaskWorry.Other);
-      finalWorries.push(customWorry.trim());
+      finalWorries.push(trimmedCustomWorry);
     }
 
     if (finalCategories.length > 0 && finalWorries.length > 0 && owner) {
-      const reflectionParts: string[] = [];
+      const trimmedFocusSentence = focusSentence.trim();
+      const trimmedReflectionNote = reflectionNote.trim();
+      const trimmedReality = reflectionReality.trim();
+      const trimmedDistance = reflectionDistance.trim();
+      const trimmedValue = reflectionValue.trim();
+      const trimmedFinalMessage = finalMessage.trim();
 
-      if (focusSentence.trim()) {
-        reflectionParts.push(`${t('newTask.step2.title')}
-${focusSentence.trim()}`);
-      }
-      if (reflectionNote.trim()) {
-        reflectionParts.push(reflectionNote.trim());
-      }
-      if (reflectionReality.trim()) {
-        reflectionParts.push(`${t('newTask.perspective.reality.title')}\n${reflectionReality.trim()}`);
-      }
-      if (reflectionDistance.trim()) {
-        reflectionParts.push(`${t('newTask.perspective.distance.title')}\n${reflectionDistance.trim()}`);
-      }
-      if (reflectionValue.trim()) {
-        reflectionParts.push(`${t('newTask.perspective.value.title')}\n${reflectionValue.trim()}`);
-      }
-      if (finalMessage.trim()) {
-        reflectionParts.push(`${t('newTask.finalMessage.label')}\n${finalMessage.trim()}`);
-      }
+      const blocks: Array<() => string | null> = [
+        () => (trimmedFocusSentence ? `${t('newTask.step2.title')}\n${trimmedFocusSentence}` : null),
+        () => {
+          if (!focusAspect) return null;
+          const aspectLabel = t(`newTask.step2.aspect.${focusAspect}`);
+          return `${t('journal.focus.aspectTitle')}\n${aspectLabel}`;
+        },
+        () => (trimmedReflectionNote ? trimmedReflectionNote : null),
+        () => (trimmedReality ? `${t('newTask.perspective.reality.title')}\n${trimmedReality}` : null),
+        () => (trimmedDistance ? `${t('newTask.perspective.distance.title')}\n${trimmedDistance}` : null),
+        () => (trimmedValue ? `${t('newTask.perspective.value.title')}\n${trimmedValue}` : null),
+        () => (trimmedFinalMessage ? `${t('newTask.finalMessage.label')}\n${trimmedFinalMessage}` : null),
+      ];
+
+      const reflectionParts = blocks
+        .map(fn => fn())
+        .filter((part): part is string => Boolean(part));
 
       const combinedReflection = reflectionParts.length > 0 ? reflectionParts.join('\n\n') : undefined;
 
@@ -224,6 +232,27 @@ ${focusSentence.trim()}`);
               placeholder={t('newTask.step2.customPlaceholder')}
               className="w-full p-4 rounded-xl border border-gray-200 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all bg-white text-text placeholder-gray-300 resize-none min-h-[96px]"
             />
+            <div className="space-y-2">
+              <div className="text-[11px] md:text-xs text-gray-400">
+                {t('newTask.step2.aspect.title')}
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {['self', 'view', 'future'].map((key) => (
+                  <button
+                    key={key}
+                    type="button"
+                    onClick={() => setFocusAspect(prev => (prev === key ? null : key))}
+                    className={`px-3 py-1 rounded-full text-xs md:text-sm border transition-colors ${
+                      focusAspect === key
+                        ? 'bg-primary/10 border-primary text-primary'
+                        : 'bg-white border-gray-200 text-gray-600 hover:border-gray-300'
+                    }`}
+                  >
+                    {t(`newTask.step2.aspect.${key}`)}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </WizardLayout>
@@ -315,6 +344,19 @@ ${focusSentence.trim()}`);
                   <div className="font-semibold mb-1">{t('newTask.perspective.value.title')}</div>
                   <div className="text-gray-500 text-xs">{t('newTask.perspective.value.q1')}</div>
                 </button>
+
+                <button
+                  type="button"
+                  onClick={() => setSelectedPerspective('observe')}
+                  className={`w-full text-left px-4 py-3 rounded-lg border text-sm transition-colors ${
+                    selectedPerspective === 'observe'
+                      ? 'border-primary bg-primary/5 text-primary'
+                      : 'border-gray-200 hover:border-gray-300'
+                  }`}
+                >
+                  <div className="font-semibold mb-1">{t('newTask.perspective.observe.title')}</div>
+                  <div className="text-gray-500 text-xs">{t('newTask.perspective.observe.q1')}</div>
+                </button>
               </div>
 
               {selectedPerspective === 'reality' && (
@@ -357,6 +399,15 @@ ${focusSentence.trim()}`);
                     className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 text-sm resize-none min-h-[96px]"
                   />
                 </div>
+              )}
+
+              {selectedPerspective && (
+                <p className="mt-4 text-xs md:text-sm text-gray-500">
+                  {selectedPerspective === 'reality' && t('newTask.perspective.reality.hint')}
+                  {selectedPerspective === 'distance' && t('newTask.perspective.distance.hint')}
+                  {selectedPerspective === 'value' && t('newTask.perspective.value.hint')}
+                  {selectedPerspective === 'observe' && t('newTask.perspective.observe.hint')}
+                </p>
               )}
             </div>
           </div>
