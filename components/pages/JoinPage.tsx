@@ -139,7 +139,7 @@ export const JoinPage: React.FC<JoinPageProps> = ({ onComplete }) => {
               </div>
             </div>
 
-            <div className="pt-4">
+            <div className="pt-4 space-y-3">
               <Button
                 type="submit"
                 className="w-full flex justify-center items-center space-x-2 group"
@@ -148,9 +148,17 @@ export const JoinPage: React.FC<JoinPageProps> = ({ onComplete }) => {
                 <span>{isSubmitting ? '送出中…' : '送出表單並前往登入體驗'}</span>
                 <Send className="w-4 h-4 group-hover:translate-x-1 transition-transform" strokeWidth={1.5} />
               </Button>
-              <p className="text-center text-[10px] text-primary-light/50 mt-4">
+              <p className="text-center text-[10px] text-primary-light/50">
                 表單僅用於本次實驗計畫的聯絡與安排，不會對外公開或用於其他用途。
               </p>
+
+              <button
+                type="button"
+                className="mx-auto block text-[11px] text-primary-light/70 hover:text-primary underline underline-offset-4 decoration-secondary-accent/40 hover:decoration-secondary-accent transition-colors"
+                onClick={() => onComplete()}
+              >
+                暫時只想先看看介面？先跳過，直接體驗。
+              </button>
             </div>
           </form>
 

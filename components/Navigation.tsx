@@ -77,7 +77,6 @@ export const Navigation = ({ currentPage, onNavigate }: NavigationProps) => {
             height={40}
             className="h-10 w-[140px] object-contain"
           />
-          <span className="absolute -top-1 -right-2 w-2 h-2 bg-secondary-accent rounded-full opacity-50"></span>
         </button>
 
         {/* Desktop Menu */}

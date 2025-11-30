@@ -64,16 +64,15 @@ export const Login: React.FC<LoginProps> = ({ navigate }) => {
                 </div>
             </div>
             {/* Logo Corner */}
-            <button
-                type="button"
-                onClick={() => navigate('login')}
+            <a
+                href="/"
                 className="absolute top-8 left-8 flex items-center gap-2"
             >
                 <img src="/logo.svg" alt="Unload Logo" className="w-[140px] h-10 object-contain" />
                 <span className="inline-flex items-center rounded-full border border-gray-200 bg-white/80 px-2 py-0.5 text-[11px] font-medium text-gray-600 shadow-sm backdrop-blur">
                     {t('login.previewBadge')}
                 </span>
-            </button>
+            </a>
 
             {/* Main Content */}
             <div className="flex-1 flex items-center justify-center p-4 bg-background">
