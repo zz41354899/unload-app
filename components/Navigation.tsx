@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, Github } from 'lucide-react';
 
 type NavigationProps = {
   currentPage: string;
   onNavigate: (page: string) => void;
+  onEnterApp?: () => void;
 };
 
-export const Navigation = ({ currentPage, onNavigate }: NavigationProps) => {
+export const Navigation = ({ currentPage, onNavigate, onEnterApp }: NavigationProps) => {
 
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -80,23 +81,48 @@ export const Navigation = ({ currentPage, onNavigate }: NavigationProps) => {
         </button>
 
         {/* Desktop Menu */}
-        <div className="hidden md:flex space-x-12">
-          {navLinks.map((link) => (
-            <button
-              key={link.id}
-              onClick={() => handleNavClick(link.id)}
-              className={`text-sm tracking-wide transition-all duration-300 relative group ${
-                currentPage === link.id ? 'text-primary font-normal' : 'text-primary-light hover:text-primary font-light'
-              }`}
-            >
-              {link.name}
-              <span
-                className={`absolute -bottom-2 left-0 w-full h-[2px] bg-primary origin-left transition-transform duration-300 ${
-                  currentPage === link.id ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'
+        <div className="hidden md:flex items-center space-x-6">
+          <div className="flex space-x-8">
+            {navLinks.map((link) => (
+              <button
+                key={link.id}
+                onClick={() => handleNavClick(link.id)}
+                className={`text-sm tracking-wide transition-all duration-300 relative group ${
+                  currentPage === link.id ? 'text-primary font-normal' : 'text-primary-light hover:text-primary font-light'
                 }`}
-              ></span>
-            </button>
-          ))}
+              >
+                {link.name}
+                <span
+                  className={`absolute -bottom-2 left-0 w-full h-[2px] bg-primary origin-left transition-transform duration-300 ${
+                    currentPage === link.id ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'
+                  }`}
+                ></span>
+              </button>
+            ))}
+          </div>
+
+          <a
+            href="https://github.com/zz41354899/unload-app"
+            target="_blank"
+            rel="noreferrer"
+            className="text-primary-light hover:text-primary transition-colors"
+            aria-label="前往 Unload GitHub 專案頁面"
+          >
+            <Github className="w-5 h-5" strokeWidth={1.5} />
+          </a>
+
+          <button
+            onClick={() => {
+              if (onEnterApp) {
+                onEnterApp();
+              } else {
+                handleNavClick('join');
+              }
+            }}
+            className="text-sm px-5 py-2 rounded-full bg-primary text-white shadow-sm hover:bg-primary-light hover:shadow-md transition-all duration-300"
+          >
+            馬上體驗
+          </button>
         </div>
 
         {/* Mobile Toggle */}
@@ -114,12 +140,26 @@ export const Navigation = ({ currentPage, onNavigate }: NavigationProps) => {
               <button
                 key={link.id}
                 onClick={() => handleNavClick(link.id)}
-                className={`text-2xl tracking-wider ${currentPage === link.id ? 'text-primary font-normal' : 'text-primary-light font-light'
-                  }`}
+                className={`text-2xl tracking-wider ${
+                  currentPage === link.id ? 'text-primary font-normal' : 'text-primary-light font-light'
+                }`}
               >
                 {link.name}
               </button>
             ))}
+
+            <button
+              onClick={() => {
+                if (onEnterApp) {
+                  onEnterApp();
+                } else {
+                  handleNavClick('join');
+                }
+              }}
+              className="mt-4 text-sm px-6 py-2 rounded-full bg-primary text-white shadow-sm hover:bg-primary-light hover:shadow-md transition-all duration-300"
+            >
+              馬上體驗
+            </button>
           </div>,
           document.body
         )}

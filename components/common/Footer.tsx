@@ -1,5 +1,5 @@
 import React from 'react';
-import { Mail } from 'lucide-react';
+import { Mail, Github } from 'lucide-react';
 
 export type FooterProps = {
   onNavigate: (page: string) => void;
@@ -80,9 +80,20 @@ export const Footer = ({ onNavigate }: FooterProps) => {
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-6 mt-16 pt-8 border-t border-secondary-light/40 flex flex-col md:flex-row justify-between items-center text-[10px] tracking-widest text-primary-light/60">
+      <div className="max-w-6xl mx-auto px-6 mt-16 pt-8 border-t border-secondary-light/40 flex flex-col md:flex-row justify-between items-center text-[10px] tracking-widest text-primary-light/60 gap-4">
         <p>© {new Date().getFullYear()} UNLOAD. ALL RIGHTS RESERVED.</p>
-        <p className="mt-2 md:mt-0">DESIGNED FOR HIGH SENSITIVITY</p>
+        <div className="flex items-center gap-4 mt-2 md:mt-0">
+          <p>DESIGNED FOR HIGH SENSITIVITY</p>
+          <a
+            href="https://github.com/zz41354899/unload-app"
+            target="_blank"
+            rel="noreferrer"
+            className="text-primary-light hover:text-primary transition-colors"
+            aria-label="前往 Unload GitHub 專案頁面"
+          >
+            <Github className="w-4 h-4" strokeWidth={1.5} />
+          </a>
+        </div>
       </div>
     </footer>
   );

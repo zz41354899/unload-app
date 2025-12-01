@@ -38,7 +38,7 @@ export const MarketingShell: React.FC<MarketingShellProps> = ({ onEnterApp }) =>
 
   return (
     <div className="min-h-screen bg-background font-sans">
-      <Navigation currentPage={currentPage} onNavigate={setCurrentPage} />
+      <Navigation currentPage={currentPage} onNavigate={setCurrentPage} onEnterApp={onEnterApp} />
       <main className="animate-in fade-in duration-500">
         {renderPage()}
       </main>

@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -52,6 +53,7 @@ export const JoinPage: React.FC<JoinPageProps> = ({ onComplete }) => {
 
     onComplete();
   };
+
   const faqs = [
     {
       question: '參與實驗計畫需要付費嗎？',
@@ -76,99 +78,50 @@ export const JoinPage: React.FC<JoinPageProps> = ({ onComplete }) => {
 
   return (
     <div className="pt-32 pb-20 min-h-screen bg-secondary-light/10">
-      <div className="max-w-xl mx-auto px-6">
+      <div className="max-w-4xl mx-auto px-6">
         <FadeIn>
-          <div className="text-center mb-12">
-            <span className="text-secondary-accent text-xs tracking-[0.2em] uppercase block mb-4">Experimental Access</span>
-            <h1 className="text-3xl font-light text-primary mb-6">參與體驗介面實驗計畫</h1>
-            <p className="text-primary-light font-light text-sm leading-loose">
-              Unload 目前處於「體驗介面」與覺察流程的實驗階段。
-              <br />
-              透過實際互動紀錄界面使用情境，做為後續調整與迭代的參考。
-            </p>
-          </div>
+          <span className="text-secondary-accent text-xs tracking-[0.2em] uppercase block mb-4">Experimental Access</span>
+          <h1 className="text-4xl md:text-5xl font-light text-primary mb-8 leading-tight">參與體驗介面實驗計畫</h1>
 
-          <form
-            className="bg-white p-8 md:p-12 rounded-2xl shadow-sm border border-secondary-light/30 hover:border-secondary-accent/40 hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 mb-20 space-y-6 text-left"
-            onSubmit={handleSubmit(onSubmit)}
-            noValidate
-          >
-            <p className="text-sm text-primary-light leading-relaxed">
-              目前實驗計畫聚焦在介面體驗與覺察流程的設計。若有意參與，
-              歡迎在下方留下基本聯絡方式與你當前想關注的職場情境，我們會在後續實驗批次中優先通知。
-            </p>
+          <div className="space-y-16 text-primary-light font-light leading-loose">
+            <section>
+              <p className="text-base md:text-lg mb-6">
+                Unload 目前處於「體驗介面」與覺察流程的實驗階段。透過實際互動與使用紀錄，觀察不同職場情境下，高敏感與在意邊界的使用者，如何與這套工具對話，做為後續調整與迭代的參考。
+              </p>
+              <p className="text-sm md:text-base">
+                如果你願意幫忙分享真實的工作情境與使用感受，這會成為我們調整系統很重要的依據。
+              </p>
+            </section>
 
-            <div className="space-y-4">
-              <div>
-                <label className="block text-xs font-medium text-primary-light/80 mb-1">稱呼（必填）</label>
-                <input
-                  type="text"
-                  className="w-full rounded-lg border border-secondary-light/50 bg-secondary-light/10 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-secondary-accent focus:border-secondary-accent/60"
-                  placeholder="例如：Sarah"
-                  {...register('name')}
-                />
-                {errors.name && (
-                  <p className="mt-1 text-xs text-red-500">{errors.name.message}</p>
-                )}
-              </div>
-
-              <div>
-                <label className="block text-xs font-medium text-primary-light/80 mb-1">Email（實驗通知用）</label>
-                <input
-                  type="email"
-                  className="w-full rounded-lg border border-secondary-light/50 bg-secondary-light/10 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-secondary-accent focus:border-secondary-accent/60"
-                  placeholder="example@unload.app"
-                  {...register('email')}
-                />
-                {errors.email && (
-                  <p className="mt-1 text-xs text-red-500">{errors.email.message}</p>
-                )}
-              </div>
-
-              <div>
-                <label className="block text-xs font-medium text-primary-light/80 mb-1">目前想關注的職場情境</label>
-                <textarea
-                  rows={4}
-                  className="w-full rounded-lg border border-secondary-light/50 bg-secondary-light/10 px-3 py-2 text-sm leading-relaxed focus:outline-none focus:ring-1 focus:ring-secondary-accent focus:border-secondary-accent/60 resize-none"
-                  placeholder="可以簡單描述讓你最近感到困擾、想釐清或想保護邊界的情境。"
-                  {...register('context')}
-                />
-                {errors.context && (
-                  <p className="mt-1 text-xs text-red-500">{errors.context.message}</p>
-                )}
-              </div>
-            </div>
-
-            <div className="pt-4 space-y-3">
-              <Button
-                type="submit"
-                className="w-full flex justify-center items-center space-x-2 group"
-                disabled={isSubmitting}
-              >
-                <span>{isSubmitting ? '送出中…' : '送出表單並前往登入體驗'}</span>
-                <Send className="w-4 h-4 group-hover:translate-x-1 transition-transform" strokeWidth={1.5} />
-              </Button>
-              <p className="text-center text-[10px] text-primary-light/50">
-                表單僅用於本次實驗計畫的聯絡與安排，不會對外公開或用於其他用途。
+            <section className="bg-white rounded-2xl shadow-sm border border-secondary-light/30 hover:border-secondary-accent/40 hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 p-6 md:p-10">
+              <h2 className="text-xl font-medium text-primary mb-4">問卷調查與實驗計畫</h2>
+              <p className="text-sm text-primary-light leading-relaxed mb-6">
+                若你願意提供更完整的使用經驗與職場情境，歡迎透過問卷調查分享給我們。這份問卷將作為後續調整介面與覺察流程的重要參考，不會用於與本計畫無關的其他用途。
               </p>
 
-              <button
-                type="button"
-                className="mx-auto block text-[11px] text-primary-light/70 hover:text-primary underline underline-offset-4 decoration-secondary-accent/40 hover:decoration-secondary-accent transition-colors"
-                onClick={() => onComplete()}
-              >
-                暫時只想先看看介面？先跳過，直接體驗。
-              </button>
-            </div>
-          </form>
+              <div className="flex flex-col items-center gap-3">
+                <Button
+                  type="button"
+                  className="inline-flex items-center space-x-2 px-8"
+                  onClick={onComplete}
+                >
+                  <span>前往問卷調查</span>
+                  <ChevronRight className="w-4 h-4" strokeWidth={1.5} />
+                </Button>
+                <p className="text-[11px] text-primary-light/60 text-center">
+                  你也可以選擇直接體驗系統，之後再決定是否填寫問卷。
+                </p>
+              </div>
+            </section>
 
-          <div className="max-w-2xl mx-auto">
-            <SectionHeading title="常見問題" subtitle="FAQ" />
-            <div className="bg-white rounded-xl border border-secondary-light/30 px-6 md:px-10 py-2 shadow-sm hover:border-secondary-accent/40 hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
-              {faqs.map((faq, index) => (
-                <AccordionItem key={index} question={faq.question} answer={faq.answer} />
-              ))}
-            </div>
+            <section>
+              <SectionHeading title="常見問題" subtitle="FAQ" />
+              <div className="bg-white rounded-xl border border-secondary-light/30 px-6 md:px-10 py-4 shadow-sm hover:border-secondary-accent/40 hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
+                {faqs.map((faq, index) => (
+                  <AccordionItem key={index} question={faq.question} answer={faq.answer} />
+                ))}
+              </div>
+            </section>
           </div>
         </FadeIn>
       </div>

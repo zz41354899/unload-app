@@ -11,7 +11,7 @@ export const PrivacyPage = () => (
 
         <div className="space-y-10 text-primary-light font-light leading-loose border-t border-secondary-light/40 pt-10">
           <p className="text-lg text-primary font-normal">
-            在 Unload，我們深知高敏族群對「邊界」的重視。這份隱私約定不僅是規則，更是我們對保護您內在空間的承諾。
+            Unload 是一套專注於職場心理邊界的覺察工具，同時也是一個以 MIT 授權釋出的開源專案。我們知道，高敏感族群與在意邊界的人，對於「自己的資料被怎麼使用」格外敏感，因此這份隱私約定，不只是法律文字，更是我們對保護您內在空間與使用痕跡的具體承諾。
           </p>
 
           <div className="grid gap-8">
@@ -21,7 +21,7 @@ export const PrivacyPage = () => (
                 <h3 className="text-lg font-medium text-primary">資料使用目的</h3>
               </div>
               <p className="text-sm">
-                在此實驗計畫階段，所有收集之資訊<strong>僅供參與計畫做使用者回饋調整</strong>，以利優化系統體驗。
+                我們所收集的資訊，將主要用於提供與維護本服務、改善使用體驗，以及進行匿名或彙總的統計分析。此外，我們可能不定期於官方網站或相關管道發放問卷調查，蒐集您自願提供的回饋與建議，用於優化系統設計與內容品質。除本頁說明或法律要求外，這些資料不會被用於與本服務無關的其他用途。
               </p>
             </div>
 
@@ -31,8 +31,7 @@ export const PrivacyPage = () => (
                 <h3 className="text-lg font-medium text-primary">關於您的權利</h3>
               </div>
               <p className="text-sm">
-                在目前的實驗階段，若不希望後續持續參與或被聯絡，可以隨時透過頁面上提供的聯絡方式告知。
-                相關紀錄僅在實驗觀察與調整所需的範圍內被保留，不會被用於與本計畫無關的其他用途。
+                若您不希望持續收到與服務相關的問卷調查或聯繫，或對個人資料的使用方式有任何疑問，您可以隨時透過頁面上提供的聯絡方式告知。我們會在合理範圍內協助處理您的請求。相關紀錄僅在提供服務、維護系統運作與進行必要分析所需的期間內被保留，不會被用於與本服務無關的其他用途。
               </p>
             </div>
 

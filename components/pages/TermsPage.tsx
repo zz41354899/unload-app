@@ -11,7 +11,7 @@ export const TermsPage = () => (
 
         <div className="space-y-10 text-primary-light font-light leading-loose border-t border-secondary-light pt-10">
           <p className="text-lg text-primary font-normal">
-            歡迎來到 Unload。在使用本服務前，請先閱讀以下約定。我們希望建立一個基於互信、尊重與安全的內在探索環境。
+            歡迎來到 Unload。這是一套聚焦職場心理邊界的覺察工具，同時也是一個以 MIT 授權釋出的開源專案，目前仍處於長期 Beta 測試與持續調整階段。本頁說明的是使用本服務時彼此之間的基本約定，協助我們維持一個基於互信、尊重與安全的內在探索環境。
           </p>
 
           <div className="space-y-8">
@@ -28,10 +28,10 @@ export const TermsPage = () => (
             <section>
               <h3 className="text-lg font-medium text-primary mb-2 flex items-center gap-2">
                 <GitMerge className="w-4 h-4 text-secondary-accent" />
-                Beta 實驗計畫 (Beta Phase)
+                Beta 測試階段 (Beta Phase)
               </h3>
               <p className="text-sm">
-                目前本服務處於實驗與開發階段。這意味著功能可能會調整，偶爾可能會發生不穩定的狀況。我們感謝您的包容與回饋，這將幫助打造更完善的正式版本。
+                目前本服務仍處於開發與 Beta 測試階段，功能與介面可能會隨時調整或更新，偶爾亦可能出現不穩定或無法預期的狀況。我們會盡力維護服務品質，但不保證任何時刻皆完全無錯誤或不中斷。您在此階段的使用與回饋，將成為我們持續改進本服務的重要參考。
               </p>
             </section>
 
@@ -43,7 +43,39 @@ export const TermsPage = () => (
               <p className="text-sm">
                 簡單來說：<strong>平台屬於我們，故事屬於使用者。</strong>
                 <br />
-                Unload 的介面設計與程式碼歸平台所有；但在日記中寫下的每一個字、每一段反思，其智慧財產權完全歸個人所有。
+                Unload 的介面設計與程式碼由平台維護與管理，並以 MIT 開源授權條款釋出，您得依該授權條款的內容使用、重製、修改與散布本專案程式碼。但您在本服務中撰寫的日記、反思內容與其他個人輸入，之智慧財產權仍完全歸屬於您本人；除法律要求或您另行明示同意外，我們不會以可識別您身分的方式公開這些內容。
+              </p>
+            </section>
+
+            <section>
+              <h3 className="text-lg font-medium text-primary mb-2 flex items-center gap-2">
+                <FileText className="w-4 h-4 text-secondary-accent" />
+                開源與貢獻 (Open Source & Contributions)
+              </h3>
+              <p className="text-sm space-y-1">
+                <span>
+                  Unload 的程式碼將會公開於 GitHub，以 MIT 授權條款釋出，歡迎任何人檢視、fork、提出 Issue 或發送 Pull Request。為了維持專案品質與使用者隱私，若您打算在 GitHub 上貢獻程式碼，請同意並遵守以下原則：
+                </span>
+                <br />
+                <span>．請遵守專案說明中所列的 MIT 授權與貢獻指南，不新增與此相牴觸的額外限制。</span>
+                <br />
+                <span>．在發送 PR 前，建議先於 Issue 區說明動機與設計想法，並盡量以小而清楚的修改單位提交變更。</span>
+                <br />
+                <span>．請避免在程式碼、測試資料或討論紀錄中加入任何真實個資或可識別使用者身分的內容。</span>
+                <br />
+                <span>．請尊重現有的程式風格與架構設計，必要時可提出重構建議，但不以破壞性方式推翻整體方向。</span>
+                <br />
+                <span>．所有被接受併入主分支的貢獻內容，將以 MIT 授權條款對外釋出，您同意不再就該部分主張額外權利或要求個別對價。</span>
+              </p>
+            </section>
+
+            <section>
+              <h3 className="text-lg font-medium text-primary mb-2 flex items-center gap-2">
+                <Smile className="w-4 h-4 text-secondary-accent" />
+                意見回饋與問卷調查 (Feedback & Surveys)
+              </h3>
+              <p className="text-sm">
+                您在使用本服務期間，可能會不定期收到來自本服務或官方網站發送之問卷調查或意見回饋邀請。您可自由選擇是否參與，並得於問卷中填寫您對本服務或相關功能之看法與建議。
               </p>
             </section>
 
