@@ -101,16 +101,6 @@ export const Navigation = ({ currentPage, onNavigate, onEnterApp }: NavigationPr
             ))}
           </div>
 
-          <a
-            href="https://github.com/zz41354899/unload-app"
-            target="_blank"
-            rel="noreferrer"
-            className="text-primary-light hover:text-primary transition-colors"
-            aria-label="前往 Unload GitHub 專案頁面"
-          >
-            <Github className="w-5 h-5" strokeWidth={1.5} />
-          </a>
-
           <button
             onClick={() => {
               if (onEnterApp) {
@@ -123,6 +113,16 @@ export const Navigation = ({ currentPage, onNavigate, onEnterApp }: NavigationPr
           >
             馬上體驗
           </button>
+
+          <a
+            href="https://github.com/zz41354899/unload-app"
+            target="_blank"
+            rel="noreferrer"
+            className="text-primary-light hover:text-primary transition-colors"
+            aria-label="前往 Unload GitHub 專案頁面"
+          >
+            <Github className="w-5 h-5" strokeWidth={1.5} />
+          </a>
         </div>
 
         {/* Mobile Toggle */}
