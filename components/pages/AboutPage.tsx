@@ -13,8 +13,12 @@ export const AboutPage = () => (
         <div className="space-y-16 text-primary-light text-lg font-light leading-loose">
           <section>
             <p className="mb-6">
-              榮格 (Carl Jung) 認為，神經症往往是心靈為了適應當下困境而做出的合理嘗試。
-              對於高敏感族群 (HSP) 而言，職場中的焦慮與耗竭，並非個人的脆弱，而是<strong>「人格面具 (Persona)」</strong>過度僵化，導致與<strong>「陰影 (Shadow)」</strong>失去連結的結果。
+              榮格 (Carl Jung) 認為，所謂的「精神官能症」，往往是心靈為了勉強適應當下困境而做出的合理嘗試。
+              對高敏感族群 (HSP) 來說，職場裡的焦慮與耗竭，並不是個人太脆弱，而是
+              <strong>「人格面具 (Persona)」</strong>
+              被迫維持在同一種樣子太久，慢慢與內在的
+              <strong>「陰影 (Shadow)」</strong>
+              失去連結所造成的結果。
             </p>
             <p>
               Unload 系統建構於此基礎之上。不採用「治療」或「矯正」的觀點，而是提供一套心理學的<strong>「鏡像機制」</strong>。
