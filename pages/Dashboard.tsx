@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import { useAppStore } from '../store';
 import { ResponsibilityOwner, TaskCategory, Task, TaskWorry, TaskPolarity } from '../types';
 import { Smile, MessageSquare, Book, TrendingUp, Target, Sparkles } from 'lucide-react';
@@ -12,6 +13,7 @@ interface DashboardProps {
 
 export const Dashboard: React.FC<DashboardProps> = ({ navigate }) => {
   const { tasks, user } = useAppStore();
+  const routerNavigate = useNavigate();
   const { t, i18n } = useTranslation();
 
   // Date Helper
@@ -169,7 +171,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ navigate }) => {
           </div>
         </div>
         <button
-          onClick={() => navigate('new-task')}
+          onClick={() => {
+            navigate('new-task');
+            routerNavigate('/app/new-task');
+          }}
           className="w-full md:w-auto bg-primary text-white px-6 md:px-8 py-3 rounded-full hover:bg-[#1e2b1e] transition-all shadow-lg shadow-primary/20 hover:shadow-primary/40 text-sm md:text-base font-medium"
         >
           {t('dashboard.header.cta')}

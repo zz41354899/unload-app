@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useAppStore } from '../store';
 import { ArrowRight, CheckCircle, Feather, Layers, Zap, Sparkles, Globe2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import { getDailyCue } from '../lib/quotes';
 
 interface OnboardingProps {
@@ -10,6 +11,7 @@ interface OnboardingProps {
 
 export const Onboarding: React.FC<OnboardingProps> = ({ navigate }) => {
   const { completeOnboarding } = useAppStore();
+  const routerNavigate = useNavigate();
   const [step, setStep] = useState(1);
   const { t, i18n } = useTranslation();
   const [isLangOpen, setIsLangOpen] = useState(false);
@@ -17,7 +19,9 @@ export const Onboarding: React.FC<OnboardingProps> = ({ navigate }) => {
 
   const handleSkip = () => {
     completeOnboarding();
+    // 同時更新舊的 currentPage 狀態與新的 URL 路由
     navigate('dashboard');
+    routerNavigate('/app/dashboard');
   };
 
   const handleNext = () => {
@@ -25,7 +29,9 @@ export const Onboarding: React.FC<OnboardingProps> = ({ navigate }) => {
       setStep((prev) => prev + 1);
     } else {
       completeOnboarding();
+      // 完成最後一步時，同樣同步狀態與路由
       navigate('dashboard');
+      routerNavigate('/app/dashboard');
     }
   };
 

@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { Feather, LayoutDashboard, History, Menu, PanelLeft, LogOut, CheckCircle, Loader, BookOpen, Globe2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import { useAppStore } from '../store';
 
 interface LayoutProps {
@@ -12,6 +13,7 @@ interface LayoutProps {
 
 export const Layout: React.FC<LayoutProps> = ({ children, currentPage, navigate }) => {
   const { user, logout, toast } = useAppStore();
+  const routerNavigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
@@ -23,6 +25,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentPage, navigate 
     // 模擬登出延遲
     await new Promise(resolve => setTimeout(resolve, 800));
     logout();
+    routerNavigate('/app/login');
   };
   
   const navItems = [
@@ -42,22 +45,28 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentPage, navigate 
       >
         {/* Header: Logo + Toggle */}
         <div className={`flex items-center mb-12 ${isSidebarOpen ? 'gap-4 flex-row' : 'flex-col gap-6'}`}>
-           {/* Logo Group */}
-           {isSidebarOpen ? (
-               <div 
-                 className="flex items-center gap-2 cursor-pointer" 
-                 onClick={() => navigate('dashboard')}
-               >
-                  <img src="/logo.svg" alt="Unload Logo" className="w-[140px] h-10 object-contain" />
-               </div>
-           ) : (
-               <div 
-                 className="cursor-pointer p-2" 
-                 onClick={() => navigate('dashboard')}
-               >
-                  <img src="/logo-m.svg" alt="Unload Logo" className="w-8 h-8 object-contain" />
-               </div>
-           )}
+          {/* Logo Group */}
+          {isSidebarOpen ? (
+            <div
+              className="flex items-center gap-2 cursor-pointer"
+              onClick={() => {
+                navigate('dashboard');
+                routerNavigate('/app/dashboard');
+              }}
+            >
+              <img src="/logo.svg" alt="Unload Logo" className="w-[140px] h-10 object-contain" />
+            </div>
+          ) : (
+            <div
+              className="cursor-pointer p-2"
+              onClick={() => {
+                navigate('dashboard');
+                routerNavigate('/app/dashboard');
+              }}
+            >
+              <img src="/logo-m.svg" alt="Unload Logo" className="w-8 h-8 object-contain" />
+            </div>
+          )}
 
            {/* Toggle Button */}
            <button 
@@ -80,7 +89,10 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentPage, navigate 
             {navItems.map((item) => (
             <button
                 key={item.id}
-                onClick={() => navigate(item.id)}
+                onClick={() => {
+                  navigate(item.id);
+                  routerNavigate(`/app/${item.id}`);
+                }}
                 className={`
                     flex items-center transition-all duration-200 w-full
                     ${isSidebarOpen ? 'gap-3 px-2 py-2 rounded-lg text-left justify-start' : 'justify-center p-3 rounded-xl'}
@@ -144,11 +156,14 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentPage, navigate 
 
       {/* Mobile Header */}
       <div className="md:hidden fixed top-0 w-full bg-background z-50 px-6 py-4 flex items-center justify-between shadow-sm md:shadow-none">
-          <div 
-            className="flex items-center gap-2 cursor-pointer" 
-            onClick={() => navigate('dashboard')}
+          <div
+            className="flex items-center gap-2 cursor-pointer"
+            onClick={() => {
+              navigate('dashboard');
+              routerNavigate('/app/dashboard');
+            }}
           >
-             <img src="/logo.svg" alt="Unload Logo" className="h-10 object-contain" />
+            <img src="/logo.svg" alt="Unload Logo" className="h-10 object-contain" />
           </div>
           <div className="flex items-center gap-3">
             <div className="relative">
@@ -203,6 +218,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentPage, navigate 
                     key={item.id}
                     onClick={() => {
                         navigate(item.id);
+                        routerNavigate(`/app/${item.id}`);
                         setMobileMenuOpen(false);
                     }}
                     className="flex items-center gap-4 w-full text-left py-4 text-lg border-b border-gray-100"
@@ -218,6 +234,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentPage, navigate 
                         await new Promise(resolve => setTimeout(resolve, 800));
                         logout();
                         setMobileMenuOpen(false);
+                        routerNavigate('/app/login');
                     }}
                     disabled={isLoggingOut}
                     className="flex items-center gap-4 w-full text-left py-4 text-lg border-b border-gray-100 text-red-500 disabled:opacity-70 disabled:cursor-not-allowed"

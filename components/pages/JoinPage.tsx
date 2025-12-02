@@ -87,7 +87,7 @@ export const JoinPage: React.FC<JoinPageProps> = ({ onComplete }) => {
           <div className="space-y-16 text-primary-light font-light leading-loose">
             <section>
               <p className="text-base md:text-lg mb-6">
-                Unload 目前處於「體驗介面」與覺察流程的實驗階段。透過實際互動與使用紀錄，觀察不同職場情境下，高敏感與在意邊界的使用者，如何與這套工具對話，做為後續調整與迭代的參考。
+                Unload 目前處於「體驗介面」與覺察流程的實驗階段。透過實際互動與使用紀錄，觀察不同職場情境下，高敏感與在意邊界的使用者，如何與這套工具對話，做為後續調整的依據。
               </p>
               <p className="text-sm md:text-base">
                 如果你願意幫忙分享真實的工作情境與使用感受，這會成為我們調整系統很重要的依據。

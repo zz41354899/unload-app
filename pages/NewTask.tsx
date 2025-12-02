@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import { WizardLayout, SelectionGrid, SelectionList, MultiSelectGrid } from '../components/StepWizard';
 import { TaskCategory, TaskWorry, ResponsibilityOwner, TaskPolarity } from '../types';
 import { useAppStore } from '../store';
@@ -13,6 +14,7 @@ interface NewTaskProps {
 
 export const NewTask: React.FC<NewTaskProps> = ({ navigate }) => {
   const { addTask, showToast, openNps } = useAppStore();
+  const routerNavigate = useNavigate();
   const [step, setStep] = useState(1);
   const { t, i18n } = useTranslation();
 
@@ -41,8 +43,12 @@ export const NewTask: React.FC<NewTaskProps> = ({ navigate }) => {
 
   const handleNext = () => setStep(prev => prev + 1);
   const handleBack = () => {
-    if (step === 1) navigate('dashboard');
-    else setStep(prev => prev - 1);
+    if (step === 1) {
+      navigate('dashboard');
+      routerNavigate('/app/dashboard');
+    } else {
+      setStep(prev => prev - 1);
+    }
   };
 
   const handleSubmit = () => {
@@ -544,6 +550,7 @@ export const NewTask: React.FC<NewTaskProps> = ({ navigate }) => {
                 type="button"
                 onClick={() => {
                   navigate('journal');
+                  routerNavigate('/app/journal');
                 }}
                 className="w-full bg-primary text-white px-4 md:px-6 py-3 md:py-4 rounded-lg md:rounded-xl hover:bg-[#1e2b1e] transition-all font-medium flex items-center justify-center gap-2 shadow-lg shadow-primary/20 text-sm md:text-base"
               >
@@ -554,6 +561,7 @@ export const NewTask: React.FC<NewTaskProps> = ({ navigate }) => {
                 type="button"
                 onClick={() => {
                   navigate('dashboard');
+                  routerNavigate('/app/dashboard');
                 }}
                 className="w-full bg-gray-100 text-text px-4 md:px-6 py-3 md:py-4 rounded-lg md:rounded-xl hover:bg-gray-200 transition-all font-medium flex items-center justify-center gap-2 text-sm md:text-base"
               >

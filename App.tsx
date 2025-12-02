@@ -1,23 +1,23 @@
 
 import React, { useState, useEffect, useState as useReactState } from 'react';
+import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import './i18n';
 import { useTranslation } from 'react-i18next';
 import { AppProvider, useAppStore } from './store';
 import { Layout } from './components/Layout';
+import { MarketingShell } from './components/MarketingShell';
 import { Login } from './pages/Login';
 import { Dashboard } from './pages/Dashboard';
 import { History } from './pages/History';
 import { NewTask } from './pages/NewTask';
 import { Journal } from './pages/Journal';
 import { Onboarding } from './pages/Onboarding';
-import { MarketingShell } from './components/MarketingShell';
 
 const AppContent: React.FC = () => {
   const { user, toast, shouldShowNps, closeNps } = useAppStore();
   const [currentPage, setCurrentPage] = useState('login');
   const [npsScore, setNpsScore] = useReactState<number | null>(null);
   const [npsComment, setNpsComment] = useReactState('');
-  const [showMarketingShell, setShowMarketingShell] = useReactState(true);
   const { t, i18n } = useTranslation();
 
   // Simple Route Protection
@@ -42,12 +42,8 @@ const AppContent: React.FC = () => {
     }
   }, [i18n.language]);
 
-  // 若尚未登入，先顯示行銷首頁殼，使用者選擇進入體驗後再顯示登入頁
+  // 若尚未登入，直接顯示登入頁（行銷路由由外層 MarketingShell 負責）
   if (!user) {
-    if (showMarketingShell) {
-      return <MarketingShell onEnterApp={() => setShowMarketingShell(false)} />;
-    }
-
     return <Login navigate={setCurrentPage} />;
   }
 
@@ -166,12 +162,28 @@ const AppContent: React.FC = () => {
   );
 };
 
-const App: React.FC = () => {
+const AppInner: React.FC = () => {
+  const navigate = useNavigate();
+
   return (
     <AppProvider>
-      <AppContent />
+      <Routes>
+        <Route path="/app/*" element={<AppContent />} />
+        <Route
+          path="/*"
+          element={(
+            <MarketingShell
+              onEnterApp={() => {
+                navigate('/app/login');
+              }}
+            />
+          )}
+        />
+      </Routes>
     </AppProvider>
   );
 };
+
+const App: React.FC = () => <AppInner />;
 
 export default App;
