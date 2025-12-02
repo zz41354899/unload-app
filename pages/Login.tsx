@@ -85,8 +85,7 @@ export const Login: React.FC<LoginProps> = ({ navigate }) => {
                     </div>
 
                     <h1 className="text-3xl font-bold mb-6 text-text">{t('login.title')}</h1>
-                    <h2 className="text-xl font-bold text-text mb-2">{t('login.subtitle')}</h2>
-                    <p className="text-lg text-text font-bold mb-8">{t('login.tagline')}</p>
+                    <h2 className="text-xl font-bold text-text mb-8">{t('login.subtitle')}</h2>
 
                     <button
                         onClick={handleLogin}
@@ -100,14 +99,30 @@ export const Login: React.FC<LoginProps> = ({ navigate }) => {
                             </>
                         ) : (
                             <>
-                                <span className="font-bold text-lg tracking-wide">{t('login.tryNow')}</span>
                                 <ArrowRight className="w-5 h-5" />
+                                <span className="font-bold text-lg tracking-wide">{t('login.google.button')}</span>
                             </>
                         )}
                     </button>
 
-                    <p className="text-xs text-gray-500">
-                        {t('login.previewHint')}
+                    <p className="text-xs text-gray-500 leading-relaxed">
+                        {t('login.google.notice.prefix')}{' '}
+                        <button
+                            type="button"
+                            onClick={() => routerNavigate('/privacy')}
+                            className="underline underline-offset-2 cursor-pointer text-gray-600 hover:text-text"
+                        >
+                            {t('login.google.privacy')}
+                        </button>{' '}
+                        {t('login.google.notice.connector')}{' '}
+                        <button
+                            type="button"
+                            onClick={() => routerNavigate('/terms')}
+                            className="underline underline-offset-2 cursor-pointer text-gray-600 hover:text-text"
+                        >
+                            {t('login.google.terms')}
+                        </button>
+                        {t('login.google.notice.suffix')}
                     </p>
                 </div>
             </div>
