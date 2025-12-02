@@ -2,14 +2,13 @@
 import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppStore } from '../store';
-import { Search, Trash2, AlertCircle, ChevronDown, Edit2, Save, X } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { TaskCategory, TaskWorry, ResponsibilityOwner, TaskPolarity } from '../types';
+import { HistoryFilters } from '../components/history/HistoryFilters';
+import { HistoryTaskList } from '../components/history/HistoryTaskList';
+import { HistoryDeleteModal } from '../components/history/HistoryDeleteModal';
 
-interface HistoryProps {
-  navigate: (page: string) => void;
-}
-
-export const History: React.FC<HistoryProps> = () => {
+export const History: React.FC = () => {
   const { tasks, deleteTask, showToast } = useAppStore();
   const { t, i18n } = useTranslation();
   const [search, setSearch] = useState('');
@@ -22,10 +21,13 @@ export const History: React.FC<HistoryProps> = () => {
   const [sortOrder, setSortOrder] = useState('newest');
 
   // Helper to identify standard categories
-  const standardCategories = Object.values(TaskCategory).filter(c => c !== TaskCategory.Other) as string[];
+  const standardCategories = useMemo(
+    () => Object.values(TaskCategory).filter((c) => c !== TaskCategory.Other) as string[],
+    [],
+  );
 
   // Filtering Logic
-  const filteredTasks = tasks.filter(task => {
+  const filteredTasks = useMemo(() => tasks.filter(task => {
     // 1. Search Text
     const categories = Array.isArray(task.category) ? task.category : [task.category];
     const worries = Array.isArray(task.worry) ? task.worry : [task.worry];
@@ -77,7 +79,7 @@ export const History: React.FC<HistoryProps> = () => {
     const dateA = new Date(a.date).getTime();
     const dateB = new Date(b.date).getTime();
     return sortOrder === 'newest' ? dateB - dateA : dateA - dateB;
-  });
+  }), [tasks, search, timeFilter, categoryFilter, ownerFilter, sortOrder, standardCategories]);
 
   const formatDate = (isoString: string) => {
     const date = new Date(isoString);
@@ -189,195 +191,48 @@ export const History: React.FC<HistoryProps> = () => {
           />
         </div>
 
-        {/* Filters */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 md:gap-4 mb-4 md:mb-8">
-          {/* Time Filter */}
-          <div className="relative">
-            <select
-              value={timeFilter}
-              onChange={(e) => setTimeFilter(e.target.value)}
-              className="w-full py-2 md:py-3 px-2 md:px-4 pr-8 md:pr-10 border border-gray-200 rounded-lg md:rounded-xl text-left text-gray-600 text-xs md:text-sm bg-white hover:bg-gray-50 transition-colors shadow-sm appearance-none cursor-pointer focus:outline-none focus:border-primary"
-            >
-              <option value="all">{t('history.filter.time.all')}</option>
-              <option value="today">{t('history.filter.time.today')}</option>
-              <option value="week">{t('history.filter.time.week')}</option>
-              <option value="month">{t('history.filter.time.month')}</option>
-            </select>
-            <ChevronDown className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 w-3 md:w-4 h-3 md:h-4 text-gray-400 pointer-events-none" />
-          </div>
+        <HistoryFilters
+          t={t}
+          timeFilter={timeFilter}
+          setTimeFilter={setTimeFilter}
+          categoryFilter={categoryFilter}
+          setCategoryFilter={setCategoryFilter}
+          ownerFilter={ownerFilter}
+          setOwnerFilter={setOwnerFilter}
+          sortOrder={sortOrder}
+          setSortOrder={setSortOrder}
+          getCategoryLabel={getCategoryLabel}
+          getOwnerLabel={getOwnerLabel}
+        />
 
-          {/* Category Filter */}
-          <div className="relative">
-            <select
-              value={categoryFilter}
-              onChange={(e) => setCategoryFilter(e.target.value)}
-              className="w-full py-2 md:py-3 px-2 md:px-4 pr-8 md:pr-10 border border-gray-200 rounded-lg md:rounded-xl text-left text-gray-600 text-xs md:text-sm bg-white hover:bg-gray-50 transition-colors shadow-sm appearance-none cursor-pointer focus:outline-none focus:border-primary"
-            >
-              <option value="all">{t('history.filter.category.all')}</option>
-              {Object.values(TaskCategory).map(cat => (
-                <option key={cat} value={cat}>{getCategoryLabel(cat)}</option>
-              ))}
-            </select>
-            <ChevronDown className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 w-3 md:w-4 h-3 md:h-4 text-gray-400 pointer-events-none" />
-          </div>
-
-          {/* Owner / Boundary Filter */}
-          <div className="relative">
-            <select
-              value={ownerFilter}
-              onChange={(e) => setOwnerFilter(e.target.value)}
-              className="w-full py-2 md:py-3 px-2 md:px-4 pr-8 md:pr-10 border border-gray-200 rounded-lg md:rounded-xl text-left text-gray-600 text-xs md:text-sm bg-white hover:bg-gray-50 transition-colors shadow-sm appearance-none cursor-pointer focus:outline-none focus:border-primary"
-            >
-              <option value="all">{t('history.filter.owner.all')}</option>
-              {Object.values(ResponsibilityOwner).map(owner => (
-                <option key={owner} value={owner}>{getOwnerLabel(owner)}</option>
-              ))}
-            </select>
-            <ChevronDown className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 w-3 md:w-4 h-3 md:h-4 text-gray-400 pointer-events-none" />
-          </div>
-
-          {/* Sort Order */}
-          <div className="relative">
-            <select
-              value={sortOrder}
-              onChange={(e) => setSortOrder(e.target.value)}
-              className="w-full py-2 md:py-3 px-2 md:px-4 pr-8 md:pr-10 border border-gray-200 rounded-lg md:rounded-xl text-left text-gray-600 text-xs md:text-sm bg-white hover:bg-gray-50 transition-colors shadow-sm appearance-none cursor-pointer focus:outline-none focus:border-primary"
-            >
-              <option value="newest">{t('history.filter.sort.newest')}</option>
-              <option value="oldest">{t('history.filter.sort.oldest')}</option>
-            </select>
-            <ChevronDown className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 w-3 md:w-4 h-3 md:h-4 text-gray-400 pointer-events-none" />
-          </div>
-        </div>
-
-        {/* Task List */}
-        <div className="space-y-3 md:space-y-4">
-          {filteredTasks.map((task, index) => (
-            <div
-              key={task.id}
-              className="bg-[#F4F4F4] p-4 md:p-6 md:px-8 rounded-lg md:rounded-xl hover:shadow-md transition-all duration-300 group"
-            >
-              {/* Top Row: Tags + Date */}
-              <div className="flex flex-col md:flex-row md:items-center justify-between mb-3 md:mb-4 gap-2 md:gap-4">
-                <div className="flex items-center gap-2 md:gap-3 flex-wrap">
-                  {Array.isArray(task.category) ? (
-                    task.category.map((cat, idx) => (
-                      <span
-                        key={idx}
-                        className="bg-[#E5E7EB] text-gray-700 px-3 md:px-4 py-1 md:py-1.5 rounded-lg text-xs md:text-sm font-medium tracking-wide"
-                      >
-                        {getCategoryLabel(cat)}
-                      </span>
-                    ))
-                  ) : (
-                    <span className="bg-[#E5E7EB] text-gray-700 px-3 md:px-4 py-1 md:py-1.5 rounded-lg text-xs md:text-sm font-medium tracking-wide">
-                      {getCategoryLabel(task.category)}
-                    </span>
-                  )}
-                  <span
-                    className="px-3 md:px-4 py-1 md:py-1.5 rounded-lg text-xs md:text-sm font-medium text-white tracking-wide"
-                    style={{ backgroundColor: getOwnerColor(task.owner) }}
-                  >
-                    {getOwnerLabel(task.owner)}
-                  </span>
-                </div>
-                <span className="text-xs md:text-sm text-gray-500 font-medium tracking-wide self-start md:self-center">
-                  {formatDate(task.date)}
-                </span>
-              </div>
-
-              {/* Bottom Row: Worry summary + Final message + Actions */}
-              <div className="flex flex-col gap-4">
-                <div className="flex items-start justify-between gap-3 md:gap-4">
-                  <div className="flex-1 min-w-0 space-y-2">
-                    <div className="space-y-1">
-                      <div className="text-xs font-medium text-gray-500">{getWorryTitle()}</div>
-                      <div className="text-xs md:text-sm text-gray-700">
-                        {Array.isArray(task.worry)
-                          ? task.worry.map(w => getWorryLabel(w as string)).join('、')
-                          : getWorryLabel(task.worry as string)}
-                      </div>
-                    </div>
-
-                    {task.reflection && (
-                      <div className="pt-2 border-t border-gray-200 space-y-1">
-                        <div className="text-[11px] md:text-xs font-medium text-gray-500">
-                          {t('history.finalMessage.label')}
-                        </div>
-                        <div className="text-xs md:text-sm text-gray-700 whitespace-pre-line leading-relaxed">
-                          {extractFinalMessage(task.reflection) || t('history.finalMessage.placeholder')}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  <button
-                    onClick={() => setDeleteId(task.id)}
-                    className="text-gray-400 hover:text-red-500 transition-colors p-2 md:p-2 rounded-full hover:bg-white/50 flex-shrink-0 self-start"
-                  >
-                    <Trash2 className="w-5 md:w-5 h-5 md:h-5" />
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))}
-
-          {filteredTasks.length === 0 && (
-            <div className="flex flex-col items-center justify-center py-20 text-gray-400">
-              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-                <Search className="w-8 h-8 text-gray-300" />
-              </div>
-              <p className="text-sm font-medium text-gray-500">{t('history.empty.title')}</p>
-              {(timeFilter !== 'all' || categoryFilter !== 'all' || ownerFilter !== 'all' || search) && (
-                <button
-                  onClick={() => {
-                    setTimeFilter('all');
-                    setCategoryFilter('all');
-                    setOwnerFilter('all');
-                    setSearch('');
-                  }}
-                  className="mt-4 text-primary text-sm hover:underline"
-                >
-                  {t('history.empty.clearFilters')}
-                </button>
-              )}
-            </div>
-          )}
-        </div>
+        <HistoryTaskList
+          t={t}
+          filteredTasks={filteredTasks}
+          formatDate={formatDate}
+          getCategoryLabel={getCategoryLabel}
+          getOwnerLabel={getOwnerLabel}
+          getOwnerColor={getOwnerColor}
+          getWorryTitle={getWorryTitle}
+          getWorryLabel={getWorryLabel}
+          extractFinalMessage={extractFinalMessage}
+          timeFilter={timeFilter}
+          categoryFilter={categoryFilter}
+          ownerFilter={ownerFilter}
+          search={search}
+          setTimeFilter={setTimeFilter}
+          setCategoryFilter={setCategoryFilter}
+          setOwnerFilter={setOwnerFilter}
+          setSearch={setSearch}
+          setDeleteId={setDeleteId}
+        />
       </div>
 
-      {/* Confirmation Modal */}
-      {
-        deleteId && (
-          <div className="fixed inset-0 bg-black/20 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
-            <div className="bg-white rounded-2xl p-8 shadow-2xl max-w-sm w-full transform transition-all scale-100">
-              <div className="flex flex-col items-center text-center">
-                <div className="w-12 h-12 bg-red-50 rounded-full flex items-center justify-center mb-4">
-                  <AlertCircle className="w-6 h-6 text-red-500" />
-                </div>
-                <h3 className="text-xl font-bold text-text mb-2">{t('history.modal.title')}</h3>
-                <p className="text-gray-500 mb-8 text-sm leading-relaxed">
-                  {t('history.modal.message')}
-                </p>
-                <div className="flex w-full gap-3">
-                  <button
-                    onClick={() => setDeleteId(null)}
-                    className="flex-1 py-3 rounded-xl border border-gray-200 text-gray-600 font-bold hover:bg-gray-50 transition-colors text-sm"
-                  >
-                    {t('history.modal.cancel')}
-                  </button>
-                  <button
-                    onClick={confirmDelete}
-                    className="flex-1 py-3 rounded-xl bg-red-500 text-white font-bold hover:bg-red-600 transition-colors shadow-lg shadow-red-500/20 text-sm"
-                  >
-                    {t('history.modal.confirm')}
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )
-      }
+      <HistoryDeleteModal
+        t={t}
+        deleteId={deleteId}
+        onCancel={() => setDeleteId(null)}
+        onConfirm={confirmDelete}
+      />
     </div >
   );
 };

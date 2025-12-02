@@ -1,11 +1,13 @@
-
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useAppStore } from '../store';
 import { ResponsibilityOwner, TaskCategory, Task, TaskWorry, TaskPolarity } from '../types';
-import { Smile, MessageSquare, Book, TrendingUp, Target, Sparkles } from 'lucide-react';
+import { Target } from 'lucide-react';
 import { DailyStepId, getDailyCue, getDailyCueForStep } from '../lib/quotes';
+import { DashboardHeader } from '../components/dashboard/DashboardHeader';
+import { DashboardDailyCue } from '../components/dashboard/DashboardDailyCue';
+import { DashboardStatsRow } from '../components/dashboard/DashboardStatsRow';
 
 interface DashboardProps {
   navigate: (page: string) => void;
@@ -22,10 +24,15 @@ export const Dashboard: React.FC<DashboardProps> = ({ navigate }) => {
   const currentMonthLabel = today.toLocaleString(i18n.language, { month: 'long' });
   const todayStr = today.toISOString().split('T')[0];
 
-  const totalTasks = tasks.length;
-  const myTasks = tasks.filter(t => t.owner === ResponsibilityOwner.Mine).length;
-  const theirTasks = tasks.filter(t => t.owner === ResponsibilityOwner.Theirs).length;
-  const sharedTasks = tasks.filter(t => t.owner === ResponsibilityOwner.Shared).length;
+  const { totalTasks, myTasks, theirTasks, sharedTasks } = useMemo(() => {
+    const total = tasks.length;
+    return {
+      totalTasks: total,
+      myTasks: tasks.filter((t) => t.owner === ResponsibilityOwner.Mine).length,
+      theirTasks: tasks.filter((t) => t.owner === ResponsibilityOwner.Theirs).length,
+      sharedTasks: tasks.filter((t) => t.owner === ResponsibilityOwner.Shared).length,
+    };
+  }, [tasks]);
 
   // 依情緒標籤 (category) 統計最常探索的情緒
   const getCategoryLabel = (cat: string) => {
@@ -67,7 +74,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ navigate }) => {
     return { categoryKey, count };
   };
 
-  const topEmotion = getTopEmotion();
+  const topEmotion = useMemo(() => getTopEmotion(), [tasks]);
 
   const getStepIdFromCategory = (cat: string): DailyStepId | null => {
     switch (cat) {
@@ -149,89 +156,43 @@ export const Dashboard: React.FC<DashboardProps> = ({ navigate }) => {
     return bestCount > 0 ? bestId : null;
   };
 
-  const todayTasks = tasks.filter((t) => t.date.split('T')[0] === todayStr);
-  const baseDailyCue = getDailyCue();
-  const inferredStepId = inferStepIdFromTasks(todayTasks);
-  const inferredCue = inferredStepId ? getDailyCueForStep(inferredStepId) : null;
-  const dailyCue = inferredCue ?? baseDailyCue;
+  const todayTasks = useMemo(
+    () => tasks.filter((t) => t.date.split('T')[0] === todayStr),
+    [tasks, todayStr],
+  );
+
+  const { baseDailyCue, inferredCue, dailyCue } = useMemo(() => {
+    const base = getDailyCue();
+    const inferredStepId = inferStepIdFromTasks(todayTasks);
+    const inferred = inferredStepId ? getDailyCueForStep(inferredStepId) : null;
+
+    return {
+      baseDailyCue: base,
+      inferredCue: inferred,
+      dailyCue: inferred ?? base,
+    } as const;
+  }, [todayTasks, i18n.language]);
 
   return (
     <div className="max-w-6xl mx-auto space-y-6 md:space-y-8 pb-12 px-4 md:px-0">
 
-      {/* Header Section */}
-      <div className="bg-white rounded-2xl p-4 md:p-12 shadow-sm border border-gray-100">
-        <div className="flex flex-col md:flex-row justify-between items-start gap-4 md:gap-6 mb-4 md:mb-6">
-          <div className="flex-1 min-w-0">
-            <h1 className="text-xl md:text-2xl font-bold mb-2 md:mb-4">{t('dashboard.header.title')}</h1>
-            <p className="text-gray-600 text-sm md:text-base mb-6 md:mb-8">{t('dashboard.header.subtitle')}</p>
-          </div>
-          <div className="text-right hidden md:block shrink-0">
-            <div className="text-3xl font-bold text-primary/20">{currentYear}</div>
-            <div className="text-xl font-medium text-primary/40">{currentMonthLabel}</div>
-          </div>
-        </div>
-        <button
-          onClick={() => {
-            navigate('new-task');
-            routerNavigate('/app/new-task');
-          }}
-          className="w-full md:w-auto bg-primary text-white px-6 md:px-8 py-3 rounded-full hover:bg-[#1e2b1e] transition-all shadow-lg shadow-primary/20 hover:shadow-primary/40 text-sm md:text-base font-medium"
-        >
-          {t('dashboard.header.cta')}
-        </button>
-      </div>
+      <DashboardHeader
+        t={t}
+        currentYear={currentYear}
+        currentMonthLabel={currentMonthLabel}
+        navigate={navigate}
+        routerNavigate={routerNavigate}
+      />
 
-      {/* Daily Cue */}
-      <div className="bg-gradient-to-r from-primary/10 via-accent/10 to-primary/10 rounded-2xl p-3 md:p-8 border border-primary/20 shadow-sm">
-        <div className="flex items-start gap-3 md:gap-4">
-          <Sparkles className="w-5 md:w-6 h-5 md:h-6 text-primary shrink-0 mt-0.5 md:mt-1" />
-          <div className="flex-1 min-w-0">
-            <p className="text-xs md:text-sm text-primary/60 font-medium mb-1 md:mb-2">{t('journal.dailyQuote.title')}</p>
-            <div className="space-y-1 md:space-y-2">
-              <p className="text-xs md:text-sm text-gray-600 font-medium">
-                {dailyCue.stageTitle && (
-                  <span>
-                    {t('journal.dailyQuote.stagePrefix')}
-                    <span className="font-semibold text-text">{dailyCue.stageTitle}</span>
-                  </span>
-                )}
-              </p>
-              <p className="text-sm md:text-base leading-relaxed text-text">
-                {dailyCue.stageDescription}
-              </p>
-              <p className="text-xs md:text-sm text-gray-700">
-                {t('journal.dailyQuote.practicePrefix')}
-                <span className="font-semibold">{dailyCue.practiceName}</span>
-                <span> — {dailyCue.actionSentence}</span>
-              </p>
-              <p className="text-[11px] md:text-xs text-gray-500">
-                {dailyCue.anchorQuote}
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
+      <DashboardDailyCue t={t} dailyCue={dailyCue} />
 
-      {/* Stats Row */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
-        {[
-          { label: t('dashboard.stats.total'), value: totalTasks, icon: TrendingUp },
-          { label: t('dashboard.stats.mine'), value: myTasks, icon: Book },
-          { label: t('dashboard.stats.theirs'), value: theirTasks, icon: MessageSquare },
-          { label: t('dashboard.stats.shared'), value: sharedTasks, icon: Smile },
-        ].map((stat) => (
-          <div
-            key={stat.label}
-            className="bg-white p-3 md:p-6 rounded-2xl shadow-sm min-h-[120px] md:min-h-[160px] flex flex-col justify-between"
-          >
-            <stat.icon className="w-4 md:w-5 h-4 md:h-5 text-gray-400 mb-2" />
-            <div>
-              <div className="text-xl md:text-4xl font-bold mb-1 text-text">{stat.value}</div>
-              <div className="text-[11px] md:text-sm text-gray-500 font-medium break-words">{stat.label}</div>
-            </div>
-          </div>
-        ))}
-      </div>
+      <DashboardStatsRow
+        t={t}
+        totalTasks={totalTasks}
+        myTasks={myTasks}
+        theirTasks={theirTasks}
+        sharedTasks={sharedTasks}
+      />
 
       {/* Focus Cards: Emotion & Perspective */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
