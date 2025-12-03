@@ -11,6 +11,7 @@
   "dependencies": {
     "@google/genai": "^1.30.0",
     "@hookform/resolvers": "^5.2.2",
+    "@prismicio/client": "^7.21.0",
     "@supabase/supabase-js": "^2.86.0",
     "@tailwindcss/vite": "^4.1.17",
     "date-fns": "^4.1.0",

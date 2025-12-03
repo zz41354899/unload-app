@@ -81,6 +81,55 @@ body {
     -moz-osx-font-smoothing: grayscale;
 }
 
+/* 全局部落格文章排版樣式：只要把 CMS 產生的 HTML 包在 .prose-blog 裡，就會自動套用這些段落 / 標題 / 列表樣式。
+   這裡改用純 CSS，避免依賴 Typography plugin 中的 `prose*` utility。 */
+.prose-blog {
+    max-width: 48rem; /* 約等於 max-w-lg */
+    color: var(--color-primary, #2D3748);
+    font-size: 1rem;
+    line-height: 1.75;
+}
+
+.prose-blog h1,
+.prose-blog h2,
+.prose-blog h3,
+.prose-blog h4,
+.prose-blog h5,
+.prose-blog h6 {
+    font-weight: 300;
+    color: var(--color-primary, #2D3748);
+}
+
+.prose-blog h2 {
+    margin-top: 2rem;
+    margin-bottom: 0.75rem;
+    font-size: 1.5rem;
+}
+
+.prose-blog p {
+    margin-bottom: 1rem;
+    line-height: 1.75;
+    color: rgba(45, 55, 72, 0.85);
+}
+
+.prose-blog ul {
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    padding-left: 1.25rem;
+}
+
+.prose-blog li {
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+    line-height: 1.75;
+    color: rgba(45, 55, 72, 0.85);
+}
+
+.prose-blog strong {
+    color: var(--color-primary, #2D3748);
+    font-weight: 600;
+}
+
 /* 讓常見可點擊元素預設顯示指標游標 */
 button,
 a,
