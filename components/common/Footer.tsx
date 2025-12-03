@@ -67,11 +67,11 @@ export const Footer = ({ onNavigate }: FooterProps) => {
 
         <div>
           <a
-            href="mailto:zz41354899@gmail.com"
+            href="mailto:support@unloadjournal.site"
             className="flex items-center space-x-2 border border-secondary-accent/10 px-4 py-2 rounded-full w-fit mb-8 hover:border-secondary-accent/40 hover:bg-secondary-light transition-colors cursor-pointer group bg-white shadow-sm hover:shadow-md"
           >
             <Mail className="w-4 h-4 text-secondary-accent group-hover:text-primary transition-colors" />
-            <span className="text-xs text-primary-light group-hover:text-primary transition-colors">zz41354899@gmail.com</span>
+            <span className="text-xs text-primary-light group-hover:text-primary transition-colors">support@unloadjournal.site</span>
           </a>
           <blockquote className="text-sm font-light italic text-primary-light/70 border-l border-secondary-accent/40 pl-4 leading-relaxed">
             "I am not what happened to me, I am what I choose to become."

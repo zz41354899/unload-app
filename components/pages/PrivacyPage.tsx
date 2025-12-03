@@ -48,8 +48,11 @@ export const PrivacyPage = () => (
 
           <div className="text-sm text-primary-light/60 mt-12 pt-8 border-t border-secondary-light/20">
             若有任何隱私疑慮，歡迎直接聯繫：
-            <a href="mailto:zz41354899@gmail.com" className="border-b border-primary/10 hover:border-primary/40 hover:text-primary transition-colors">
-              zz41354899@gmail.com
+            <a
+              href="mailto:support@unloadjournal.site"
+              className="border-b border-primary/10 hover:border-primary/40 hover:text-primary transition-colors"
+            >
+              support@unloadjournal.site
             </a>
           </div>
         </div>
