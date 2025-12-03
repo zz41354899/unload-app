@@ -133,7 +133,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentPage, navigate 
                         {isSidebarOpen && (
                             <div className="flex-1 min-w-0">
                                 <div className="text-sm font-bold text-text truncate">{user.name}</div>
-                                <div className="text-xs text-gray-400 truncate">{t('layout.nav.plan.free')}</div>
+                                <div className="text-xs text-gray-400 truncate">{user.email}</div>
                             </div>
                         )}
                     </div>
