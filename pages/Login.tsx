@@ -26,6 +26,10 @@ export const Login: React.FC<LoginProps> = ({ navigate }) => {
             provider: 'google',
             options: {
                 redirectTo,
+                queryParams: {
+                    // 總是顯示帳號選擇清單，方便切換 Google 帳號
+                    prompt: 'select_account',
+                },
             },
         });
 

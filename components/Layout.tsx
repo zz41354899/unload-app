@@ -4,6 +4,7 @@ import { Feather, LayoutDashboard, History, Menu, PanelLeft, LogOut, CheckCircle
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useAppStore } from '../store';
+import { supabase } from '../lib/supabaseClient';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -24,6 +25,15 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentPage, navigate 
     setIsLoggingOut(true);
     // 模擬登出延遲
     await new Promise(resolve => setTimeout(resolve, 800));
+
+    // 同步登出 Supabase，確保不會在 App 初始化時又從 session 還原 user
+    try {
+      await supabase.auth.signOut();
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('[Supabase] signOut failed:', error);
+    }
+
     logout();
     routerNavigate('/app/login');
   };
@@ -232,6 +242,12 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentPage, navigate 
                     onClick={async () => {
                         setIsLoggingOut(true);
                         await new Promise(resolve => setTimeout(resolve, 800));
+                        try {
+                            await supabase.auth.signOut();
+                        } catch (error) {
+                            // eslint-disable-next-line no-console
+                            console.error('[Supabase] signOut failed:', error);
+                        }
                         logout();
                         setMobileMenuOpen(false);
                         routerNavigate('/app/login');

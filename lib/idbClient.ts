@@ -25,13 +25,18 @@ export const loadTasksFromDb = async (): Promise<Task[]> => {
   if (typeof indexedDB === 'undefined') {
     // 環境不支援 IndexedDB，退回 localStorage
     const storedTasks = localStorage.getItem('unload_tasks');
-    return storedTasks ? (JSON.parse(storedTasks) as Task[]) : [];
+    const parsed = storedTasks ? (JSON.parse(storedTasks) as Task[]) : [];
+    // eslint-disable-next-line no-console
+    console.log('[IDB] loadTasksFromDb(localStorage fallback) ->', parsed.length);
+    return parsed;
   }
 
   const db = await getDb();
   const existing = (await db.get(TASKS_STORE, TASKS_KEY)) as Task[] | undefined;
 
   if (existing && Array.isArray(existing)) {
+    // eslint-disable-next-line no-console
+    console.log('[IDB] loadTasksFromDb(indexedDB) ->', existing.length);
     return existing;
   }
 
@@ -40,6 +45,8 @@ export const loadTasksFromDb = async (): Promise<Task[]> => {
   if (storedTasks) {
     const parsed = JSON.parse(storedTasks) as Task[];
     await db.put(TASKS_STORE, parsed, TASKS_KEY);
+    // eslint-disable-next-line no-console
+    console.log('[IDB] loadTasksFromDb(migrated from localStorage) ->', parsed.length);
     return parsed;
   }
 
@@ -57,4 +64,6 @@ export const saveTasksToDb = async (tasks: Task[]): Promise<void> => {
 
   // 仍同步一份到 localStorage，方便除錯與備援
   localStorage.setItem('unload_tasks', JSON.stringify(tasks));
+  // eslint-disable-next-line no-console
+  console.log('[IDB] saveTasksToDb ->', tasks.length);
 };

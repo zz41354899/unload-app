@@ -28,14 +28,14 @@ const AppContent: React.FC = () => {
       if (error || !data.user) return;
 
       const profile = data.user.user_metadata as
-        | { full_name?: string; name?: string; picture?: string; avatar_url?: string }
+        | { full_name?: string; name?: string; picture?: string; avatar_url?: string; has_onboarded?: boolean }
         | undefined;
 
       login({
         name: profile?.full_name || profile?.name || data.user.email || 'Guest',
         email: data.user.email ?? '',
         avatar: profile?.picture || profile?.avatar_url || 'https://picsum.photos/seed/unloadUser/200',
-        hasOnboarded: false,
+        hasOnboarded: profile?.has_onboarded ?? false,
       });
     })();
   }, [user, login]);

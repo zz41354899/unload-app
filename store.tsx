@@ -2,6 +2,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Task, User } from './types';
 import { loadTasksFromDb, saveTasksToDb } from './lib/idbClient';
+import { supabase } from './lib/supabaseClient';
 
 interface AppContextType {
   user: User | null;
@@ -26,6 +27,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [tasks, setTasks] = useState<Task[]>([]);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
   const [shouldShowNps, setShouldShowNps] = useState(false);
+  const [hasLoadedTasks, setHasLoadedTasks] = useState(false);
 
   useEffect(() => {
     // 初始化時載入使用者與任務資料
@@ -38,13 +40,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     void (async () => {
       const initialTasks = await loadTasksFromDb();
       setTasks(initialTasks ?? []);
+      setHasLoadedTasks(true);
     })();
   }, []);
 
   useEffect(() => {
     // 每次任務變動時同步到 IndexedDB（並由 helper 內部維護 localStorage 備份）
+    if (!hasLoadedTasks) return;
     void saveTasksToDb(tasks);
-  }, [tasks]);
+  }, [tasks, hasLoadedTasks]);
 
 
   const login = (userData: User) => {
@@ -95,6 +99,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const updatedUser = { ...user, hasOnboarded: true };
       setUser(updatedUser);
       localStorage.setItem('unload_user', JSON.stringify(updatedUser));
+
+      // 同步更新 Supabase 使用者 metadata，讓 hasOnboarded 狀態在不同裝置／新 session 也能保留
+      void supabase.auth.updateUser({
+        data: { has_onboarded: true },
+      });
     }
   };
 
