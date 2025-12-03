@@ -9,6 +9,7 @@ interface AppContextType {
   login: (user: User) => void;
   logout: () => void;
   tasks: Task[];
+  hasLoadedTasks: boolean;
   addTask: (task: Omit<Task, 'id' | 'date'>) => string;
   deleteTask: (id: string) => void;
   updateTask: (id: string, updates: Partial<Task>) => void;
@@ -40,7 +41,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     void (async () => {
       const initialTasks = await loadTasksFromDb();
       setTasks(initialTasks ?? []);
-      setHasLoadedTasks(true);
+      // 稍微延遲切換 hasLoadedTasks，讓 skeleton UI 有明顯顯示時間
+      setTimeout(() => {
+        setHasLoadedTasks(true);
+      }, 400);
     })();
   }, []);
 
@@ -114,6 +118,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         login,
         logout,
         tasks,
+        hasLoadedTasks,
         addTask,
         deleteTask,
         updateTask,

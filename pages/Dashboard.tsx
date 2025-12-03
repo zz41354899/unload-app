@@ -14,7 +14,7 @@ interface DashboardProps {
 }
 
 export const Dashboard: React.FC<DashboardProps> = ({ navigate }) => {
-  const { tasks, user } = useAppStore();
+  const { tasks, user, hasLoadedTasks } = useAppStore();
   const routerNavigate = useNavigate();
   const { t, i18n } = useTranslation();
 
@@ -172,6 +172,25 @@ export const Dashboard: React.FC<DashboardProps> = ({ navigate }) => {
       dailyCue: inferred ?? base,
     } as const;
   }, [todayTasks, i18n.language]);
+
+  if (!hasLoadedTasks) {
+    return (
+      <div className="max-w-6xl mx-auto space-y-6 md:space-y-8 pb-12 px-4 md:px-0 animate-pulse">
+        <div className="h-10 w-48 bg-gray-200 rounded-lg mt-4" />
+        <div className="h-40 bg-gray-200 rounded-2xl" />
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="h-24 bg-gray-200 rounded-2xl" />
+          <div className="h-24 bg-gray-200 rounded-2xl" />
+          <div className="h-24 bg-gray-200 rounded-2xl" />
+          <div className="h-24 bg-gray-200 rounded-2xl" />
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
+          <div className="h-40 bg-gray-200 rounded-2xl" />
+          <div className="h-40 bg-gray-200 rounded-2xl" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-6xl mx-auto space-y-6 md:space-y-8 pb-12 px-4 md:px-0">
