@@ -1,10 +1,11 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Task, User } from './types';
+import { loadTasksFromDb, saveTasksToDb } from './lib/idbClient';
 
 interface AppContextType {
   user: User | null;
-  login: () => void;
+  login: (user: User) => void;
   logout: () => void;
   tasks: Task[];
   addTask: (task: Omit<Task, 'id' | 'date'>) => string;
@@ -27,45 +28,35 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [shouldShowNps, setShouldShowNps] = useState(false);
 
   useEffect(() => {
-    // Load from local storage
+    // 初始化時載入使用者與任務資料
     const storedUser = localStorage.getItem('unload_user');
     if (storedUser) {
       setUser(JSON.parse(storedUser));
     }
 
-    const storedTasks = localStorage.getItem('unload_tasks');
-    if (storedTasks) {
-      setTasks(JSON.parse(storedTasks));
-    } else {
-      setTasks([]);
-    }
+    // 透過 IndexedDB 載入任務，若尚無資料會回傳空陣列或從 localStorage 遷移
+    void (async () => {
+      const initialTasks = await loadTasksFromDb();
+      setTasks(initialTasks ?? []);
+    })();
   }, []);
 
   useEffect(() => {
-    localStorage.setItem('unload_tasks', JSON.stringify(tasks));
+    // 每次任務變動時同步到 IndexedDB（並由 helper 內部維護 localStorage 備份）
+    void saveTasksToDb(tasks);
   }, [tasks]);
 
 
-  const login = () => {
-    const dummyUser: User = {
-      name: 'Sarah Chen',
-      email: 'sarah@example.com',
-
-      avatar: 'https://picsum.photos/seed/unloadUser/200',
-      hasOnboarded: false
-    };
-    setUser(dummyUser);
-    localStorage.setItem('unload_user', JSON.stringify(dummyUser));
+  const login = (userData: User) => {
+    // 之後會由 Supabase Google 登入回傳真實使用者資料（含頭像與 email）
+    setUser(userData);
+    localStorage.setItem('unload_user', JSON.stringify(userData));
   };
 
   const logout = () => {
-    // 清空使用者與本地儲存的登入資訊
+    // 登出時僅清除使用者登入資訊，保留本機已記錄的任務資料
     setUser(null);
     localStorage.removeItem('unload_user');
-
-    // 同時清空任務資料，讓每次登入都是乾淨狀態
-    setTasks([]);
-    localStorage.removeItem('unload_tasks');
   };
 
   const addTask = (taskData: Omit<Task, 'id' | 'date'>) => {

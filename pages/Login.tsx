@@ -4,6 +4,7 @@ import { ArrowRight, Loader, Globe2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useAppStore } from '../store';
+import { supabase } from '../lib/supabaseClient';
 
 interface LoginProps {
     navigate: (page: string) => void;
@@ -18,14 +19,26 @@ export const Login: React.FC<LoginProps> = ({ navigate }) => {
 
     const handleLogin = async () => {
         setIsLoading(true);
-        // 模擬登入延遲
-        await new Promise((resolve) => setTimeout(resolve, 800));
-        login();
 
-        // TODO: 之後接入 hasOnboarded / Google 登入時，
-        // 可以在這裡依使用者狀態分流到 /app/onboarding 或 /app/dashboard。
-        // 目前預設首次登入先導向引導頁路由。
-        routerNavigate('/app/onboarding');
+        const redirectTo = `${window.location.origin}/app/login`;
+
+        const { error } = await supabase.auth.signInWithOAuth({
+            provider: 'google',
+            options: {
+                redirectTo,
+            },
+        });
+
+        if (error) {
+            // TODO: 之後可整合全域 toast 呈現錯誤
+            // eslint-disable-next-line no-console
+            console.error('[Supabase] Google sign-in failed:', error.message);
+            setIsLoading(false);
+            return;
+        }
+
+        // 成功時會跳轉至 Google，再依 Supabase 設定導回 redirectTo；
+        // 回到應用後再由 App 層透過 supabase.auth.getUser() 建立本地 user 狀態。
     };
 
     return (

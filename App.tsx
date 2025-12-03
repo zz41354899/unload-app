@@ -12,11 +12,33 @@ import { History } from './pages/History';
 import { NewTask } from './pages/NewTask';
 import { Journal } from './pages/Journal';
 import { Onboarding } from './pages/Onboarding';
+import { supabase } from './lib/supabaseClient';
 
 const AppContent: React.FC = () => {
-  const { user, toast } = useAppStore();
+  const { user, toast, login } = useAppStore();
   const [currentPage, setCurrentPage] = useState('login');
   const { t, i18n } = useTranslation();
+
+  // 從 Supabase session 還原使用者資訊（例如 Google 登入後導回 /app/login）
+  useEffect(() => {
+    void (async () => {
+      if (user) return; // 已有本地使用者就不需重新載入
+
+      const { data, error } = await supabase.auth.getUser();
+      if (error || !data.user) return;
+
+      const profile = data.user.user_metadata as
+        | { full_name?: string; name?: string; picture?: string; avatar_url?: string }
+        | undefined;
+
+      login({
+        name: profile?.full_name || profile?.name || data.user.email || 'Guest',
+        email: data.user.email ?? '',
+        avatar: profile?.picture || profile?.avatar_url || 'https://picsum.photos/seed/unloadUser/200',
+        hasOnboarded: false,
+      });
+    })();
+  }, [user, login]);
 
   // Simple Route Protection
   useEffect(() => {
