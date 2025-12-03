@@ -31,13 +31,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [hasLoadedTasks, setHasLoadedTasks] = useState(false);
 
   useEffect(() => {
-    // 初始化時載入使用者與任務資料
-    const storedUser = localStorage.getItem('unload_user');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
-
-    // 透過 IndexedDB 載入任務，若尚無資料會回傳空陣列或從 localStorage 遷移
+    // 初始化時載入任務資料（使用 IndexedDB，不再依賴 localStorage）
     void (async () => {
       const initialTasks = await loadTasksFromDb();
       setTasks(initialTasks ?? []);
@@ -57,14 +51,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const login = (userData: User) => {
     // 之後會由 Supabase Google 登入回傳真實使用者資料（含頭像與 email）
+    // 使用者狀態僅保存在記憶體，實際持久化交由 Supabase session 處理
     setUser(userData);
-    localStorage.setItem('unload_user', JSON.stringify(userData));
   };
 
   const logout = () => {
-    // 登出時僅清除使用者登入資訊，保留本機已記錄的任務資料
+    // 登出時僅清除記憶體中的使用者登入資訊，保留本機已記錄的任務資料
     setUser(null);
-    localStorage.removeItem('unload_user');
   };
 
   const addTask = (taskData: Omit<Task, 'id' | 'date'>) => {
@@ -102,8 +95,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (user) {
       const updatedUser = { ...user, hasOnboarded: true };
       setUser(updatedUser);
-      localStorage.setItem('unload_user', JSON.stringify(updatedUser));
-
       // 同步更新 Supabase 使用者 metadata，讓 hasOnboarded 狀態在不同裝置／新 session 也能保留
       void supabase.auth.updateUser({
         data: { has_onboarded: true },
