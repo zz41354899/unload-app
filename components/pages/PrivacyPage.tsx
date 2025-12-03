@@ -11,7 +11,7 @@ export const PrivacyPage = () => (
 
         <div className="space-y-10 text-primary-light font-light leading-loose border-t border-secondary-light/40 pt-10">
           <p className="text-lg text-primary font-normal">
-            Unload 是一套專注於職場心理邊界的覺察工具，同時也是一個以 MIT 授權釋出的開源專案。我們知道，高敏感族群與在意邊界的人，對於「自己的資料被怎麼使用」格外敏感，因此這份隱私約定，不只是法律文字，更是我們對保護您內在空間與使用痕跡的具體承諾。
+            Unload 心輕日誌 是一套專注於職場心理邊界的覺察工具，同時也是一個以 MIT 授權釋出的開源專案。我們知道，高敏感族群與在意邊界的人，對於「自己的資料被怎麼使用」格外敏感，因此這份隱私約定，不只是法律文字，更是我們對保護您內在空間與使用痕跡的具體承諾。
           </p>
 
           <div className="grid gap-8">

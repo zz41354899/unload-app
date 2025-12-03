@@ -21,7 +21,7 @@ export const AboutPage = () => (
               失去連結所造成的結果。
             </p>
             <p>
-              Unload 系統建構於此基礎之上。不採用「治療」或「矯正」的觀點，而是提供一套心理學的<strong>「鏡像機制」</strong>。
+              Unload 心輕日誌建構於阿德勒心理學基礎之上。不採用「治療」或「矯正」的觀點，而是提供一套心理學的<strong>「鏡像機制」</strong>。
             </p>
           </section>
 

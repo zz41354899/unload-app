@@ -11,7 +11,7 @@ export const TermsPage = () => (
 
         <div className="space-y-10 text-primary-light font-light leading-loose border-t border-secondary-light pt-10">
           <p className="text-lg text-primary font-normal">
-            歡迎來到 Unload。這是一套聚焦職場心理邊界的覺察工具，同時也是一個以 MIT 授權釋出的開源專案，目前仍處於長期 Beta 測試與持續調整階段。本頁說明的是使用本服務時彼此之間的基本約定，協助我們維持一個基於互信、尊重與安全的內在探索環境。
+            歡迎來到 Unload 心輕日誌。這是一套聚焦職場心理邊界的覺察工具，同時也是一個以 MIT 授權釋出的開源專案，目前仍處於長期 Beta 測試與持續調整階段。本頁說明的是使用本服務時彼此之間的基本約定，協助我們維持一個基於互信、尊重與安全的內在探索環境。
           </p>
 
           <div className="space-y-8">
@@ -54,7 +54,7 @@ export const TermsPage = () => (
               </h3>
               <p className="text-sm space-y-1">
                 <span>
-                  Unload 的程式碼將會公開於 GitHub，以 MIT 授權條款釋出，歡迎任何人檢視、fork、提出 Issue 或發送 Pull Request。為了維持專案品質與使用者隱私，若您打算在 GitHub 上貢獻程式碼，請同意並遵守以下原則：
+                  Unload 心輕日誌 的程式碼將會公開於 GitHub，以 MIT 授權條款釋出，歡迎任何人檢視、fork、提出 Issue 或發送 Pull Request。為了維持專案品質與使用者隱私，若您打算在 GitHub 上貢獻程式碼，請同意並遵守以下原則：
                 </span>
                 <br />
                 <span>．請遵守專案說明中所列的 MIT 授權與貢獻指南，不新增與此相牴觸的額外限制。</span>
