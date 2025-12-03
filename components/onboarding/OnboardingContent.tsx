@@ -18,7 +18,7 @@ interface OnboardingContentProps {
 export const OnboardingContent: React.FC<OnboardingContentProps> = ({ step, currentStep, children }) => (
   <div className="w-full md:w-1/2 p-8 md:p-16 flex flex-col justify-center bg-white relative">
     <div className="flex md:hidden justify-center gap-2 mb-8">
-      {[1, 2, 3, 4].map((s) => (
+      {[1, 2, 3].map((s) => (
         <div
           key={s}
           className={`h-1.5 rounded-full transition-all duration-300 ${

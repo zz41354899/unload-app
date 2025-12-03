@@ -123,90 +123,100 @@ export const NewTask: React.FC<NewTaskProps> = ({ navigate }) => {
   // Step 1: Category
   if (step === 1) {
     return (
-      <NewTaskStep1Category
-        t={t}
-        step={step}
-        polarity={polarity}
-        categories={categories}
-        setCategories={setCategories}
-        categoryOptions={categoryOptions}
-        customCategory={customCategory}
-        setCustomCategory={setCustomCategory}
-        categoryLimitMessage={categoryLimitMessage}
-        setCategoryLimitMessage={setCategoryLimitMessage}
-        CUSTOM_CATEGORY_KEY={CUSTOM_CATEGORY_KEY}
-        onBack={handleBack}
-        onNext={handleNext}
-      />
+      <div className="max-w-6xl mx-auto pb-12 px-4 md:px-0">
+        <NewTaskStep1Category
+          t={t}
+          step={step}
+          polarity={polarity}
+          categories={categories}
+          setCategories={setCategories}
+          categoryOptions={categoryOptions}
+          customCategory={customCategory}
+          setCustomCategory={setCustomCategory}
+          categoryLimitMessage={categoryLimitMessage}
+          setCategoryLimitMessage={setCategoryLimitMessage}
+          CUSTOM_CATEGORY_KEY={CUSTOM_CATEGORY_KEY}
+          onBack={handleBack}
+          onNext={handleNext}
+        />
+      </div>
     );
   }
 
   // Step 2: Focus sentence
   if (step === 2) {
     return (
-      <NewTaskStep2Focus
-        t={t}
-        i18nLanguage={i18n.language}
-        step={step}
-        categories={categories}
-        CUSTOM_CATEGORY_KEY={CUSTOM_CATEGORY_KEY}
-        customCategory={customCategory}
-        polarity={polarity}
-        focusSentence={focusSentence}
-        setFocusSentence={setFocusSentence}
-        focusAspect={focusAspect}
-        setFocusAspect={setFocusAspect}
-        onBack={handleBack}
-        onNext={handleNext}
-      />
+      <div className="max-w-6xl mx-auto pb-12 px-4 md:px-0">
+        <NewTaskStep2Focus
+          t={t}
+          i18nLanguage={i18n.language}
+          step={step}
+          categories={categories}
+          CUSTOM_CATEGORY_KEY={CUSTOM_CATEGORY_KEY}
+          customCategory={customCategory}
+          polarity={polarity}
+          focusSentence={focusSentence}
+          setFocusSentence={setFocusSentence}
+          focusAspect={focusAspect}
+          setFocusAspect={setFocusAspect}
+          onBack={handleBack}
+          onNext={handleNext}
+        />
+      </div>
     );
   }
 
   // Step 3: Owner
   if (step === 3) {
     return (
-      <NewTaskStep3Owner
-        t={t}
-        step={step}
-        owner={owner}
-        setOwner={setOwner}
-        onBack={handleBack}
-        onNext={handleNext}
-      />
+      <div className="max-w-6xl mx-auto pb-12 px-4 md:px-0">
+        <NewTaskStep3Owner
+          t={t}
+          step={step}
+          owner={owner}
+          setOwner={setOwner}
+          onBack={handleBack}
+          onNext={handleNext}
+        />
+      </div>
     );
   }
 
   // Step 4: Multi-perspective choice (A/B/C)
   if (step === 4) {
     return (
-      <NewTaskStep4Perspective
-        t={t}
-        step={step}
-        selectedPerspective={selectedPerspective}
-        setSelectedPerspective={setSelectedPerspective}
-        reflectionReality={reflectionReality}
-        setReflectionReality={setReflectionReality}
-        reflectionDistance={reflectionDistance}
-        setReflectionDistance={setReflectionDistance}
-        reflectionValue={reflectionValue}
-        setReflectionValue={setReflectionValue}
-        onBack={handleBack}
-        onNext={() => setStep(5)}
-      />
+      <div className="max-w-6xl mx-auto pb-12 px-4 md:px-0">
+        <NewTaskStep4Perspective
+          t={t}
+          step={step}
+          selectedPerspective={selectedPerspective}
+          setSelectedPerspective={setSelectedPerspective}
+          reflectionReality={reflectionReality}
+          setReflectionReality={setReflectionReality}
+          reflectionDistance={reflectionDistance}
+          setReflectionDistance={setReflectionDistance}
+          reflectionValue={reflectionValue}
+          setReflectionValue={setReflectionValue}
+          onBack={handleBack}
+          onNext={() => setStep(5)}
+        />
+      </div>
     );
   }
 
   // Step 5: Final message
   if (step === 5) {
     return (
-      <NewTaskStep5FinalMessage
-        t={t}
-        step={step}
-        finalMessage={finalMessage}
-        setFinalMessage={setFinalMessage}
-        onBack={handleBack}
-        onSubmit={handleSubmit}
-      />
+      <div className="max-w-6xl mx-auto pb-12 px-4 md:px-0">
+        <NewTaskStep5FinalMessage
+          t={t}
+          step={step}
+          finalMessage={finalMessage}
+          setFinalMessage={setFinalMessage}
+          onBack={handleBack}
+          onSubmit={handleSubmit}
+        />
+      </div>
     );
   }
 
@@ -215,16 +225,18 @@ export const NewTask: React.FC<NewTaskProps> = ({ navigate }) => {
     const resultQuote = getQuoteByControlLevel(control);
 
     return (
-      <NewTaskResult
-        t={t}
-        polarity={polarity}
-        control={control}
-        categories={categories}
-        worries={worries}
-        resultQuote={resultQuote}
-        navigate={navigate}
-        routerNavigate={routerNavigate}
-      />
+      <div className="max-w-6xl mx-auto pb-12 px-4 md:px-0">
+        <NewTaskResult
+          t={t}
+          polarity={polarity}
+          control={control}
+          categories={categories}
+          worries={worries}
+          resultQuote={resultQuote}
+          navigate={navigate}
+          routerNavigate={routerNavigate}
+        />
+      </div>
     );
   }
 

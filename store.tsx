@@ -19,6 +19,11 @@ interface AppContextType {
   openNps: () => void;
   closeNps: () => void;
   completeOnboarding: () => void;
+  isGuideOpen: boolean;
+  openGuide: () => void;
+  closeGuide: () => void;
+  guideStep: number;
+  setGuideStep: (step: number) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -29,6 +34,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
   const [shouldShowNps, setShouldShowNps] = useState(false);
   const [hasLoadedTasks, setHasLoadedTasks] = useState(false);
+  const [isGuideOpen, setIsGuideOpen] = useState(false);
+  const [guideStep, setGuideStepState] = useState(0);
 
   useEffect(() => {
     // 初始化時載入任務資料（使用 IndexedDB，不再依賴 localStorage）
@@ -47,7 +54,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (!hasLoadedTasks) return;
     void saveTasksToDb(tasks);
   }, [tasks, hasLoadedTasks]);
-
 
   const login = (userData: User) => {
     // 之後會由 Supabase Google 登入回傳真實使用者資料（含頭像與 email）
@@ -102,6 +108,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
 
+  const openGuide = () => {
+    setIsGuideOpen(true);
+    setGuideStepState(1);
+  };
+
+  const closeGuide = () => {
+    setIsGuideOpen(false);
+    setGuideStepState(0);
+  };
+
+  const setGuideStep = (step: number) => {
+    setGuideStepState(step);
+  };
+
   return (
     <AppContext.Provider
       value={{
@@ -119,6 +139,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         openNps,
         closeNps,
         completeOnboarding,
+        isGuideOpen,
+        openGuide,
+        closeGuide,
+        guideStep,
+        setGuideStep,
       }}
     >
       {children}

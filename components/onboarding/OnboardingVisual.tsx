@@ -28,7 +28,7 @@ export const OnboardingVisual: React.FC<OnboardingVisualProps> = ({
     </div>
 
     <div className="hidden md:flex gap-3 mt-8">
-      {[1, 2, 3, 4].map((s) => (
+      {[1, 2, 3].map((s) => (
         <div
           key={s}
           className={`h-2 rounded-full transition-all duration-300 ${

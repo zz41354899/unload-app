@@ -1,10 +1,11 @@
 
 import React, { useState } from 'react';
-import { Feather, LayoutDashboard, History, Menu, PanelLeft, LogOut, CheckCircle, Loader, BookOpen, Globe2 } from 'lucide-react';
+import { Compass, LayoutDashboard, History, Menu, PanelLeft, LogOut, CheckCircle, Loader, BookOpen, Globe2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useAppStore } from '../store';
 import { supabase } from '../lib/supabaseClient';
+import { Onboarding } from '../pages/Onboarding';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -13,7 +14,7 @@ interface LayoutProps {
 }
 
 export const Layout: React.FC<LayoutProps> = ({ children, currentPage, navigate }) => {
-  const { user, logout, toast } = useAppStore();
+  const { user, logout, toast, isGuideOpen, openGuide, closeGuide, guideStep } = useAppStore();
   const routerNavigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -96,31 +97,47 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentPage, navigate 
                 </div>
             )}
             
-            {navItems.map((item) => (
-            <button
-                key={item.id}
-                onClick={() => {
-                  navigate(item.id);
-                  routerNavigate(`/app/${item.id}`);
-                }}
-                className={`
-                    flex items-center transition-all duration-200 w-full
+            {navItems.map((item) => {
+              const isActive = currentPage === item.id;
+              const isHistoryGuide = guideStep === 3 && item.id === 'journal';
+              const baseActive = isActive
+                ? (isSidebarOpen ? 'text-text font-bold' : 'bg-primary text-white shadow-lg shadow-primary/30')
+                : 'text-gray-500 hover:text-text hover:bg-gray-50';
+              const guideRing = isHistoryGuide ? ' ring-2 ring-accent shadow-lg' : '';
+
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => {
+                    navigate(item.id);
+                    routerNavigate(`/app/${item.id}`);
+                  }}
+                  className={`flex items-center transition-all duration-200 w-full
                     ${isSidebarOpen ? 'gap-3 px-2 py-2 rounded-lg text-left justify-start' : 'justify-center p-3 rounded-xl'}
-                    ${currentPage === item.id 
-                        ? (isSidebarOpen ? 'text-text font-bold' : 'bg-primary text-white shadow-lg shadow-primary/30') 
-                        : 'text-gray-500 hover:text-text hover:bg-gray-50'}
-                `}
-                title={!isSidebarOpen ? item.label : undefined}
-            >
-                {/* Logic: Open -> Text Only (matches PDF). Closed -> Icon Only. */}
-                {!isSidebarOpen && <item.icon className="w-5 h-5" />}
-                {isSidebarOpen && <span className="text-base">{item.label}</span>}
-            </button>
-            ))}
+                    ${baseActive}${guideRing}
+                  `}
+                  title={!isSidebarOpen ? item.label : undefined}
+                >
+                  {/* Logic: Open -> Text Only. Closed -> Icon Only. */}
+                  {!isSidebarOpen && <item.icon className="w-5 h-5" />}
+                  {isSidebarOpen && <span className="text-base">{item.label}</span>}
+                </button>
+              );
+            })}
         </nav>
 
         {/* Sidebar Footer: User & Logout */}
         <div className={`mt-auto flex flex-col gap-4 w-full ${isSidebarOpen ? 'items-start' : 'items-center'}`}>
+            {/* Onboarding Guide Trigger */}
+            <button
+              type="button"
+              onClick={openGuide}
+              className={`flex items-center w-full text-left text-sm rounded-lg transition-all duration-200 ${isSidebarOpen ? 'gap-3 px-2 py-2' : 'justify-center p-3'} text-gray-500 hover:text-text hover:bg-gray-50`}
+            >
+              <Compass className="w-4 h-4" />
+              {isSidebarOpen && <span>{t('onboarding.action.start')}</span>}
+            </button>
+
             {user && (
                 <>
                     {/* User Info (Only expanded) or Avatar (Collapsed) */}
@@ -237,6 +254,17 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentPage, navigate 
                     {item.label}
                 </button>
             ))}
+            <button
+                type="button"
+                onClick={() => {
+                    openGuide();
+                    setMobileMenuOpen(false);
+                }}
+                className="flex items-center gap-4 w-full text-left py-4 text-lg border-b border-gray-100 text-gray-500 hover:text-text"
+            >
+                <Compass className="w-5 h-5 text-gray-400" />
+                {t('onboarding.action.start')}
+            </button>
             {user && (
                 <button
                     onClick={async () => {
@@ -316,6 +344,14 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentPage, navigate 
         </header>
 
         {children}
+
+        {isGuideOpen && (
+          <div className="fixed inset-0 z-[10000] bg-black/40 pointer-events-none flex items-center justify-center">
+            <div className="w-full h-full md:h-auto md:w-auto pointer-events-auto">
+              <Onboarding onClose={closeGuide} navigatePage={navigate} />
+            </div>
+          </div>
+        )}
       </main>
 
     </div>

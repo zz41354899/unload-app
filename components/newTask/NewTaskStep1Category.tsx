@@ -1,6 +1,7 @@
 import React from 'react';
 import { WizardLayout, MultiSelectGrid } from '../../components/StepWizard';
 import { TaskPolarity } from '../../types';
+import { useAppStore } from '../../store';
 
 interface NewTaskStep1CategoryProps {
   t: (key: string, options?: any) => string;
@@ -33,65 +34,69 @@ export const NewTaskStep1Category: React.FC<NewTaskStep1CategoryProps> = ({
   onBack,
   onNext,
 }) => {
+  const { guideStep } = useAppStore();
+  const isGuideStep2 = guideStep === 2;
   const isOtherSelected = categories.includes(CUSTOM_CATEGORY_KEY);
   const isValid = categories.length > 0 && (!isOtherSelected || customCategory.trim().length > 0);
 
   return (
-    <WizardLayout
-      title={t('newTask.step1.title')}
-      subtitle={t('newTask.step1.subtitle')}
-      onBack={onBack}
-      onNext={onNext}
-      nextDisabled={!isValid}
-      currentStep={1}
-      totalSteps={5}
-    >
-      <div key={step}>
-        <MultiSelectGrid
-          options={categoryOptions}
-          selected={categories}
-          onSelect={(vals) => {
-            let next = vals;
-            if (vals.length > 2) {
-              next = vals.slice(-2);
-              setCategoryLimitMessage(t('wizard.maxSelections', { count: 2 }));
-            } else {
-              setCategoryLimitMessage(null);
+    <div className={isGuideStep2 ? 'ring-4 ring-accent shadow-xl rounded-2xl transition-all duration-300' : ''}>
+      <WizardLayout
+        title={t('newTask.step1.title')}
+        subtitle={t('newTask.step1.subtitle')}
+        onBack={onBack}
+        onNext={onNext}
+        nextDisabled={!isValid}
+        currentStep={1}
+        totalSteps={5}
+      >
+        <div key={step}>
+          <MultiSelectGrid
+            options={categoryOptions}
+            selected={categories}
+            onSelect={(vals) => {
+              let next = vals;
+              if (vals.length > 2) {
+                next = vals.slice(-2);
+                setCategoryLimitMessage(t('wizard.maxSelections', { count: 2 }));
+              } else {
+                setCategoryLimitMessage(null);
+              }
+              setCategories(next);
+              if (!next.includes(CUSTOM_CATEGORY_KEY)) setCustomCategory('');
+            }}
+            getLabel={(option, translate) =>
+              option === CUSTOM_CATEGORY_KEY
+                ? translate('taskCategory.Custom')
+                : polarity === TaskPolarity.Positive
+                  ? translate(`taskCategoryPositive.${option}`)
+                  : translate(`taskCategory.${option}`)
             }
-            setCategories(next);
-            if (!next.includes(CUSTOM_CATEGORY_KEY)) setCustomCategory('');
-          }}
-          getLabel={(option, translate) =>
-            option === CUSTOM_CATEGORY_KEY
-              ? translate('taskCategory.Custom')
-              : polarity === TaskPolarity.Positive
-                ? translate(`taskCategoryPositive.${option}`)
-                : translate(`taskCategory.${option}`)
-          }
-          getHintOverride={(option, translate) =>
-            option === CUSTOM_CATEGORY_KEY
-              ? translate('taskCategory.Custom_hint')
-              : polarity === TaskPolarity.Positive
-                ? translate(`taskCategoryPositive.${option}_hint`)
-                : translate(`taskCategory.${option}_hint`)
-          }
-        />
-        {categoryLimitMessage && (
-          <p className="mt-3 text-xs text-red-500">{categoryLimitMessage}</p>
-        )}
-        {isOtherSelected && (
-          <div>
-            <input
-              type="text"
-              placeholder={t('newTask.step1.customPlaceholder')}
-              value={customCategory}
-              onChange={(e) => setCustomCategory(e.target.value)}
-              className="w-full mt-4 p-4 rounded-xl border border-gray-200 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all bg-white text-text placeholder-gray-300"
-              autoFocus
-            />
-          </div>
-        )}
-      </div>
-    </WizardLayout>
+            getHintOverride={(option, translate) =>
+              option === CUSTOM_CATEGORY_KEY
+                ? translate('taskCategory.Custom_hint')
+                : polarity === TaskPolarity.Positive
+                  ? translate(`taskCategoryPositive.${option}_hint`)
+                  : translate(`taskCategory.${option}_hint`)
+            }
+          />
+          {categoryLimitMessage && (
+            <p className="mt-3 text-xs text-red-500">{categoryLimitMessage}</p>
+          )}
+          {isOtherSelected && (
+            <div>
+              <input
+                type="text"
+                placeholder={t('newTask.step1.customPlaceholder')}
+                value={customCategory}
+                onChange={(e) => setCustomCategory(e.target.value)}
+                className="w-full mt-4 p-4 rounded-xl border border-gray-200 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all bg-white text-text placeholder-gray-300"
+                autoFocus
+              />
+            </div>
+          )}
+        </div>
+      </WizardLayout>
+    </div>
   );
 };
