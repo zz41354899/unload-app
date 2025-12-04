@@ -83,9 +83,8 @@ export const NewTaskResult: React.FC<NewTaskResultProps> = ({
   const feedback = getResultFeedback();
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 md:p-6 bg-background">
-      <div className="max-w-2xl w-full">
-        <div className="bg-white rounded-2xl md:rounded-3xl p-6 md:p-12 shadow-xl border border-gray-100">
+    <div className="max-w-2xl w-full mx-auto">
+      <div className="bg-white rounded-2xl md:rounded-3xl p-6 md:p-12 shadow-xl border border-gray-100">
           <div className="flex justify-center mb-6 md:mb-8">
             <div className="relative">
               <div className="absolute inset-0 bg-primary/20 rounded-full blur-xl" />
@@ -117,6 +116,19 @@ export const NewTaskResult: React.FC<NewTaskResultProps> = ({
             {t('newTask.closingMessage')}
           </div>
 
+          <div className="mb-8 md:mb-10 text-center text-[11px] md:text-xs text-gray-400">
+            <span>{t('newTask.result.surveyIntro')}</span>
+            {' '}
+            <a
+              href="https://forms.gle/WwKZqVow5mav8R9W6"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline underline-offset-2 text-primary hover:text-primary/80"
+            >
+              {t('newTask.result.surveyLinkLabel')}
+            </a>
+          </div>
+
           <div className="flex flex-col gap-2 md:gap-3">
             <button
               type="button"
@@ -143,6 +155,5 @@ export const NewTaskResult: React.FC<NewTaskResultProps> = ({
           </div>
         </div>
       </div>
-    </div>
   );
 };

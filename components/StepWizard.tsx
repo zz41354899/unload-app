@@ -32,7 +32,7 @@ export const WizardLayout: React.FC<WizardLayoutProps> = ({
   const resolvedNextLabel = nextLabel ?? t('wizard.next');
 
   return (
-    <div className="max-w-6xl mx-auto mt-4 relative px-4 md:px-0">
+    <div className="max-w-6xl mx-auto mt-4 relative">
       <div className="flex justify-between items-center mb-6">
         <button 
           onClick={onBack}

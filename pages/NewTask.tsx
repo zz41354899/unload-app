@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { WizardLayout, SelectionGrid, SelectionList, MultiSelectGrid } from '../components/StepWizard';
@@ -7,6 +7,7 @@ import { TaskCategory, TaskWorry, ResponsibilityOwner, TaskPolarity } from '../t
 import { useAppStore } from '../store';
 import { getQuoteByControlLevel } from '../lib/quotes';
 import { CheckCircle, ArrowRight, Brain } from 'lucide-react';
+import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import { NewTaskStep1Category } from '../components/newTask/NewTaskStep1Category';
 import { NewTaskStep2Focus } from '../components/newTask/NewTaskStep2Focus';
 import { NewTaskStep3Owner } from '../components/newTask/NewTaskStep3Owner';
@@ -23,6 +24,9 @@ export const NewTask: React.FC<NewTaskProps> = ({ navigate }) => {
   const routerNavigate = useNavigate();
   const [step, setStep] = useState(1);
   const { t, i18n } = useTranslation();
+
+  const [hasMeditationCompleted, setHasMeditationCompleted] = useState(false);
+  const [meditationSecondsLeft, setMeditationSecondsLeft] = useState(15);
 
   const [categories, setCategories] = useState<string[]>([]);
   const [categoryLimitMessage, setCategoryLimitMessage] = useState<string | null>(null);
@@ -42,6 +46,23 @@ export const NewTask: React.FC<NewTaskProps> = ({ navigate }) => {
   const [selectedPerspective, setSelectedPerspective] = useState<'reality' | 'distance' | 'value' | 'observe' | null>(null);
   const [polarity, setPolarity] = useState<TaskPolarity>(TaskPolarity.Negative);
   const [focusAspect, setFocusAspect] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (hasMeditationCompleted) return;
+
+    if (meditationSecondsLeft <= 0) {
+      setHasMeditationCompleted(true);
+      return;
+    }
+
+    const timer = window.setTimeout(() => {
+      setMeditationSecondsLeft(prev => prev - 1);
+    }, 1000);
+
+    return () => {
+      window.clearTimeout(timer);
+    };
+  }, [hasMeditationCompleted, meditationSecondsLeft]);
 
   // Step 1 pseudo option: extra "Other" entry mapped to custom text
   const CUSTOM_CATEGORY_KEY = '__custom__';
@@ -120,10 +141,49 @@ export const NewTask: React.FC<NewTaskProps> = ({ navigate }) => {
     }
   };
 
+  if (!hasMeditationCompleted) {
+    return (
+      <div className="max-w-3xl mx-auto pb-12 min-h-[60vh] flex items-center">
+        <div className="w-full flex flex-col items-center text-center space-y-6">
+          <div className="w-64 h-64 md:w-64 md:h-64 mb-2">
+            <DotLottieReact
+              src="https://lottie.host/6a19ac85-9564-4e55-952c-6f0aa034aea8/pDRxA86fdk.lottie"
+              loop
+              autoplay
+            />
+          </div>
+          <div className="space-y-2">
+            <h1 className="text-xl md:text-2xl font-medium text-primary">
+              {t('newTask.meditation.title')}
+            </h1>
+            <p className="text-sm md:text-base text-primary-light leading-relaxed">
+              {t('newTask.meditation.subtitle')}
+            </p>
+          </div>
+          <p className="text-xs md:text-sm text-primary-light/80 leading-relaxed max-w-xl">
+            {t('newTask.meditation.body')}
+          </p>
+          <div className="flex flex-col items-center gap-3 mt-2">
+            <div className="text-xs md:text-sm text-primary-light/80">
+              {t('newTask.meditation.countdown', { seconds: meditationSecondsLeft })}
+            </div>
+            <button
+              type="button"
+              className="px-4 py-2 rounded-full text-xs md:text-sm border border-secondary-light/60 text-primary-light hover:border-secondary-accent hover:text-secondary-accent transition-colors"
+              onClick={() => setHasMeditationCompleted(true)}
+            >
+              {t('newTask.meditation.skip')}
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   // Step 1: Category
   if (step === 1) {
     return (
-      <div className="max-w-6xl mx-auto pb-12 px-4 md:px-0">
+      <div className="max-w-6xl mx-auto pb-12">
         <NewTaskStep1Category
           t={t}
           step={step}
@@ -146,7 +206,7 @@ export const NewTask: React.FC<NewTaskProps> = ({ navigate }) => {
   // Step 2: Focus sentence
   if (step === 2) {
     return (
-      <div className="max-w-6xl mx-auto pb-12 px-4 md:px-0">
+      <div className="max-w-6xl mx-auto pb-12">
         <NewTaskStep2Focus
           t={t}
           i18nLanguage={i18n.language}
@@ -169,7 +229,7 @@ export const NewTask: React.FC<NewTaskProps> = ({ navigate }) => {
   // Step 3: Owner
   if (step === 3) {
     return (
-      <div className="max-w-6xl mx-auto pb-12 px-4 md:px-0">
+      <div className="max-w-6xl mx-auto pb-12">
         <NewTaskStep3Owner
           t={t}
           step={step}
@@ -185,7 +245,7 @@ export const NewTask: React.FC<NewTaskProps> = ({ navigate }) => {
   // Step 4: Multi-perspective choice (A/B/C)
   if (step === 4) {
     return (
-      <div className="max-w-6xl mx-auto pb-12 px-4 md:px-0">
+      <div className="max-w-6xl mx-auto pb-12">
         <NewTaskStep4Perspective
           t={t}
           step={step}
@@ -207,7 +267,7 @@ export const NewTask: React.FC<NewTaskProps> = ({ navigate }) => {
   // Step 5: Final message
   if (step === 5) {
     return (
-      <div className="max-w-6xl mx-auto pb-12 px-4 md:px-0">
+      <div className="max-w-6xl mx-auto pb-12">
         <NewTaskStep5FinalMessage
           t={t}
           step={step}
@@ -225,7 +285,7 @@ export const NewTask: React.FC<NewTaskProps> = ({ navigate }) => {
     const resultQuote = getQuoteByControlLevel(control);
 
     return (
-      <div className="max-w-6xl mx-auto pb-12 px-4 md:px-0">
+      <div className="max-w-6xl mx-auto pb-12">
         <NewTaskResult
           t={t}
           polarity={polarity}

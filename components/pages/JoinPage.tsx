@@ -104,7 +104,9 @@ export const JoinPage: React.FC<JoinPageProps> = ({ onComplete }) => {
                 <Button
                   type="button"
                   className="inline-flex items-center space-x-2 px-8"
-                  onClick={onComplete}
+                  onClick={() => {
+                    window.open('https://forms.gle/WwKZqVow5mav8R9W6', '_blank', 'noopener,noreferrer');
+                  }}
                 >
                   <span>前往問卷調查</span>
                   <ChevronRight className="w-4 h-4" strokeWidth={1.5} />
