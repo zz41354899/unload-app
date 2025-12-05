@@ -1,7 +1,3 @@
-<div align="center">
-<img width="200" alt="Unload Logo" src="./public/logo.svg" />
-</div>
-
 # Unload 心輕日誌 - 職場心理邊界覺察工具
 
 > 給高敏感與在意邊界的人，一個比較安全的緩衝區。
