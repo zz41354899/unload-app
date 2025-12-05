@@ -17,7 +17,9 @@ export const OnboardingNavbar: React.FC<OnboardingNavbarProps> = ({
   onChangeLanguage,
 }) => (
   <nav className="w-full px-6 py-6 md:px-12 flex justify-between items-center shrink-0">
-    <img src="/logo.svg" alt="Unload Logo" className="w-[140px] h-[40px]" />
+    <span className="text-2xl font-extrabold tracking-tight text-gray-900">
+      LOGO
+    </span>
 
     <div className="relative z-50">
       <div className="relative">

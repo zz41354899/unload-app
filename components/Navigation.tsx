@@ -65,19 +65,15 @@ export const Navigation = ({ currentPage, onNavigate, onEnterApp }: NavigationPr
         }`}
     >
       <div className="max-w-6xl mx-auto px-6 flex justify-between items-center">
-        {/* Logo */}
+        {/* Logo (文字版) */}
         <button
           onClick={() => handleNavClick('home')}
           className="relative z-50 focus:outline-none"
           aria-label="返回首頁"
         >
-          <img
-            src="/logo.svg"
-            alt="Unload 標誌"
-            width={140}
-            height={40}
-            className="h-10 w-[140px] object-contain"
-          />
+          <span className="text-2xl font-extrabold tracking-tight text-primary">
+            LOGO
+          </span>
         </button>
 
         {/* Desktop Menu */}

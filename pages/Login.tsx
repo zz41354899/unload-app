@@ -91,14 +91,18 @@ export const Login: React.FC<LoginProps> = ({ navigate }) => {
                 href="/"
                 className="absolute top-8 left-8 flex items-center gap-2"
             >
-                <img src="/logo.svg" alt="Unload Logo" className="w-[140px] h-10 object-contain" />
+                <span className="text-2xl font-extrabold tracking-tight text-text">
+                    LOGO
+                </span>
             </a>
 
             {/* Main Content */}
             <div className="flex-1 flex items-center justify-center p-4 bg-background">
                 <div className="bg-white p-10 md:p-16 rounded-3xl shadow-xl max-w-md w-full text-center">
                     <div className="flex justify-center mb-6">
-                        <img src="/logo-m.svg" alt="Unload Logo" className="w-10 h-10 object-contain" />
+                        <span className="text-3xl font-extrabold tracking-tight text-text">
+                            LOGO
+                        </span>
                     </div>
 
                     <h1 className="text-3xl font-bold mb-6 text-text">{t('login.title')}</h1>

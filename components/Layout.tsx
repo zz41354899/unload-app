@@ -56,27 +56,31 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentPage, navigate 
       >
         {/* Header: Logo + Toggle */}
         <div className={`flex items-center mb-12 ${isSidebarOpen ? 'gap-4 flex-row' : 'flex-col gap-6'}`}>
-          {/* Logo Group */}
+          {/* Logo Group (文字版 Logo) */}
           {isSidebarOpen ? (
-            <div
+            <button
+              type="button"
               className="flex items-center gap-2 cursor-pointer"
               onClick={() => {
                 navigate('dashboard');
                 routerNavigate('/app/dashboard');
               }}
             >
-              <img src="/logo.svg" alt="Unload Logo" className="w-[140px] h-10 object-contain" />
-            </div>
+              <span className="text-2xl font-extrabold tracking-tight text-text">
+                LOGO
+              </span>
+            </button>
           ) : (
-            <div
-              className="cursor-pointer p-2"
+            <button
+              type="button"
+              className="cursor-pointer p-2 flex items-center justify-center rounded-lg bg-primary text-white font-bold text-xl shadow-sm"
               onClick={() => {
                 navigate('dashboard');
                 routerNavigate('/app/dashboard');
               }}
             >
-              <img src="/logo-m.svg" alt="Unload Logo" className="w-8 h-8 object-contain" />
-            </div>
+              <span>L</span>
+            </button>
           )}
 
            {/* Toggle Button */}
@@ -183,15 +187,18 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentPage, navigate 
 
       {/* Mobile Header */}
       <div className="md:hidden fixed top-0 w-full bg-background z-50 px-6 py-4 flex items-center justify-between shadow-sm md:shadow-none">
-          <div
+          <button
+            type="button"
             className="flex items-center gap-2 cursor-pointer"
             onClick={() => {
               navigate('dashboard');
               routerNavigate('/app/dashboard');
             }}
           >
-            <img src="/logo.svg" alt="Unload Logo" className="h-10 object-contain" />
-          </div>
+            <span className="text-xl font-extrabold tracking-tight text-text">
+              LOGO
+            </span>
+          </button>
           <div className="flex items-center gap-3">
             <div className="relative">
               <button

@@ -5,7 +5,6 @@ import './i18n';
 import { useTranslation } from 'react-i18next';
 import { AppProvider, useAppStore } from './store';
 import { Layout } from './components/Layout';
-import { MarketingShell } from './components/MarketingShell';
 import { Login } from './pages/Login';
 import { Dashboard } from './pages/Dashboard';
 import { History } from './pages/History';
@@ -71,7 +70,7 @@ const AppContent: React.FC = () => {
     }
   }, [i18n.language]);
 
-  // 若尚未登入，直接顯示登入頁（行銷路由由外層 MarketingShell 負責）
+  // 若尚未登入，直接顯示登入頁
   if (!user) {
     return <Login navigate={setCurrentPage} />;
   }
@@ -98,50 +97,6 @@ const AppContent: React.FC = () => {
   );
 };
 
-const RootRoute: React.FC = () => {
-  const { user, login } = useAppStore();
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    void (async () => {
-      // 若已經有本地 user，直接導向儀表板
-      if (user) {
-        navigate('/app/dashboard', { replace: true });
-        return;
-      }
-
-      // 嘗試從 Supabase session 還原使用者（例如重新整理在 / 時）
-      const { data, error } = await supabase.auth.getUser();
-      if (error || !data.user) return;
-
-      const profile = data.user.user_metadata as
-        | { full_name?: string; name?: string; picture?: string; avatar_url?: string; has_onboarded?: boolean }
-        | undefined;
-
-      login({
-        name: profile?.full_name || profile?.name || data.user.email || 'Guest',
-        email: data.user.email ?? '',
-        avatar: profile?.picture || profile?.avatar_url || 'https://picsum.photos/seed/unloadUser/200',
-        hasOnboarded: profile?.has_onboarded ?? false,
-      });
-
-      navigate('/app/dashboard', { replace: true });
-    })();
-  }, [user, login, navigate]);
-
-  if (user) {
-    return null;
-  }
-
-  return (
-    <MarketingShell
-      onEnterApp={() => {
-        navigate('/app/dashboard');
-      }}
-    />
-  );
-};
-
 const AppInner: React.FC = () => {
   const navigate = useNavigate();
 
@@ -149,11 +104,12 @@ const AppInner: React.FC = () => {
     <AppProvider>
       <Routes>
         <Route path="/app/*" element={<AppContent />} />
-        <Route path="/*" element={<RootRoute />} />
+        {/* 任何非 /app 路徑一律導向登入頁 */}
+        <Route path="/*" element={<Navigate to="/app/login" replace />} />
       </Routes>
     </AppProvider>
   );
-};
+}
 
 const App: React.FC = () => <AppInner />;
 
