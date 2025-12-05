@@ -23,65 +23,6 @@ export const NewTaskResult: React.FC<NewTaskResultProps> = ({
   navigate,
   routerNavigate,
 }) => {
-  const getResultFeedback = (): string => {
-    const categoryLabels = (Array.isArray(categories) ? categories : [categories]).map((cat) => {
-      if (!cat) return '';
-
-      if (polarity === TaskPolarity.Positive) {
-        const positiveKey = `taskCategoryPositive.${cat}`;
-        const positiveLabel = t(positiveKey);
-        if (positiveLabel !== positiveKey) {
-          return positiveLabel;
-        }
-      }
-
-      const defaultKey = `taskCategory.${cat}`;
-      const defaultLabel = t(defaultKey);
-      return defaultLabel !== defaultKey ? defaultLabel : '';
-    });
-
-    const worryLabels = (Array.isArray(worries) ? worries : [worries]).map((worry) => {
-      if (!worry) return '';
-
-      if (polarity === TaskPolarity.Positive) {
-        const positiveKey = `taskWorryPositive.${worry}`;
-        const positiveLabel = t(positiveKey);
-        if (positiveLabel !== positiveKey) {
-          return positiveLabel;
-        }
-      }
-
-      const defaultKey = `taskWorry.${worry}`;
-      const defaultLabel = t(defaultKey);
-      return defaultLabel !== defaultKey ? defaultLabel : '';
-    });
-
-    const categoryStr = categoryLabels.filter(Boolean).join('、');
-    const worryStr = worryLabels.filter(Boolean).join('、');
-
-    if (polarity === TaskPolarity.Positive) {
-      if (control < 20) {
-        return t('newTask.result.feedbackPositive.low', { category: categoryStr, worry: worryStr, control });
-      }
-      if (control < 60) {
-        return t('newTask.result.feedbackPositive.mid', { category: categoryStr, worry: worryStr, control });
-      }
-
-      return t('newTask.result.feedbackPositive.high', { category: categoryStr, worry: worryStr, control });
-    }
-
-    if (control < 20) {
-      return t('newTask.result.feedback.low', { category: categoryStr, worry: worryStr, control });
-    }
-    if (control < 60) {
-      return t('newTask.result.feedback.mid', { category: categoryStr, worry: worryStr, control });
-    }
-
-    return t('newTask.result.feedback.high', { category: categoryStr, worry: worryStr, control });
-  };
-
-  const feedback = getResultFeedback();
-
   return (
     <div className="max-w-2xl w-full mx-auto">
       <div className="bg-white rounded-2xl md:rounded-3xl p-6 md:p-12 shadow-xl border border-gray-100">
@@ -106,10 +47,6 @@ export const NewTaskResult: React.FC<NewTaskResultProps> = ({
             <p className="text-center text-xs md:text-sm text-gray-600">
               {t('newTask.closingQuote')}
             </p>
-          </div>
-
-          <div className="mb-6 md:mb-8 text-center text-xs md:text-sm text-gray-500">
-            {feedback}
           </div>
 
           <div className="mb-8 md:mb-10 text-center text-xs md:text-sm text-gray-500">
